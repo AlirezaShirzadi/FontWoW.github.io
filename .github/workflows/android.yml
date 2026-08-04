@@ -11,6 +11,9 @@ on:
       - '.github/workflows/android.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,3 +42,12 @@ jobs:
         with:
           name: fontwow-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Publish rolling release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: FontWoW (Android - latest build)
+          body: APK ساخته‌شده به‌صورت خودکار از آخرین کد main. این نسخه‌ی debug است.
+          prerelease: true
+          files: android/app/build/outputs/apk/debug/app-debug.apk

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toPng, toBlob } from 'html-to-image'
+import { isNative, saveImageNative, copyImageNative, copyTextNative } from './native'
 import {
   FONTS, FONT_CATEGORIES, BACKGROUNDS, BG_CATEGORIES, BG_TEMPLATES, ALL_BACKGROUNDS,
   TEXT_BOX_STYLES, TEXT_COLORS, THEME_COLORS, googleFontsUrlFor,
@@ -417,12 +418,17 @@ export default function App() {
 
   async function exportPng() {
     if (!previewRef.current) return
+    const fileName = `fontwow-${Date.now()}.png`
     try {
       const dataUrl = await toPng(previewRef.current, { pixelRatio: 3, cacheBust: true })
-      const link = document.createElement('a')
-      link.download = `fontwow-${Date.now()}.png`
-      link.href = dataUrl
-      link.click()
+      if (isNative()) {
+        await saveImageNative(dataUrl, fileName)
+      } else {
+        const link = document.createElement('a')
+        link.download = fileName
+        link.href = dataUrl
+        link.click()
+      }
       setToast(t('imageSaved'))
     } catch {
       setToast(t('imageError'))
@@ -433,12 +439,19 @@ export default function App() {
   async function copyImage() {
     if (!previewRef.current) return
     try {
-      const blob = await toBlob(previewRef.current, { pixelRatio: 3, cacheBust: true })
-      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })])
-      setToast(t('imageCopied'))
+      if (isNative()) {
+        const dataUrl = await toPng(previewRef.current, { pixelRatio: 3, cacheBust: true })
+        await copyImageNative(dataUrl, `fontwow-${Date.now()}.png`)
+        setToast(t('imageCopied'))
+      } else {
+        const blob = await toBlob(previewRef.current, { pixelRatio: 3, cacheBust: true })
+        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })])
+        setToast(t('imageCopied'))
+      }
     } catch {
       try {
-        await navigator.clipboard.writeText(state.text)
+        if (isNative()) await copyTextNative(state.text)
+        else await navigator.clipboard.writeText(state.text)
         setToast(t('imageCopyFallback'))
       } catch {
         setToast(t('copyFailed'))
@@ -449,7 +462,8 @@ export default function App() {
 
   async function copyText() {
     try {
-      await navigator.clipboard.writeText(state.text)
+      if (isNative()) await copyTextNative(state.text)
+      else await navigator.clipboard.writeText(state.text)
       setToast(t('textCopied'))
     } catch {
       setToast(t('copyFailed'))
@@ -948,6 +962,7 @@ export default function App() {
           <p className="settings-label">{t('contact')}</p>
           <a className="sheet-item" href="https://github.com/FontWoW/FontWoW.github.io" target="_blank" rel="noreferrer"><I.IconGithub size={17} /> GitHub</a>
           <a className="sheet-item" href="mailto:m4tinbeigi@gmail.com"><I.IconMail size={17} /> m4tinbeigi@gmail.com</a>
+          <a className="sheet-item" href="#/about"><I.IconDownload size={17} /> معرفی برنامه و دانلود اندروید</a>
 
           <p className="settings-label">{t('version')}: 1.0.0</p>
           <button className="sheet-item" onClick={resetAppSettings}><I.IconRefresh size={17} /> {t('resetSettings')}</button>
