@@ -165,7 +165,7 @@ export const TEXT_COLORS = [
 ]
 
 export const THEME_COLORS = [
-  '#ff5c5c', '#ff9f43', '#feca57', '#1dd1a1', '#54a0ff', '#9b59b6', '#ec4899',
+  '#8b5cf6', '#f43f5e', '#f97316', '#eab308', '#10b981', '#0ea5e9', '#ec4899', '#ff5c5c',
 ]
 
 export const TEXT_EFFECTS = [

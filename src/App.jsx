@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toPng, toBlob } from 'html-to-image'
 import {
   FONTS, FONT_CATEGORIES, BACKGROUNDS, BG_CATEGORIES, BG_TEMPLATES, ALL_BACKGROUNDS,
   TEXT_BOX_STYLES, TEXT_COLORS, THEME_COLORS, googleFontsUrlFor,
   TEXT_EFFECTS, TEXT_GRADIENTS, ASPECT_RATIOS, TEMPLATES,
 } from './fonts'
+import * as I from './icons'
 import { STRINGS } from './strings'
 import './App.css'
 
@@ -76,7 +77,71 @@ const defaultState = {
 
 const defaultAppSettings = {
   lang: 'fa',
-  themeColor: '#ff5c5c',
+  themeColor: '#8b5cf6',
+}
+
+function Sheet({ title, onClose, tall, children }) {
+  const [closing, setClosing] = useState(false)
+  const [drag, setDrag] = useState(null)
+
+  function requestClose() {
+    setClosing(true)
+  }
+
+  function onGrabDown(e) {
+    const startY = e.clientY
+    function onMove(ev) {
+      setDrag(Math.max(0, ev.clientY - startY))
+    }
+    function onUp(ev) {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      setDrag(null)
+      if (ev.clientY - startY > 80) setClosing(true)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }
+
+  return (
+    <div className={`sheet-overlay${closing ? ' closing' : ''}`} onClick={requestClose}>
+      <div
+        className={`sheet${tall ? ' tall' : ''}${closing ? ' closing' : ''}`}
+        style={drag != null ? { transform: `translateY(${drag}px)`, transition: 'none' } : undefined}
+        onClick={e => e.stopPropagation()}
+        onAnimationEnd={e => {
+          if (closing && e.target === e.currentTarget) onClose()
+        }}
+      >
+        <div className="sheet-grab" onPointerDown={onGrabDown}><span /></div>
+        <div className="sheet-header">
+          <button className="icon-btn" onClick={requestClose} aria-label="close"><I.IconX size={14} /></button>
+          <span>{title}</span>
+          <span />
+        </div>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function SliderRow({ label, value, display, min, max, step, onChange }) {
+  const pct = ((value - min) / (max - min)) * 100
+  return (
+    <div className="row">
+      <span>{label}</span>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        style={{ '--p': `${pct}%` }}
+        onChange={onChange}
+      />
+      <span className="val">{display ?? value}</span>
+    </div>
+  )
 }
 
 export default function App() {
@@ -96,6 +161,7 @@ export default function App() {
   const [activeCanvasTool, setActiveCanvasTool] = useState(null)
   const previewRef = useRef(null)
   const textRef = useRef(null)
+  const tabsRef = useRef(null)
 
   const t = key => STRINGS[appSettings.lang]?.[key] ?? STRINGS.fa[key] ?? key
 
@@ -132,6 +198,21 @@ export default function App() {
       face.load().then(loaded => document.fonts.add(loaded)).catch(() => {})
     })
   }, [customFonts])
+
+  useLayoutEffect(() => {
+    function place() {
+      const wrap = tabsRef.current
+      if (!wrap) return
+      const btn = wrap.querySelector('.tab.active')
+      const ind = wrap.querySelector('.tab-indicator')
+      if (!btn || !ind) return
+      ind.style.width = `${btn.offsetWidth}px`
+      ind.style.transform = `translateX(${btn.offsetLeft}px)`
+      btn.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    }
+    place()
+    document.fonts?.ready?.then(place)
+  }, [tab, appSettings.lang])
 
   useEffect(() => {
     const cats = new Set([fontLang, font?.lang].filter(Boolean))
@@ -426,13 +507,13 @@ export default function App() {
   }
 
   const TABS = [
-    { id: 'font', label: t('tabFont') },
-    { id: 'style', label: t('tabStyle') },
-    { id: 'box', label: t('tabBox') },
-    { id: 'color', label: t('tabColor') },
-    { id: 'bg', label: t('tabBg') },
-    { id: 'layout', label: t('tabLayout') },
-    { id: 'templates', label: t('tabTemplates') },
+    { id: 'font', label: t('tabFont'), Icon: I.IconType },
+    { id: 'style', label: t('tabStyle'), Icon: I.IconSparkles },
+    { id: 'box', label: t('tabBox'), Icon: I.IconSquare },
+    { id: 'color', label: t('tabColor'), Icon: I.IconPalette },
+    { id: 'bg', label: t('tabBg'), Icon: I.IconImage },
+    { id: 'layout', label: t('tabLayout'), Icon: I.IconSliders },
+    { id: 'templates', label: t('tabTemplates'), Icon: I.IconGrid },
   ]
 
   const bgSwatches = bgCategory === 'colors'
@@ -441,13 +522,21 @@ export default function App() {
 
   return (
     <div className="app" style={{ '--accent': appSettings.themeColor }}>
+      <div className="aurora" aria-hidden="true"><i /><i /><i /></div>
       <header className="topbar">
-        <button className="pill-btn" onClick={() => setShowSave(true)}>{t('save')}</button>
-        <div className="brand">FontWoW</div>
+        <button className="pill-btn" onClick={() => { update({ activeLayerId: null }); setShowSave(true) }}>
+          <I.IconDownload size={14} /> {t('save')}
+        </button>
+        <div className="brand">
+          <I.Logo size={22} />
+          <span className="brand-name">FontWoW</span>
+        </div>
         <div className="header-actions">
-          <button className="pill-btn ghost icon-only" onClick={() => setShowSettings(true)} aria-label={t('settings')}>⚙</button>
-          <button className="pill-btn ghost" onClick={() => setShowDonate(true)}>{t('donate')}</button>
-          <button className="pill-btn" onClick={() => setShowGallery(true)}>{t('gallery')}</button>
+          <button className="pill-btn ghost icon-only" onClick={() => setShowSettings(true)} aria-label={t('settings')}><I.IconSettings size={16} /></button>
+          <button className="pill-btn ghost icon-only" onClick={() => setShowDonate(true)} aria-label={t('donate')}><I.IconHeart size={16} /></button>
+          <button className="pill-btn soft" onClick={() => setShowGallery(true)}>
+            <I.IconImages size={14} /> {t('gallery')}
+          </button>
         </div>
       </header>
 
@@ -493,15 +582,15 @@ export default function App() {
                 {layer.text}
                 {state.activeLayerId === layer.id && (
                   <>
-                    <span className="layer-del" onPointerDown={e => e.stopPropagation()} onClick={() => deleteLayer(layer.id)}>✕</span>
-                    <span className="layer-rotate-handle" onPointerDown={e => handleLayerRotate(e, layer)}>↻</span>
+                    <span className="layer-del" onPointerDown={e => e.stopPropagation()} onClick={() => deleteLayer(layer.id)}><I.IconX size={11} /></span>
+                    <span className="layer-rotate-handle" onPointerDown={e => handleLayerRotate(e, layer)}><I.IconRotate size={11} /></span>
                   </>
                 )}
               </div>
             )
           })}
         </div>
-        <button className="add-layer-btn" onClick={addLayer} aria-label={t('addLayer')}>＋ Aa</button>
+        <button className="add-layer-btn" onClick={addLayer} aria-label={t('addLayer')}><I.IconPlus size={12} /> Aa</button>
         {state.text && (
           <>
             <div className="canvas-rail">
@@ -509,21 +598,21 @@ export default function App() {
                 className={`rail-btn ${activeCanvasTool === 'size' ? 'on' : ''}`}
                 onClick={() => toggleCanvasTool('size')}
                 aria-label={t('size')}
-              >⇕</button>
+              ><I.IconTextSize size={16} /></button>
               <button className="rail-btn" onClick={cycleAlign} aria-label={t(`align_${state.align}`)}>
-                {state.align === 'right' ? '⇥' : state.align === 'left' ? '⇤' : '⇹'}
+                {state.align === 'right' ? <I.IconAlignRight size={16} /> : state.align === 'left' ? <I.IconAlignLeft size={16} /> : <I.IconAlignCenter size={16} />}
               </button>
               <button
                 className={`rail-btn ${state.underline ? 'on' : ''}`}
                 onClick={() => update({ underline: !state.underline })}
                 aria-label={t('underline')}
-              ><u>A</u></button>
+              ><I.IconUnderline size={15} /></button>
               <button
                 className={`rail-btn ${state.direction === 'rtl' ? 'on' : ''}`}
                 onClick={() => update({ direction: state.direction === 'rtl' ? 'ltr' : 'rtl' })}
                 aria-label="RTL"
               >RTL</button>
-              <button className="rail-btn danger" onClick={clearAll} aria-label={t('clear')}>🗑</button>
+              <button className="rail-btn danger" onClick={clearAll} aria-label={t('clear')}><I.IconTrash size={15} /></button>
             </div>
             {activeCanvasTool === 'size' && (
               <div className="canvas-size-slider">
@@ -543,19 +632,20 @@ export default function App() {
       </main>
 
       <section className="controls">
-        <div className="tabs">
+        <div className="tabs" ref={tabsRef}>
+          <span className="tab-indicator" aria-hidden="true" />
           {TABS.map(tb => (
             <button
               key={tb.id}
               className={`tab ${tab === tb.id ? 'active' : ''}`}
               onClick={() => setTab(tb.id)}
             >
-              {tb.label}
+              <tb.Icon size={14} /> {tb.label}
             </button>
           ))}
         </div>
 
-        <div className="panel">
+        <div className="panel" key={tab}>
           {tab === 'font' && (
             <>
               <div className="chip-row sub-row">
@@ -577,7 +667,7 @@ export default function App() {
                     onClick={() => update({ fontId: f.id, direction: f.rtl ? 'rtl' : 'ltr' })}
                   >
                     {f.dataUrl && (
-                      <span className="del-font" onClick={e => deleteCustomFont(f.id, e)}>✕</span>
+                      <span className="del-font" onClick={e => deleteCustomFont(f.id, e)}><I.IconX size={9} /></span>
                     )}
                     <span style={{ fontFamily: f.family }}>{f.rtl ? 'ابر' : 'Aa'}</span>
                     <span className="chip-label">{f.label}</span>
@@ -585,7 +675,7 @@ export default function App() {
                 ))}
                 <label className="chip font-chip upload-chip">
                   <input type="file" accept=".ttf,.otf,.woff,.woff2" onChange={onUploadFont} hidden />
-                  <span>＋</span>
+                  <I.IconPlus size={17} />
                   <span className="chip-label">{t('yourFont')}</span>
                 </label>
               </div>
@@ -597,9 +687,9 @@ export default function App() {
               <button className={`toggle ${state.bold ? 'on' : ''}`} onClick={() => update({ bold: !state.bold })}><b>B</b> {t('bold')}</button>
               <button className={`toggle ${state.italic ? 'on' : ''}`} onClick={() => update({ italic: !state.italic })}><i>I</i> {t('italic')}</button>
               <button className={`toggle ${state.underline ? 'on' : ''}`} onClick={() => update({ underline: !state.underline })}><u>U</u> {t('underline')}</button>
-              <button className={`toggle ${state.shadow ? 'on' : ''}`} onClick={() => update({ shadow: !state.shadow })}>🌫 {t('shadow')}</button>
-              <button className={`toggle ${state.stroke ? 'on' : ''}`} onClick={() => update({ stroke: !state.stroke })}>◯ {t('stroke')}</button>
-              <button className={`toggle ${state.direction === 'ltr' ? 'on' : ''}`} onClick={() => update({ direction: state.direction === 'rtl' ? 'ltr' : 'rtl' })}>↔ {state.direction === 'rtl' ? 'RTL' : 'LTR'}</button>
+              <button className={`toggle ${state.shadow ? 'on' : ''}`} onClick={() => update({ shadow: !state.shadow })}><I.IconShadow size={14} /> {t('shadow')}</button>
+              <button className={`toggle ${state.stroke ? 'on' : ''}`} onClick={() => update({ stroke: !state.stroke })}><I.IconCircle size={14} /> {t('stroke')}</button>
+              <button className={`toggle ${state.direction === 'ltr' ? 'on' : ''}`} onClick={() => update({ direction: state.direction === 'rtl' ? 'ltr' : 'rtl' })}><I.IconArrowsLR size={14} /> {state.direction === 'rtl' ? 'RTL' : 'LTR'}</button>
             </div>
           )}
 
@@ -684,7 +774,7 @@ export default function App() {
                     onClick={() => update({ bgId: 'custom-image' })}
                     title={t('myImage')}
                   >
-                    <span className="del-font" onClick={removeBgImage}>✕</span>
+                    <span className="del-font" onClick={removeBgImage}><I.IconX size={9} /></span>
                   </button>
                 )}
                 {bgSwatches.map(b => (
@@ -699,77 +789,45 @@ export default function App() {
                 {bgCategory === 'colors' && (
                   <label className="swatch bg-swatch upload-chip" title={t('uploadImage')}>
                     <input type="file" accept="image/*" onChange={onUploadBgImage} hidden />
-                    <span>＋</span>
+                    <I.IconPlus size={17} />
                   </label>
                 )}
               </div>
               <div className="layout-panel">
-                <div className="row">
-                  <span>{t('brightness')}</span>
-                  <input type="range" min="50" max="150" value={state.bgFilter.brightness} onChange={e => update({ bgFilter: { ...state.bgFilter, brightness: +e.target.value } })} />
-                  <span className="val">{state.bgFilter.brightness}%</span>
-                </div>
-                <div className="row">
-                  <span>{t('contrast')}</span>
-                  <input type="range" min="50" max="150" value={state.bgFilter.contrast} onChange={e => update({ bgFilter: { ...state.bgFilter, contrast: +e.target.value } })} />
-                  <span className="val">{state.bgFilter.contrast}%</span>
-                </div>
-                <div className="row">
-                  <span>{t('blur')}</span>
-                  <input type="range" min="0" max="20" value={state.bgFilter.blur} onChange={e => update({ bgFilter: { ...state.bgFilter, blur: +e.target.value } })} />
-                  <span className="val">{state.bgFilter.blur}</span>
-                </div>
-                <div className="row">
-                  <span>{t('grayscale')}</span>
-                  <input type="range" min="0" max="100" value={state.bgFilter.grayscale} onChange={e => update({ bgFilter: { ...state.bgFilter, grayscale: +e.target.value } })} />
-                  <span className="val">{state.bgFilter.grayscale}%</span>
-                </div>
+                <SliderRow label={t('brightness')} min={50} max={150} value={state.bgFilter.brightness} display={`${state.bgFilter.brightness}%`} onChange={e => update({ bgFilter: { ...state.bgFilter, brightness: +e.target.value } })} />
+                <SliderRow label={t('contrast')} min={50} max={150} value={state.bgFilter.contrast} display={`${state.bgFilter.contrast}%`} onChange={e => update({ bgFilter: { ...state.bgFilter, contrast: +e.target.value } })} />
+                <SliderRow label={t('blur')} min={0} max={20} value={state.bgFilter.blur} onChange={e => update({ bgFilter: { ...state.bgFilter, blur: +e.target.value } })} />
+                <SliderRow label={t('grayscale')} min={0} max={100} value={state.bgFilter.grayscale} display={`${state.bgFilter.grayscale}%`} onChange={e => update({ bgFilter: { ...state.bgFilter, grayscale: +e.target.value } })} />
               </div>
             </>
           )}
 
           {tab === 'templates' && (
             <div className="chip-row">
-              {TEMPLATES.map(tpl => (
-                <button key={tpl.id} className="chip" onClick={() => applyTemplate(tpl)}>
-                  <span className="chip-label">{tpl.label}</span>
-                </button>
-              ))}
+              {TEMPLATES.map(tpl => {
+                const tplBg = ALL_BACKGROUNDS.find(b => b.id === tpl.bgId)
+                return (
+                  <button
+                    key={tpl.id}
+                    className="chip template-chip"
+                    style={tplBg ? { background: tplBg.css } : undefined}
+                    onClick={() => applyTemplate(tpl)}
+                  >
+                    <span className="chip-label">{tpl.label}</span>
+                  </button>
+                )
+              })}
             </div>
           )}
 
           {tab === 'layout' && (
             <div className="layout-panel">
-              <div className="row">
-                <span>{t('size')}</span>
-                <input type="range" min="16" max="120" value={state.fontSize} onChange={e => update({ fontSize: +e.target.value })} />
-                <span className="val">{state.fontSize}</span>
-              </div>
-              <div className="row">
-                <span>{t('letterSpacing')}</span>
-                <input type="range" min="-4" max="20" value={state.letterSpacing} onChange={e => update({ letterSpacing: +e.target.value })} />
-                <span className="val">{state.letterSpacing}</span>
-              </div>
-              <div className="row">
-                <span>{t('lineHeight')}</span>
-                <input type="range" min="0.8" max="2.4" step="0.1" value={state.lineHeight} onChange={e => update({ lineHeight: +e.target.value })} />
-                <span className="val">{state.lineHeight}</span>
-              </div>
-              <div className="row">
-                <span>{t('strokeWidth')}</span>
-                <input type="range" min="0.5" max="6" step="0.5" value={state.strokeWidth} onChange={e => update({ strokeWidth: +e.target.value })} />
-                <span className="val">{state.strokeWidth}</span>
-              </div>
-              <div className="row">
-                <span>{t('opacity')}</span>
-                <input type="range" min="10" max="100" value={state.opacity} onChange={e => update({ opacity: +e.target.value })} />
-                <span className="val">{state.opacity}%</span>
-              </div>
-              <div className="row">
-                <span>{t('margin')}</span>
-                <input type="range" min="0" max="60" value={state.margin} onChange={e => update({ margin: +e.target.value })} />
-                <span className="val">{state.margin}</span>
-              </div>
+              <SliderRow label={t('size')} min={16} max={120} value={state.fontSize} onChange={e => update({ fontSize: +e.target.value })} />
+              <SliderRow label={t('letterSpacing')} min={-4} max={20} value={state.letterSpacing} onChange={e => update({ letterSpacing: +e.target.value })} />
+              <SliderRow label={t('lineHeight')} min={0.8} max={2.4} step={0.1} value={state.lineHeight} onChange={e => update({ lineHeight: +e.target.value })} />
+              <SliderRow label={t('strokeWidth')} min={0.5} max={6} step={0.5} value={state.strokeWidth} onChange={e => update({ strokeWidth: +e.target.value })} />
+              <SliderRow label={t('opacity')} min={10} max={100} value={state.opacity} display={`${state.opacity}%`} onChange={e => update({ opacity: +e.target.value })} />
+              <SliderRow label={t('margin')} min={0} max={60} value={state.margin} onChange={e => update({ margin: +e.target.value })} />
               <div className="align-row">
                 {['right', 'center', 'left'].map(a => (
                   <button key={a} className={`toggle ${state.align === a ? 'on' : ''}`} onClick={() => update({ align: a })}>
@@ -795,31 +853,23 @@ export default function App() {
       </section>
 
       {showSave && (
-        <div className="sheet-overlay" onClick={() => setShowSave(false)}>
-          <div className="sheet" onClick={e => e.stopPropagation()}>
-            <div className="sheet-header">
-              <button className="icon-btn" onClick={() => setShowSave(false)}>✕</button>
-              <span>{t('save')}</span>
-              <span />
-            </div>
-            <button className="sheet-item recommended" onClick={exportPng}>⬇ {t('saveToDevice')}</button>
-            <button className="sheet-item" onClick={copyImage}>📋 {t('copyImageBtn')}</button>
-            <button className="sheet-item" onClick={copyText}>🔤 {t('copyTextBtn')}</button>
-            <button className="sheet-item" onClick={saveToGallery}>⭐ {t('saveToAppGallery')}</button>
-          </div>
-        </div>
+        <Sheet title={t('save')} onClose={() => setShowSave(false)}>
+          <button className="sheet-item recommended" onClick={exportPng}><I.IconDownload size={17} /> {t('saveToDevice')}</button>
+          <button className="sheet-item" onClick={copyImage}><I.IconCopy size={17} /> {t('copyImageBtn')}</button>
+          <button className="sheet-item" onClick={copyText}><I.IconType size={17} /> {t('copyTextBtn')}</button>
+          <button className="sheet-item" onClick={saveToGallery}><I.IconStar size={17} /> {t('saveToAppGallery')}</button>
+        </Sheet>
       )}
 
       {showGallery && (
-        <div className="sheet-overlay" onClick={() => setShowGallery(false)}>
-          <div className="sheet tall" onClick={e => e.stopPropagation()}>
-            <div className="sheet-header">
-              <button className="icon-btn" onClick={() => setShowGallery(false)}>✕</button>
-              <span>{t('myGallery')}</span>
-              <span />
+        <Sheet title={t('myGallery')} tall onClose={() => setShowGallery(false)}>
+          {saved.length === 0 && (
+            <div className="empty">
+              <I.EmptyArt />
+              <p>{t('emptyGallery')}</p>
             </div>
-            {saved.length === 0 && <p className="empty">{t('emptyGallery')}</p>}
-            <div className="gallery-grid">
+          )}
+          <div className="gallery-grid">
               {saved.map(entry => {
                 const f = allFonts.find(x => x.id === entry.fontId) ?? allFonts[0]
                 const b = ALL_BACKGROUNDS.find(x => x.id === entry.bgId) ?? ALL_BACKGROUNDS[0]
@@ -840,90 +890,79 @@ export default function App() {
                     >
                       {entry.text}
                     </span>
-                    <button className="delete-btn" onClick={e => deleteEntry(entry.id, e)}>✕</button>
+                    <button className="delete-btn" onClick={e => deleteEntry(entry.id, e)}><I.IconX size={11} /></button>
                   </div>
                 )
               })}
-            </div>
           </div>
-        </div>
+        </Sheet>
       )}
 
       {showDonate && (
-        <div className="sheet-overlay" onClick={() => setShowDonate(false)}>
-          <div className="sheet" onClick={e => e.stopPropagation()}>
-            <div className="sheet-header">
-              <button className="icon-btn" onClick={() => setShowDonate(false)}>✕</button>
-              <span>{t('donate')}</span>
-              <span />
-            </div>
-            <p className="donate-text">{t('donateText')}</p>
-            {DONATE_URL ? (
-              <a className="sheet-item recommended" href={DONATE_URL} target="_blank" rel="noreferrer">
-                💳 {t('payViaZibal')}
-              </a>
-            ) : (
-              <p className="empty">{t('donateNotSet')}</p>
-            )}
-            <p className="settings-label">{t('suggestFontLabel')}</p>
-            <input
-              className="text-input"
-              type="text"
-              placeholder={t('suggestFontPlaceholder')}
-              value={fontSuggestion}
-              onChange={e => setFontSuggestion(e.target.value)}
-            />
-            <a
-              className="sheet-item"
-              href={`mailto:m4tinbeigi@gmail.com?subject=${encodeURIComponent('پیشنهاد فونت برای FontWoW')}&body=${encodeURIComponent(fontSuggestion)}`}
-            >
-              ✉️ {t('sendSuggestion')}
+        <Sheet title={t('donate')} onClose={() => setShowDonate(false)}>
+          <p className="donate-text">{t('donateText')}</p>
+          {DONATE_URL ? (
+            <a className="sheet-item recommended" href={DONATE_URL} target="_blank" rel="noreferrer">
+              <I.IconCreditCard size={17} /> {t('payViaZibal')}
             </a>
-          </div>
-        </div>
+          ) : (
+            <p className="empty">{t('donateNotSet')}</p>
+          )}
+          <p className="settings-label">{t('suggestFontLabel')}</p>
+          <input
+            className="text-input"
+            type="text"
+            placeholder={t('suggestFontPlaceholder')}
+            value={fontSuggestion}
+            onChange={e => setFontSuggestion(e.target.value)}
+          />
+          <a
+            className="sheet-item"
+            href={`mailto:m4tinbeigi@gmail.com?subject=${encodeURIComponent('پیشنهاد فونت برای FontWoW')}&body=${encodeURIComponent(fontSuggestion)}`}
+          >
+            <I.IconMail size={17} /> {t('sendSuggestion')}
+          </a>
+        </Sheet>
       )}
 
       {showSettings && (
-        <div className="sheet-overlay" onClick={() => setShowSettings(false)}>
-          <div className="sheet tall" onClick={e => e.stopPropagation()}>
-            <div className="sheet-header">
-              <button className="icon-btn" onClick={() => setShowSettings(false)}>✕</button>
-              <span>{t('settings')}</span>
-              <span />
-            </div>
-
-            <p className="settings-label">{t('themeColor')}</p>
-            <div className="chip-row">
-              {THEME_COLORS.map(c => (
-                <button
-                  key={c}
-                  className={`swatch ${appSettings.themeColor === c ? 'selected' : ''}`}
-                  style={{ background: c }}
-                  onClick={() => setAppSettings(s => ({ ...s, themeColor: c }))}
-                />
-              ))}
-            </div>
-
-            <p className="settings-label">{t('language')}</p>
-            <div className="align-row">
-              <button className={`toggle ${appSettings.lang === 'fa' ? 'on' : ''}`} onClick={() => setAppSettings(s => ({ ...s, lang: 'fa' }))}>فارسی</button>
-              <button className={`toggle ${appSettings.lang === 'en' ? 'on' : ''}`} onClick={() => setAppSettings(s => ({ ...s, lang: 'en' }))}>English</button>
-            </div>
-
-            <p className="settings-label">{t('contact')}</p>
-            <a className="sheet-item" href="https://github.com/FontWoW/FontWoW.github.io" target="_blank" rel="noreferrer">🐙 GitHub</a>
-            <a className="sheet-item" href="mailto:m4tinbeigi@gmail.com">✉️ m4tinbeigi@gmail.com</a>
-
-            <p className="settings-label">{t('version')}: 1.0.0</p>
-            <button className="sheet-item" onClick={resetAppSettings}>♻ {t('resetSettings')}</button>
+        <Sheet title={t('settings')} tall onClose={() => setShowSettings(false)}>
+          <p className="settings-label">{t('themeColor')}</p>
+          <div className="chip-row">
+            {THEME_COLORS.map(c => (
+              <button
+                key={c}
+                className={`swatch ${appSettings.themeColor === c ? 'selected' : ''}`}
+                style={{ background: c }}
+                onClick={() => setAppSettings(s => ({ ...s, themeColor: c }))}
+              />
+            ))}
           </div>
+
+          <p className="settings-label">{t('language')}</p>
+          <div className="align-row">
+            <button className={`toggle ${appSettings.lang === 'fa' ? 'on' : ''}`} onClick={() => setAppSettings(s => ({ ...s, lang: 'fa' }))}>فارسی</button>
+            <button className={`toggle ${appSettings.lang === 'en' ? 'on' : ''}`} onClick={() => setAppSettings(s => ({ ...s, lang: 'en' }))}>English</button>
+          </div>
+
+          <p className="settings-label">{t('contact')}</p>
+          <a className="sheet-item" href="https://github.com/FontWoW/FontWoW.github.io" target="_blank" rel="noreferrer"><I.IconGithub size={17} /> GitHub</a>
+          <a className="sheet-item" href="mailto:m4tinbeigi@gmail.com"><I.IconMail size={17} /> m4tinbeigi@gmail.com</a>
+
+          <p className="settings-label">{t('version')}: 1.0.0</p>
+          <button className="sheet-item" onClick={resetAppSettings}><I.IconRefresh size={17} /> {t('resetSettings')}</button>
+        </Sheet>
+      )}
+
+      {toast && (
+        <div className="toast" key={toast}>
+          <I.ToastCheck size={19} />
+          <span>{toast}</span>
         </div>
       )}
 
-      {toast && <div className="toast">{toast}</div>}
-
       <footer className="footer">
-        <a href="https://github.com/FontWoW/FontWoW.github.io" target="_blank" rel="noreferrer">{t('openSource')} ↗</a>
+        <a href="https://github.com/FontWoW/FontWoW.github.io" target="_blank" rel="noreferrer">{t('openSource')} <I.IconExternal size={11} className="flip-rtl" /></a>
       </footer>
     </div>
   )
