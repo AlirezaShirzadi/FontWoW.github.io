@@ -47,6 +47,13 @@ body {
   user-select: none;
 }
 
+body.landing-mode {
+  overflow: auto;
+  position: static;
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
 #root {
   height: 100%;
 }
