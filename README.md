@@ -1,8 +1,30 @@
+<div align="center">
+
+<img src="public/favicon.svg" width="72" alt="FontWoW" />
+
 # FontWoW
 
-ابزار وب متن‌آرایی، مخصوص موبایل — متن بنویس، فونت و استایل انتخاب کن، و خروجی عکس بگیر یا کپی کن.
+**متن‌آرایی آنلاین — بنویس، استایل بده، عکس بگیر ⚡**
 
-اجرا: **https://fontwow.github.io**
+[![Deploy](https://github.com/FontWoW/FontWoW.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/FontWoW/FontWoW.github.io/actions/workflows/deploy.yml)
+[![React 19](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
+
+**اجرا: [fontwow.github.io](https://fontwow.github.io)**
+
+<table>
+  <tr>
+    <td><img src="docs/screen-editor.png" width="230" alt="ادیتور" /></td>
+    <td><img src="docs/screen-layout.png" width="230" alt="تنظیمات چیدمان" /></td>
+    <td><img src="docs/screen-save.png" width="230" alt="ذخیره و خروجی" /></td>
+  </tr>
+</table>
+
+</div>
+
+<div dir="rtl">
+
+ابزار وب متن‌آرایی، مخصوص موبایل — متن بنویس، فونت و استایل انتخاب کن، و خروجی عکس بگیر یا کپی کن.
 
 بدون نصب، بدون حساب کاربری، کاملاً رایگان و سمت کاربر (client-side). هیچ داده‌ای به سرور فرستاده نمی‌شود و همه‌چیز (طرح‌های ذخیره‌شده، تنظیمات، فونت‌های دلخواه) در `localStorage` مرورگر خودت می‌ماند.
 
@@ -11,6 +33,7 @@
 ### فونت
 - ده‌ها فونت آماده، دسته‌بندی‌شده بر اساس زبان: فارسی، عربی، انگلیسی، ژاپنی، کره‌ای، چینی، روسی، هندی و بیشتر
 - آپلود فونت دلخواه خودت (فرمت‌های `ttf` / `otf` / `woff` / `woff2`) — به‌صورت محلی بارگذاری و در گالری فونت‌هایت ذخیره می‌شود
+- فرم «پیشنهاد فونت» در بخش حمایت مالی، برای درخواست اضافه‌شدن فونت جدید
 
 ### استایل متن
 - بولد، ایتالیک، زیرخط
@@ -22,7 +45,7 @@
 
 ### افکت متن و قالب‌های آماده
 - افکت گرادیان (چند گرادیان رنگی) و افکت نئون روی متن
-- تب «قالب‌ها»: ترکیب‌های آماده‌ی فونت + رنگ + جعبه + پس‌زمینه + افکت برای شروع سریع
+- تب «قالب‌ها» با پیش‌نمایش زنده‌ی پس‌زمینه: ترکیب‌های آماده‌ی فونت + رنگ + جعبه + پس‌زمینه + افکت برای شروع سریع
 
 ### چند لایه‌ی متن
 - افزودن لایه‌های متن مستقل روی بوم (دکمه‌ی ＋ Aa)
@@ -39,14 +62,20 @@
 - فیلتر روی عکس پس‌زمینه: روشنایی، کنتراست، بلور، سیاه‌وسفید
 
 ### خروجی و ذخیره
-- خروجی PNG با کیفیت بالا
+- خروجی PNG با کیفیت بالا (خروجی همیشه تمیز است — هیچ عنصری از رابط کاربری داخل عکس نمی‌افتد)
 - کپی مستقیم عکس در کلیپ‌بورد
 - کپی متن ساده
 - ذخیره‌ی طرح‌ها در گالری داخل برنامه برای استفاده‌ی بعدی
 
+### ظاهر و طراحی
+- تم تیره‌ی بنفش با پس‌زمینه‌ی متحرک (aurora) و انیمیشن‌های SVG — لوگو، تب‌ها، شیت‌ها، اسلایدرها و نوتیفیکیشن‌ها همه انیمیشن دارند
+- **رنگ تم قابل انتخاب** — کل رابط کاربری (دکمه‌ها، درخشش‌ها، اسلایدرها، لوگو) با رنگ انتخابی شما هماهنگ می‌شود
+- تمام آیکون‌ها SVG دست‌ساز هستند؛ هیچ کتابخانه‌ی UI اضافه‌ای استفاده نشده
+- احترام به `prefers-reduced-motion` برای کاربرانی که انیمیشن نمی‌خواهند
+
 ### تنظیمات برنامه ⚙️
 از آیکون تنظیمات در بالای صفحه قابل دسترسی است:
-- **رنگ تم برنامه** — انتخاب از چند رنگ آماده برای شخصی‌سازی ظاهر برنامه
+- **رنگ تم برنامه** — انتخاب از ۸ رنگ آماده
 - **زبان برنامه** — چندزبانه؛ فعلاً **فارسی** و **English** پشتیبانی می‌شوند. با تغییر زبان، جهت صفحه (RTL/LTR) هم به‌صورت خودکار عوض می‌شود
 - **ارتباط با ما** و لینک مخزن متن‌باز
 - **بازگردانی تنظیمات** به حالت پیش‌فرض
@@ -65,48 +94,54 @@
 
 ```bash
 npm install
-npm run dev
+npm run dev      # سرور توسعه
+npm run lint     # لینت با oxlint
+npm run build    # ساخت نسخه‌ی نهایی در dist/
+npm run preview  # پیش‌نمایش نسخه‌ی buildشده
 ```
 
-### لینت
-
-```bash
-npm run lint
-```
-
-### ساخت نسخه‌ی نهایی
-
-```bash
-npm run build
-```
-
-خروجی در پوشه‌ی `dist` ساخته می‌شود و با گیت‌هاب اکشن به‌صورت خودکار روی GitHub Pages منتشر می‌شود.
-
-### پیش‌نمایش نسخه‌ی build‌شده
-
-```bash
-npm run preview
-```
+خروجی build با گیت‌هاب اکشن به‌صورت خودکار روی GitHub Pages منتشر می‌شود.
 
 ## ساختار پروژه
 
 ```
 src/
   App.jsx      رابط کاربری اصلی و منطق برنامه
-  App.css      استایل‌های برنامه
-  fonts.js     تعریف فونت‌ها، دسته‌بندی‌ها، پس‌زمینه‌ها و استایل‌های جعبه‌ی متن
+  App.css      استایل‌ها و انیمیشن‌ها (design tokens)
+  icons.jsx    مجموعه آیکون‌های SVG دست‌ساز + لوگوی متحرک
+  fonts.js     تعریف فونت‌ها، دسته‌بندی‌ها، پس‌زمینه‌ها و قالب‌ها
   strings.js   متن‌های چندزبانه (فارسی/انگلیسی)
-  index.css    استایل‌های پایه
+  index.css    توکن‌های طراحی و استایل‌های پایه
   main.jsx     نقطه‌ی ورود React
 ```
 
+## نکته‌ی مهم برای توسعه‌دهنده‌ها
+
+عنصر بوم (`.stage-inner`) مستقیماً با `html-to-image` به PNG تبدیل می‌شود. **هیچ عنصر تزئینی یا UI نباید داخل این عنصر رندر شود** وگرنه وارد عکس خروجی کاربر می‌شود. تمام افکت‌های ظاهری (aurora، درخشش، قاب) به‌صورت sibling خارج از آن پیاده شده‌اند.
+
 ## تکنولوژی‌ها
 
-- [React 19](https://react.dev/)
-- [Vite](https://vitejs.dev/)
+- [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
 - [html-to-image](https://github.com/bubkoo/html-to-image) برای تبدیل طرح به PNG
 - فونت‌ها از [Google Fonts](https://fonts.google.com/)
+- بدون هیچ کتابخانه‌ی UI یا آیکون — همه‌چیز CSS و SVG خالص
 
 ## مجوز
 
 متن‌باز — استفاده، تغییر و توسعه‌ی آزاد.
+
+</div>
+
+---
+
+## English
+
+**FontWoW** is a free, mobile-first, client-side text-styling web app: type your text, pick from dozens of Google Fonts (grouped by language, RTL-aware) or upload your own, style it with colors, gradients, neon effects, text boxes, draggable layers, and backgrounds — then export a clean high-res PNG or copy it straight to the clipboard. Nothing is sent to any server; designs, settings, and custom fonts live in your browser's `localStorage`.
+
+The UI is a violet "aurora" dark theme with hand-rolled SVG icons and animations (no UI libraries), a user-selectable accent color that re-tints the whole interface, full Persian/English localization with automatic RTL/LTR switching, and `prefers-reduced-motion` support.
+
+```bash
+npm install && npm run dev
+```
+
+Built with React 19 + Vite, deployed to GitHub Pages via GitHub Actions. Open source — use it, fork it, improve it.
