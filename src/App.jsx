@@ -88,6 +88,7 @@ export default function App() {
   const [showSave, setShowSave] = useState(false)
   const [showGallery, setShowGallery] = useState(false)
   const [showDonate, setShowDonate] = useState(false)
+  const [fontSuggestion, setFontSuggestion] = useState('')
   const [showSettings, setShowSettings] = useState(false)
   const [saved, setSaved] = useState(() => loadJSON(STORAGE_KEY, []))
   const [customFonts, setCustomFonts] = useState(() => loadJSON(CUSTOM_FONTS_KEY, []))
@@ -864,6 +865,20 @@ export default function App() {
             ) : (
               <p className="empty">{t('donateNotSet')}</p>
             )}
+            <p className="settings-label">{t('suggestFontLabel')}</p>
+            <input
+              className="text-input"
+              type="text"
+              placeholder={t('suggestFontPlaceholder')}
+              value={fontSuggestion}
+              onChange={e => setFontSuggestion(e.target.value)}
+            />
+            <a
+              className="sheet-item"
+              href={`mailto:m4tinbeigi@gmail.com?subject=${encodeURIComponent('پیشنهاد فونت برای FontWoW')}&body=${encodeURIComponent(fontSuggestion)}`}
+            >
+              ✉️ {t('sendSuggestion')}
+            </a>
           </div>
         </div>
       )}

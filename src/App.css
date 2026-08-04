@@ -102,6 +102,11 @@
   outline: none;
   white-space: pre-wrap;
   cursor: text;
+  transition: text-align 0.15s ease;
+}
+
+.sheet-item {
+  transition: text-align 0.15s ease;
 }
 
 .text-layer {
@@ -532,7 +537,7 @@
 .sheet-item {
   display: block;
   width: 100%;
-  text-align: right;
+  text-align: start;
   background: #2a2c33;
   border: none;
   color: #f2f2f2;
@@ -545,6 +550,25 @@
 
 .sheet-item.recommended {
   border: 2px solid var(--accent, #ff5c5c);
+}
+
+.text-input {
+  display: block;
+  width: 100%;
+  background: #2a2c33;
+  border: 1px solid #3a3c44;
+  color: #f2f2f2;
+  padding: 13px 16px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  font-size: 14.5px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--accent, #ff5c5c);
 }
 
 .empty {
