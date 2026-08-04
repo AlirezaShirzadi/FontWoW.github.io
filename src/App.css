@@ -19,7 +19,11 @@
   padding-right: env(safe-area-inset-right);
 }
 
-/* ===== Ambient aurora (fixed, behind everything, never exported) ===== */
+/* ===== Ambient aurora (fixed, behind everything, never exported) =====
+   Static backdrop only. These blobs previously drifted via infinite
+   transform animations; re-compositing three ~55vmax translucent gradients
+   every frame pegged CPU to 100% on load, so the motion is removed.
+   The gradients keep the same violet-aurora look but are drawn once. */
 .aurora {
   position: fixed;
   inset: 0;
@@ -34,21 +38,18 @@
   height: 55vmax;
   border-radius: 50%;
   opacity: 0.5;
-  will-change: transform;
 }
 
 .aurora i:nth-child(1) {
   top: -20vmax;
   inset-inline-start: -12vmax;
   background: radial-gradient(circle at center, var(--accent-glow), transparent 62%);
-  animation: drift1 52s ease-in-out infinite alternate;
 }
 
 .aurora i:nth-child(2) {
   bottom: -22vmax;
   inset-inline-end: -14vmax;
   background: radial-gradient(circle at center, rgba(126, 20, 255, 0.16), transparent 60%);
-  animation: drift2 64s ease-in-out infinite alternate;
 }
 
 .aurora i:nth-child(3) {
@@ -57,17 +58,6 @@
   width: 40vmax;
   height: 40vmax;
   background: radial-gradient(circle at center, rgba(71, 191, 255, 0.1), transparent 60%);
-  animation: drift3 75s ease-in-out infinite alternate;
-}
-
-@keyframes drift1 {
-  to { transform: translate(9vmax, 7vmax) scale(1.15); }
-}
-@keyframes drift2 {
-  to { transform: translate(-8vmax, -6vmax) scale(1.2); }
-}
-@keyframes drift3 {
-  to { transform: translate(-6vmax, 8vmax) scale(0.85); }
 }
 
 /* ===== Topbar ===== */
