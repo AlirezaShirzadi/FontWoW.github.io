@@ -3,6 +3,7 @@ import { toPng, toBlob } from 'html-to-image'
 import {
   FONTS, FONT_CATEGORIES, BACKGROUNDS, BG_CATEGORIES, BG_TEMPLATES, ALL_BACKGROUNDS,
   TEXT_BOX_STYLES, TEXT_COLORS, THEME_COLORS, googleFontsUrlFor,
+  TEXT_EFFECTS, TEXT_GRADIENTS, ASPECT_RATIOS, TEMPLATES,
 } from './fonts'
 import { STRINGS } from './strings'
 import './App.css'
@@ -65,6 +66,12 @@ const defaultState = {
   letterSpacing: 0,
   lineHeight: 1.4,
   direction: 'rtl',
+  effect: 'none',
+  textGradient: 'g1',
+  aspectRatio: 'free',
+  bgFilter: { brightness: 100, contrast: 100, blur: 0, grayscale: 0 },
+  layers: [],
+  activeLayerId: null,
 }
 
 const defaultAppSettings = {
@@ -193,7 +200,92 @@ export default function App() {
     update({ text: e.currentTarget.innerText })
   }
 
+  function addLayer() {
+    const id = `layer-${Date.now()}`
+    const newLayer = { id, text: t('newLayerText'), x: 50, y: 50, rotation: 0, fontId: state.fontId, color: state.color, fontSize: 28 }
+    update({ layers: [...state.layers, newLayer], activeLayerId: id })
+  }
+
+  function updateLayer(id, patch) {
+    setState(s => ({ ...s, layers: s.layers.map(l => (l.id === id ? { ...l, ...patch } : l)) }))
+  }
+
+  function deleteLayer(id) {
+    update({ layers: state.layers.filter(l => l.id !== id), activeLayerId: null })
+  }
+
+  function handleLayerDrag(e, layer) {
+    e.stopPropagation()
+    update({ activeLayerId: layer.id })
+    if (!previewRef.current) return
+    const rect = previewRef.current.getBoundingClientRect()
+    const startX = e.clientX
+    const startY = e.clientY
+    const origX = layer.x
+    const origY = layer.y
+    function onMove(ev) {
+      const dx = ((ev.clientX - startX) / rect.width) * 100
+      const dy = ((ev.clientY - startY) / rect.height) * 100
+      updateLayer(layer.id, {
+        x: Math.min(95, Math.max(5, origX + dx)),
+        y: Math.min(95, Math.max(5, origY + dy)),
+      })
+    }
+    function onUp() {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }
+
+  function handleLayerRotate(e, layer) {
+    e.stopPropagation()
+    const layerEl = e.currentTarget.closest('.text-layer')
+    if (!layerEl) return
+    const rect = layerEl.getBoundingClientRect()
+    const cx = rect.left + rect.width / 2
+    const cy = rect.top + rect.height / 2
+    function onMove(ev) {
+      const angle = Math.atan2(ev.clientY - cy, ev.clientX - cx) * (180 / Math.PI)
+      updateLayer(layer.id, { rotation: Math.round(angle + 90) })
+    }
+    function onUp() {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }
+
+  function applyTemplate(tpl) {
+    update({
+      fontId: tpl.fontId,
+      color: tpl.color,
+      textBoxStyle: tpl.textBoxStyle,
+      bgId: tpl.bgId,
+      effect: tpl.effect,
+      ...(tpl.textGradient ? { textGradient: tpl.textGradient } : {}),
+    })
+  }
+
   const strokeColor = state.color === '#111111' ? '#fff' : '#111'
+
+  let effectStyle = {}
+  if (state.effect === 'gradient') {
+    const grad = TEXT_GRADIENTS.find(g => g.id === state.textGradient) ?? TEXT_GRADIENTS[0]
+    effectStyle = {
+      backgroundImage: grad.css,
+      WebkitBackgroundClip: 'text',
+      backgroundClip: 'text',
+      color: 'transparent',
+      WebkitTextFillColor: 'transparent',
+    }
+  } else if (state.effect === 'neon') {
+    effectStyle = {
+      textShadow: `0 0 6px ${state.color}, 0 0 14px ${state.color}, 0 0 28px ${state.color}, 0 0 48px ${state.color}`,
+    }
+  }
 
   const textStyle = {
     fontFamily: font.family,
@@ -209,6 +301,9 @@ export default function App() {
     opacity: state.opacity / 100,
     textShadow: state.shadow ? '0 4px 18px rgba(0,0,0,0.55), 0 1px 0 rgba(0,0,0,0.3)' : 'none',
     WebkitTextStroke: state.stroke ? `${state.strokeWidth}px ${strokeColor}` : 'none',
+    position: 'relative',
+    zIndex: 1,
+    ...effectStyle,
     ...boxStyleFor(state.textBoxStyle, state.color),
     ...(state.textBoxStyle !== 'none'
       ? {
@@ -220,8 +315,19 @@ export default function App() {
       : {}),
   }
 
+  const ratio = ASPECT_RATIOS.find(r => r.id === state.aspectRatio)?.value ?? null
+
   const previewStyle = {
     padding: `${state.margin}px`,
+    position: 'relative',
+    ...(ratio ? { flex: '0 0 auto', width: 'auto', height: '100%', aspectRatio: ratio } : {}),
+  }
+
+  const bgLayerStyle = {
+    position: 'absolute',
+    inset: 0,
+    zIndex: 0,
+    filter: `brightness(${state.bgFilter.brightness}%) contrast(${state.bgFilter.contrast}%) blur(${state.bgFilter.blur}px) grayscale(${state.bgFilter.grayscale}%)`,
     ...(state.bgId === 'custom-image' && state.customBgUrl
       ? { backgroundImage: `url(${state.customBgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
       : { background: bg.css }),
@@ -325,6 +431,7 @@ export default function App() {
     { id: 'color', label: t('tabColor') },
     { id: 'bg', label: t('tabBg') },
     { id: 'layout', label: t('tabLayout') },
+    { id: 'templates', label: t('tabTemplates') },
   ]
 
   const bgSwatches = bgCategory === 'colors'
@@ -344,7 +451,13 @@ export default function App() {
       </header>
 
       <main className="stage">
-        <div className="stage-inner" ref={previewRef} style={previewStyle}>
+        <div
+          className="stage-inner"
+          ref={previewRef}
+          style={previewStyle}
+          onClick={() => state.activeLayerId && update({ activeLayerId: null })}
+        >
+          <div className="bg-layer" style={bgLayerStyle} />
           <div
             className="text-canvas"
             ref={textRef}
@@ -354,7 +467,40 @@ export default function App() {
             data-placeholder={t('placeholder')}
             onInput={onTextInput}
           />
+          {state.layers.map(layer => {
+            const layerFont = allFonts.find(f => f.id === layer.fontId) ?? font
+            return (
+              <div
+                key={layer.id}
+                className={`text-layer ${state.activeLayerId === layer.id ? 'active' : ''}`}
+                style={{
+                  left: `${layer.x}%`,
+                  top: `${layer.y}%`,
+                  transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
+                  fontFamily: layerFont.family,
+                  fontSize: `${layer.fontSize}px`,
+                  color: layer.color,
+                  direction: layerFont.rtl ? 'rtl' : 'ltr',
+                }}
+                onPointerDown={e => handleLayerDrag(e, layer)}
+                onClick={e => e.stopPropagation()}
+                onDoubleClick={() => {
+                  const val = window.prompt(t('editLayerText'), layer.text)
+                  if (val != null) updateLayer(layer.id, { text: val })
+                }}
+              >
+                {layer.text}
+                {state.activeLayerId === layer.id && (
+                  <>
+                    <span className="layer-del" onPointerDown={e => e.stopPropagation()} onClick={() => deleteLayer(layer.id)}>✕</span>
+                    <span className="layer-rotate-handle" onPointerDown={e => handleLayerRotate(e, layer)}>↻</span>
+                  </>
+                )}
+              </div>
+            )
+          })}
         </div>
+        <button className="add-layer-btn" onClick={addLayer} aria-label={t('addLayer')}>＋ Aa</button>
         {state.text && (
           <>
             <div className="canvas-rail">
@@ -456,6 +602,36 @@ export default function App() {
             </div>
           )}
 
+          {tab === 'style' && (
+            <>
+              <p className="settings-label">{t('effect')}</p>
+              <div className="chip-row">
+                {TEXT_EFFECTS.map(fx => (
+                  <button
+                    key={fx.id}
+                    className={`chip ${state.effect === fx.id ? 'selected' : ''}`}
+                    onClick={() => update({ effect: fx.id })}
+                  >
+                    <span className="chip-label">{fx.label}</span>
+                  </button>
+                ))}
+              </div>
+              {state.effect === 'gradient' && (
+                <div className="chip-row">
+                  {TEXT_GRADIENTS.map(g => (
+                    <button
+                      key={g.id}
+                      className={`swatch ${state.textGradient === g.id ? 'selected' : ''}`}
+                      style={{ background: g.css }}
+                      onClick={() => update({ textGradient: g.id })}
+                      title={g.label}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
           {tab === 'box' && (
             <div className="chip-row">
               {TEXT_BOX_STYLES.map(s => (
@@ -526,7 +702,39 @@ export default function App() {
                   </label>
                 )}
               </div>
+              <div className="layout-panel">
+                <div className="row">
+                  <span>{t('brightness')}</span>
+                  <input type="range" min="50" max="150" value={state.bgFilter.brightness} onChange={e => update({ bgFilter: { ...state.bgFilter, brightness: +e.target.value } })} />
+                  <span className="val">{state.bgFilter.brightness}%</span>
+                </div>
+                <div className="row">
+                  <span>{t('contrast')}</span>
+                  <input type="range" min="50" max="150" value={state.bgFilter.contrast} onChange={e => update({ bgFilter: { ...state.bgFilter, contrast: +e.target.value } })} />
+                  <span className="val">{state.bgFilter.contrast}%</span>
+                </div>
+                <div className="row">
+                  <span>{t('blur')}</span>
+                  <input type="range" min="0" max="20" value={state.bgFilter.blur} onChange={e => update({ bgFilter: { ...state.bgFilter, blur: +e.target.value } })} />
+                  <span className="val">{state.bgFilter.blur}</span>
+                </div>
+                <div className="row">
+                  <span>{t('grayscale')}</span>
+                  <input type="range" min="0" max="100" value={state.bgFilter.grayscale} onChange={e => update({ bgFilter: { ...state.bgFilter, grayscale: +e.target.value } })} />
+                  <span className="val">{state.bgFilter.grayscale}%</span>
+                </div>
+              </div>
             </>
+          )}
+
+          {tab === 'templates' && (
+            <div className="chip-row">
+              {TEMPLATES.map(tpl => (
+                <button key={tpl.id} className="chip" onClick={() => applyTemplate(tpl)}>
+                  <span className="chip-label">{tpl.label}</span>
+                </button>
+              ))}
+            </div>
           )}
 
           {tab === 'layout' && (
@@ -565,6 +773,18 @@ export default function App() {
                 {['right', 'center', 'left'].map(a => (
                   <button key={a} className={`toggle ${state.align === a ? 'on' : ''}`} onClick={() => update({ align: a })}>
                     {t(`align_${a}`)}
+                  </button>
+                ))}
+              </div>
+              <p className="settings-label">{t('aspectRatio')}</p>
+              <div className="chip-row">
+                {ASPECT_RATIOS.map(r => (
+                  <button
+                    key={r.id}
+                    className={`chip ${state.aspectRatio === r.id ? 'selected' : ''}`}
+                    onClick={() => update({ aspectRatio: r.id })}
+                  >
+                    <span className="chip-label">{r.label}</span>
                   </button>
                 ))}
               </div>
@@ -677,6 +897,7 @@ export default function App() {
 
             <p className="settings-label">{t('contact')}</p>
             <a className="sheet-item" href="https://github.com/FontWoW/FontWoW.github.io" target="_blank" rel="noreferrer">🐙 GitHub</a>
+            <a className="sheet-item" href="mailto:m4tinbeigi@gmail.com">✉️ m4tinbeigi@gmail.com</a>
 
             <p className="settings-label">{t('version')}: 1.0.0</p>
             <button className="sheet-item" onClick={resetAppSettings}>♻ {t('resetSettings')}</button>

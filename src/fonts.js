@@ -167,3 +167,35 @@ export const TEXT_COLORS = [
 export const THEME_COLORS = [
   '#ff5c5c', '#ff9f43', '#feca57', '#1dd1a1', '#54a0ff', '#9b59b6', '#ec4899',
 ]
+
+export const TEXT_EFFECTS = [
+  { id: 'none', label: 'بدون افکت' },
+  { id: 'gradient', label: 'گرادیان' },
+  { id: 'neon', label: 'نئون' },
+]
+
+export const TEXT_GRADIENTS = [
+  { id: 'g1', label: 'طلایی', css: 'linear-gradient(90deg,#f7971e,#ffd200)' },
+  { id: 'g2', label: 'صورتی', css: 'linear-gradient(90deg,#ff5f6d,#ffc371)' },
+  { id: 'g3', label: 'بنفش', css: 'linear-gradient(90deg,#8e2de2,#4a00e0)' },
+  { id: 'g4', label: 'آبی', css: 'linear-gradient(90deg,#00c6ff,#0072ff)' },
+  { id: 'g5', label: 'سبز', css: 'linear-gradient(90deg,#11998e,#38ef7d)' },
+  { id: 'g6', label: 'رنگین‌کمان', css: 'linear-gradient(90deg,#ff0000,#ff9900,#33cc33,#0066ff,#9900cc)' },
+]
+
+export const ASPECT_RATIOS = [
+  { id: 'free', label: 'آزاد', value: null },
+  { id: 'story', label: 'استوری ۹:۱۶', value: '9 / 16' },
+  { id: 'square', label: 'مربعی ۱:۱', value: '1 / 1' },
+  { id: 'portrait', label: 'پست عمودی ۴:۵', value: '4 / 5' },
+  { id: 'landscape', label: 'لندسکیپ ۱۶:۹', value: '16 / 9' },
+]
+
+export const TEMPLATES = [
+  { id: 't1', label: 'مینیمال', fontId: 'vazirmatn', color: '#ffffff', textBoxStyle: 'none', bgId: 'grad-6', effect: 'none' },
+  { id: 't2', label: 'نئون شب', fontId: 'righteous', color: '#4dd0e1', textBoxStyle: 'none', bgId: 'solid-2', effect: 'neon' },
+  { id: 't3', label: 'طلایی VIP', fontId: 'playfair', color: '#ffd700', textBoxStyle: 'frame', bgId: 'solid-2', effect: 'gradient', textGradient: 'g1' },
+  { id: 't4', label: 'پاستیلی', fontId: 'caveat', color: '#ffffff', textBoxStyle: 'glass', bgId: 'f1', effect: 'none' },
+  { id: 't5', label: 'خیابونی', fontId: 'bebas', color: '#ffffff', textBoxStyle: 'box', bgId: 'grad-1', effect: 'none' },
+  { id: 't6', label: 'رنگین‌کمانی', fontId: 'anton', color: '#ffffff', textBoxStyle: 'none', bgId: 'solid-2', effect: 'gradient', textGradient: 'g6' },
+]
