@@ -1,11 +1,17 @@
 import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Capacitor } from '@capacitor/core'
 import './index.css'
 import App from './App.jsx'
 import Landing from './Landing.jsx'
 
 function isAppHash() {
   return window.location.hash.replace(/^#\/?/, '') === 'app'
+}
+
+// The native app has no landing page to show — always boot straight into the editor.
+if (Capacitor.isNativePlatform() && !isAppHash()) {
+  window.location.hash = '#/app'
 }
 
 function Root() {

@@ -8,6 +8,15 @@ const LATEST_RELEASE_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.
 const RELEASES_URL = `${REPO}/releases/tag/latest`
 const APP_URL = '#/app'
 
+function detectPlatform() {
+  const ua = navigator.userAgent || ''
+  const isStandalone = window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true
+  if (isStandalone) return null
+  if (/android/i.test(ua)) return 'android'
+  if (/iphone|ipad|ipod/i.test(ua)) return 'ios'
+  return null
+}
+
 const FEATURES = [
   { icon: I.IconType, title: 'ده‌ها فونت چندزبانه', text: 'فارسی، عربی، انگلیسی، ژاپنی، کره‌ای، چینی، روسی، هندی و بیشتر — به‌علاوه‌ی آپلود فونت دلخواه خودت.' },
   { icon: I.IconPalette, title: 'استایل و افکت متن', text: 'بولد، ایتالیک، زیرخط، سایه، دورخط، گرادیان، نئون و جعبه‌های متن آماده.' },
@@ -22,6 +31,7 @@ export default function Landing() {
   const [contributorsError, setContributorsError] = useState(false)
   const [apkUrl, setApkUrl] = useState(null)
   const [apkError, setApkError] = useState(false)
+  const [platform] = useState(detectPlatform)
 
   useEffect(() => {
     let cancelled = false
@@ -85,6 +95,29 @@ export default function Landing() {
           نسخه‌ی اندروید فعلاً یک build آزمایشی (debug) است؛ ممکن است هنگام نصب هشدار «منبع ناشناس» ببینید.
         </p>
       </header>
+
+      {platform === 'android' && (
+        <div className="landing-platform-banner">
+          <I.IconDownload size={18} />
+          <span>روی اندروید هستی؟ برای تجربه‌ی بهتر و سریع‌تر، نسخه‌ی اپلیکیشن اندروید رو نصب کن.</span>
+          <a
+            className="landing-btn landing-btn-primary landing-btn-sm"
+            href={apkUrl || RELEASES_URL}
+            target={apkError ? '_blank' : undefined}
+            rel={apkError ? 'noreferrer' : undefined}
+          >
+            دانلود اپ اندروید
+          </a>
+        </div>
+      )}
+      {platform === 'ios' && (
+        <div className="landing-platform-banner">
+          <I.IconExternal size={18} />
+          <span>
+            روی آیفون هستی؟ FontWoW رو به‌عنوان اپ نصب کن: دکمه‌ی Share را بزن و «Add to Home Screen» را انتخاب کن.
+          </span>
+        </div>
+      )}
 
       <section className="landing-screens">
         <img src="/docs/screen-editor.png" alt="ادیتور FontWoW" />

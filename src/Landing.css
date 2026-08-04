@@ -85,6 +85,29 @@
   max-width: 420px;
 }
 
+.landing-platform-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 640px;
+  margin: 20px auto 0;
+  padding: 12px 16px;
+  border-radius: var(--r-lg, 14px);
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.landing-btn-sm {
+  padding: 8px 14px;
+  font-size: 12px;
+}
+
 .landing-screens {
   display: flex;
   gap: 16px;
