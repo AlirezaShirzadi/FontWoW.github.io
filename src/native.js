@@ -23,6 +23,13 @@ export async function saveImageNative(dataUrl, fileName) {
 }
 
 export async function copyImageNative(dataUrl, fileName) {
+  const { Clipboard } = await import('@capacitor/clipboard')
+  try {
+    await Clipboard.write({ image: dataUrl })
+    return
+  } catch {
+    // Fall back to sharing the file if the platform can't write image data to the clipboard.
+  }
   const { Filesystem, Directory } = await import('@capacitor/filesystem')
   const { Share } = await import('@capacitor/share')
   const tmp = await Filesystem.writeFile({

@@ -6,7 +6,7 @@ const REPO = 'https://github.com/FontWoW/FontWoW.github.io'
 const CONTRIBUTORS_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io/contributors'
 const LATEST_RELEASE_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io/releases/tags/latest'
 const RELEASES_URL = `${REPO}/releases/tag/latest`
-const APP_URL = '#/'
+const APP_URL = '#/app'
 
 const FEATURES = [
   { icon: I.IconType, title: 'ده‌ها فونت چندزبانه', text: 'فارسی، عربی، انگلیسی، ژاپنی، کره‌ای، چینی، روسی، هندی و بیشتر — به‌علاوه‌ی آپلود فونت دلخواه خودت.' },

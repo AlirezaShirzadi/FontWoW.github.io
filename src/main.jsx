@@ -4,15 +4,15 @@ import './index.css'
 import App from './App.jsx'
 import Landing from './Landing.jsx'
 
-function isAboutHash() {
-  return window.location.hash.replace(/^#\/?/, '') === 'about'
+function isAppHash() {
+  return window.location.hash.replace(/^#\/?/, '') === 'app'
 }
 
 function Root() {
-  const [landing, setLanding] = useState(isAboutHash())
+  const [landing, setLanding] = useState(!isAppHash())
 
   useEffect(() => {
-    const onHashChange = () => setLanding(isAboutHash())
+    const onHashChange = () => setLanding(!isAppHash())
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])

@@ -101,6 +101,12 @@ export function googleFontsUrlFor(categoryId) {
   return `https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`
 }
 
+// builds a Google Fonts stylesheet URL for a single font, used to fetch it on demand
+export function googleFontsUrlForFont(font) {
+  if (!font?.google) return null
+  return `https://fonts.googleapis.com/css2?family=${font.google}&display=swap`
+}
+
 export const BACKGROUNDS = [
   { id: 'none', label: 'بدون پس‌زمینه', css: 'transparent' },
   { id: 'solid-1', label: 'قرمز', css: '#c0392b' },
@@ -191,11 +197,7 @@ export const ASPECT_RATIOS = [
   { id: 'landscape', label: 'لندسکیپ ۱۶:۹', value: '16 / 9' },
 ]
 
-export const TEMPLATES = [
-  { id: 't1', label: 'مینیمال', fontId: 'vazirmatn', color: '#ffffff', textBoxStyle: 'none', bgId: 'grad-6', effect: 'none' },
-  { id: 't2', label: 'نئون شب', fontId: 'righteous', color: '#4dd0e1', textBoxStyle: 'none', bgId: 'solid-2', effect: 'neon' },
-  { id: 't3', label: 'طلایی VIP', fontId: 'playfair', color: '#ffd700', textBoxStyle: 'frame', bgId: 'solid-2', effect: 'gradient', textGradient: 'g1' },
-  { id: 't4', label: 'پاستیلی', fontId: 'caveat', color: '#ffffff', textBoxStyle: 'glass', bgId: 'f1', effect: 'none' },
-  { id: 't5', label: 'خیابونی', fontId: 'bebas', color: '#ffffff', textBoxStyle: 'box', bgId: 'grad-1', effect: 'none' },
-  { id: 't6', label: 'رنگین‌کمانی', fontId: 'anton', color: '#ffffff', textBoxStyle: 'none', bgId: 'solid-2', effect: 'gradient', textGradient: 'g6' },
-]
+// designer-editable styles: edit templates.json directly, or use the in-app "Style Studio"
+// (Templates tab -> add) to preview a style live and copy its JSON to paste in there.
+import templatesData from './templates.json'
+export const TEMPLATES = templatesData

@@ -3,7 +3,7 @@ import { toPng, toBlob } from 'html-to-image'
 import { isNative, saveImageNative, copyImageNative, copyTextNative } from './native'
 import {
   FONTS, FONT_CATEGORIES, BACKGROUNDS, BG_CATEGORIES, BG_TEMPLATES, ALL_BACKGROUNDS,
-  TEXT_BOX_STYLES, TEXT_COLORS, THEME_COLORS, googleFontsUrlFor,
+  TEXT_BOX_STYLES, TEXT_COLORS, THEME_COLORS, googleFontsUrlForFont,
   TEXT_EFFECTS, TEXT_GRADIENTS, ASPECT_RATIOS, TEMPLATES,
 } from './fonts'
 import * as I from './icons'
@@ -13,6 +13,7 @@ import './App.css'
 const STORAGE_KEY = 'fontwow_saved_v1'
 const SETTINGS_KEY = 'fontwow_settings_v1'
 const CUSTOM_FONTS_KEY = 'fontwow_custom_fonts_v1'
+const CUSTOM_TEMPLATES_KEY = 'fontwow_custom_templates_v1'
 const APP_SETTINGS_KEY = 'fontwow_app_settings_v1'
 const DONATE_URL = '' // لینک درگاه پرداخت زیبال رو اینجا قرار بده
 
@@ -158,6 +159,9 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [saved, setSaved] = useState(() => loadJSON(STORAGE_KEY, []))
   const [customFonts, setCustomFonts] = useState(() => loadJSON(CUSTOM_FONTS_KEY, []))
+  const [customTemplates, setCustomTemplates] = useState(() => loadJSON(CUSTOM_TEMPLATES_KEY, []))
+  const [showStyleStudio, setShowStyleStudio] = useState(false)
+  const [styleName, setStyleName] = useState('')
   const [toast, setToast] = useState('')
   const [activeCanvasTool, setActiveCanvasTool] = useState(null)
   const previewRef = useRef(null)
@@ -173,6 +177,7 @@ export default function App() {
   )
   const font = useMemo(() => allFonts.find(f => f.id === state.fontId) ?? allFonts[0], [allFonts, state.fontId])
   const bg = useMemo(() => ALL_BACKGROUNDS.find(b => b.id === state.bgId) ?? ALL_BACKGROUNDS[0], [state.bgId])
+  const allTemplates = useMemo(() => [...TEMPLATES, ...customTemplates], [customTemplates])
 
   useEffect(() => {
     if (!toast) return
@@ -215,20 +220,43 @@ export default function App() {
     document.fonts?.ready?.then(place)
   }, [tab, appSettings.lang])
 
-  useEffect(() => {
-    const cats = new Set([fontLang, font?.lang].filter(Boolean))
-    cats.forEach(cat => {
-      const linkId = `google-fonts-${cat}`
-      if (document.getElementById(linkId)) return
-      const url = googleFontsUrlFor(cat)
-      if (!url) return
+  const [loadedFontIds, setLoadedFontIds] = useState(() => new Set())
+  const [loadingFontId, setLoadingFontId] = useState(null)
+
+  function loadFont(f) {
+    if (!f || f.dataUrl || loadedFontIds.has(f.id)) return Promise.resolve()
+    const linkId = `google-font-${f.id}`
+    const existing = document.getElementById(linkId)
+    if (existing) {
+      setLoadedFontIds(prev => new Set(prev).add(f.id))
+      return Promise.resolve()
+    }
+    const url = googleFontsUrlForFont(f)
+    if (!url) return Promise.resolve()
+    setLoadingFontId(f.id)
+    return new Promise(resolve => {
       const link = document.createElement('link')
       link.id = linkId
       link.rel = 'stylesheet'
       link.href = url
+      link.onload = () => {
+        setLoadedFontIds(prev => new Set(prev).add(f.id))
+        setLoadingFontId(id => (id === f.id ? null : id))
+        resolve()
+      }
+      link.onerror = () => {
+        link.remove()
+        setLoadingFontId(id => (id === f.id ? null : id))
+        setToast(t('fontError'))
+        resolve()
+      }
       document.head.appendChild(link)
     })
-  }, [fontLang, font])
+  }
+
+  useEffect(() => {
+    loadFont(font)
+  }, [font])
 
   async function onUploadFont(e) {
     const file = e.target.files?.[0]
@@ -285,8 +313,38 @@ export default function App() {
 
   function addLayer() {
     const id = `layer-${Date.now()}`
-    const newLayer = { id, text: t('newLayerText'), x: 50, y: 50, rotation: 0, fontId: state.fontId, color: state.color, fontSize: 28 }
+    const newLayer = { id, type: 'text', text: t('newLayerText'), x: 50, y: 50, rotation: 0, fontId: state.fontId, color: state.color, fontSize: 28 }
     update({ layers: [...state.layers, newLayer], activeLayerId: id })
+  }
+
+  async function onUploadLayerImage(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    try {
+      const dataUrl = await fileToDataUrl(file)
+      const id = `layer-${Date.now()}`
+      const newLayer = { id, type: 'image', src: dataUrl, x: 50, y: 50, rotation: 0, width: 120 }
+      update({ layers: [...state.layers, newLayer], activeLayerId: id })
+    } catch {
+      setToast(t('bgError'))
+    }
+  }
+
+  function handleLayerResize(e, layer) {
+    e.stopPropagation()
+    const startX = e.clientX
+    const origWidth = layer.width
+    function onMove(ev) {
+      const width = Math.min(600, Math.max(30, origWidth + (ev.clientX - startX)))
+      updateLayer(layer.id, { width })
+    }
+    function onUp() {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
   }
 
   function updateLayer(id, patch) {
@@ -350,6 +408,55 @@ export default function App() {
       effect: tpl.effect,
       ...(tpl.textGradient ? { textGradient: tpl.textGradient } : {}),
     })
+  }
+
+  function buildStyleFromCurrentState(label, id) {
+    return {
+      id,
+      label,
+      fontId: state.fontId,
+      color: state.color,
+      textBoxStyle: state.textBoxStyle,
+      bgId: state.bgId,
+      effect: state.effect,
+      ...(state.effect === 'gradient' ? { textGradient: state.textGradient } : {}),
+    }
+  }
+
+  function saveCustomTemplate() {
+    if (!styleName.trim()) {
+      setToast(t('nameFirst'))
+      return
+    }
+    const entry = buildStyleFromCurrentState(styleName.trim(), `custom-${Date.now()}`)
+    const next = [...customTemplates, entry]
+    setCustomTemplates(next)
+    localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(next))
+    setToast(t('styleSaved'))
+    setStyleName('')
+  }
+
+  async function copyStyleJSON() {
+    if (!styleName.trim()) {
+      setToast(t('nameFirst'))
+      return
+    }
+    const entry = buildStyleFromCurrentState(styleName.trim(), `t-${Date.now()}`)
+    const json = JSON.stringify(entry, null, 2)
+    try {
+      if (isNative()) await copyTextNative(json)
+      else await navigator.clipboard.writeText(json)
+      setToast(t('styleJSONCopied'))
+    } catch {
+      setToast(t('copyFailed'))
+    }
+  }
+
+  function deleteCustomTemplate(id, e) {
+    e.stopPropagation()
+    const next = customTemplates.filter(tpl => tpl.id !== id)
+    setCustomTemplates(next)
+    localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(next))
   }
 
   const strokeColor = state.color === '#111111' ? '#fff' : '#111'
@@ -416,10 +523,20 @@ export default function App() {
       : { background: bg.css }),
   }
 
+  async function ensureFontPainted() {
+    await loadFont(font)
+    try {
+      await document.fonts?.load(`${state.fontSize}px ${font.family}`)
+    } catch {}
+    await document.fonts?.ready
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  }
+
   async function exportPng() {
     if (!previewRef.current) return
     const fileName = `fontwow-${Date.now()}.png`
     try {
+      await ensureFontPainted()
       const dataUrl = await toPng(previewRef.current, { pixelRatio: 3, cacheBust: true })
       if (isNative()) {
         await saveImageNative(dataUrl, fileName)
@@ -439,6 +556,7 @@ export default function App() {
   async function copyImage() {
     if (!previewRef.current) return
     try {
+      await ensureFontPainted()
       if (isNative()) {
         const dataUrl = await toPng(previewRef.current, { pixelRatio: 3, cacheBust: true })
         await copyImageNative(dataUrl, `fontwow-${Date.now()}.png`)
@@ -498,7 +616,7 @@ export default function App() {
   }
 
   function clearAll() {
-    update({ text: '' })
+    setState({ ...defaultState })
     if (textRef.current) textRef.current.innerText = ''
     textRef.current?.focus()
   }
@@ -536,6 +654,7 @@ export default function App() {
 
   return (
     <div className="app" style={{ '--accent': appSettings.themeColor }}>
+      <h1 className="sr-only">FontWoW — متن‌آرایی و فونت‌نویسی آنلاین فارسی</h1>
       <div className="aurora" aria-hidden="true"><i /><i /><i /></div>
       <header className="topbar">
         <button className="pill-btn" onClick={() => { update({ activeLayerId: null }); setShowSave(true) }}>
@@ -572,6 +691,31 @@ export default function App() {
             onInput={onTextInput}
           />
           {state.layers.map(layer => {
+            if (layer.type === 'image') {
+              return (
+                <div
+                  key={layer.id}
+                  className={`text-layer image-layer ${state.activeLayerId === layer.id ? 'active' : ''}`}
+                  style={{
+                    left: `${layer.x}%`,
+                    top: `${layer.y}%`,
+                    width: `${layer.width}px`,
+                    transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
+                  }}
+                  onPointerDown={e => handleLayerDrag(e, layer)}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <img src={layer.src} alt="" draggable={false} />
+                  {state.activeLayerId === layer.id && (
+                    <>
+                      <span className="layer-del" onPointerDown={e => e.stopPropagation()} onClick={() => deleteLayer(layer.id)}><I.IconX size={11} /></span>
+                      <span className="layer-rotate-handle" onPointerDown={e => handleLayerRotate(e, layer)}><I.IconRotate size={11} /></span>
+                      <span className="layer-resize-handle" onPointerDown={e => handleLayerResize(e, layer)}><I.IconArrowsLR size={11} /></span>
+                    </>
+                  )}
+                </div>
+              )
+            }
             const layerFont = allFonts.find(f => f.id === layer.fontId) ?? font
             return (
               <div
@@ -605,6 +749,10 @@ export default function App() {
           })}
         </div>
         <button className="add-layer-btn" onClick={addLayer} aria-label={t('addLayer')}><I.IconPlus size={12} /> Aa</button>
+        <label className="add-layer-btn add-image-layer-btn" aria-label={t('addSticker')}>
+          <input type="file" accept="image/*" onChange={onUploadLayerImage} hidden />
+          <I.IconPlus size={12} /> <I.IconImage size={13} />
+        </label>
         {state.text && (
           <>
             <div className="canvas-rail">
@@ -677,11 +825,17 @@ export default function App() {
                 {visibleFonts.map(f => (
                   <button
                     key={f.id}
-                    className={`chip font-chip ${state.fontId === f.id ? 'selected' : ''}`}
-                    onClick={() => update({ fontId: f.id, direction: f.rtl ? 'rtl' : 'ltr' })}
+                    className={`chip font-chip ${state.fontId === f.id ? 'selected' : ''} ${loadingFontId === f.id ? 'loading' : ''}`}
+                    onClick={() => {
+                      update({ fontId: f.id, direction: f.rtl ? 'rtl' : 'ltr' })
+                      loadFont(f)
+                    }}
                   >
                     {f.dataUrl && (
                       <span className="del-font" onClick={e => deleteCustomFont(f.id, e)}><I.IconX size={9} /></span>
+                    )}
+                    {loadingFontId === f.id && (
+                      <span className="font-loader"><I.IconLoader size={16} /></span>
                     )}
                     <span style={{ fontFamily: f.family }}>{f.rtl ? 'ابر' : 'Aa'}</span>
                     <span className="chip-label">{f.label}</span>
@@ -818,8 +972,9 @@ export default function App() {
 
           {tab === 'templates' && (
             <div className="chip-row">
-              {TEMPLATES.map(tpl => {
+              {allTemplates.map(tpl => {
                 const tplBg = ALL_BACKGROUNDS.find(b => b.id === tpl.bgId)
+                const isCustom = tpl.id.startsWith('custom-')
                 return (
                   <button
                     key={tpl.id}
@@ -827,10 +982,20 @@ export default function App() {
                     style={tplBg ? { background: tplBg.css } : undefined}
                     onClick={() => applyTemplate(tpl)}
                   >
+                    {isCustom && (
+                      <span className="del-font" onClick={e => deleteCustomTemplate(tpl.id, e)}><I.IconX size={9} /></span>
+                    )}
                     <span className="chip-label">{tpl.label}</span>
                   </button>
                 )
               })}
+              <button
+                className="chip template-chip upload-chip"
+                onClick={() => { setStyleName(''); setShowStyleStudio(true) }}
+              >
+                <I.IconPlus size={17} />
+                <span className="chip-label">{t('newStyle')}</span>
+              </button>
             </div>
           )}
 
@@ -909,6 +1074,23 @@ export default function App() {
                 )
               })}
           </div>
+        </Sheet>
+      )}
+
+      {showStyleStudio && (
+        <Sheet title={t('styleStudio')} onClose={() => setShowStyleStudio(false)}>
+          <p className="donate-text">{t('styleStudioHint')}</p>
+          <p className="settings-label">{t('styleNameLabel')}</p>
+          <input
+            className="text-input"
+            type="text"
+            placeholder={t('styleNamePlaceholder')}
+            value={styleName}
+            onChange={e => setStyleName(e.target.value)}
+          />
+          <button className="sheet-item recommended" onClick={saveCustomTemplate}><I.IconStar size={17} /> {t('saveStyleToApp')}</button>
+          <button className="sheet-item" onClick={copyStyleJSON}><I.IconCopy size={17} /> {t('copyStyleJSON')}</button>
+          <p className="settings-label">{t('styleStudioJsonHint')}</p>
         </Sheet>
       )}
 
