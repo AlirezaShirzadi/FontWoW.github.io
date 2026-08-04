@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react'
 import * as I from './icons'
 import './Landing.css'
 
 const REPO = 'https://github.com/FontWoW/FontWoW.github.io'
-const APK_URL = `${REPO}/releases/latest/download/app-debug.apk`
+const CONTRIBUTORS_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io/contributors'
+const LATEST_RELEASE_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io/releases/tags/latest'
+const RELEASES_URL = `${REPO}/releases/tag/latest`
 const APP_URL = '#/'
 
 const FEATURES = [
@@ -15,6 +18,47 @@ const FEATURES = [
 ]
 
 export default function Landing() {
+  const [contributors, setContributors] = useState(null)
+  const [contributorsError, setContributorsError] = useState(false)
+  const [apkUrl, setApkUrl] = useState(null)
+  const [apkError, setApkError] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(CONTRIBUTORS_API)
+      .then(res => {
+        if (!res.ok) throw new Error('bad response')
+        return res.json()
+      })
+      .then(data => {
+        if (!cancelled) setContributors(Array.isArray(data) ? data : [])
+      })
+      .catch(() => {
+        if (!cancelled) setContributorsError(true)
+      })
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(LATEST_RELEASE_API)
+      .then(res => {
+        if (!res.ok) throw new Error('bad response')
+        return res.json()
+      })
+      .then(data => {
+        const asset = data.assets?.find(a => a.name.endsWith('.apk'))
+        if (!cancelled) {
+          if (asset) setApkUrl(asset.browser_download_url)
+          else setApkError(true)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setApkError(true)
+      })
+    return () => { cancelled = true }
+  }, [])
+
   return (
     <div className="landing" dir="rtl">
       <header className="landing-hero">
@@ -26,9 +70,14 @@ export default function Landing() {
             <I.IconExternal size={16} />
             اجرای برنامه در مرورگر
           </a>
-          <a className="landing-btn landing-btn-secondary" href={APK_URL}>
+          <a
+            className={`landing-btn landing-btn-secondary${!apkUrl ? ' disabled' : ''}`}
+            href={apkUrl || RELEASES_URL}
+            target={apkError ? '_blank' : undefined}
+            rel={apkError ? 'noreferrer' : undefined}
+          >
             <I.IconDownload size={16} />
-            دانلود نسخه‌ی اندروید (APK)
+            {apkUrl ? 'دانلود نسخه‌ی اندروید (APK)' : apkError ? 'مشاهده‌ی نسخه‌ها در گیت‌هاب' : 'در حال یافتن آخرین نسخه…'}
           </a>
         </div>
         <p className="landing-note">
@@ -54,6 +103,33 @@ export default function Landing() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="landing-contributors">
+        <h2>مشارکت‌کنندگان</h2>
+        {contributorsError && (
+          <p className="landing-contributors-fallback">
+            فهرست مشارکت‌کنندگان فعلاً در دسترس نیست — <a href={`${REPO}/graphs/contributors`} target="_blank" rel="noreferrer">مشاهده در گیت‌هاب</a>
+          </p>
+        )}
+        {!contributorsError && !contributors && <p className="landing-contributors-loading">در حال بارگذاری…</p>}
+        {contributors && contributors.length > 0 && (
+          <div className="landing-contributors-grid">
+            {contributors.map(c => (
+              <a
+                key={c.id}
+                className="landing-contributor"
+                href={c.html_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img src={c.avatar_url} alt={c.login} width="56" height="56" loading="lazy" />
+                <span>{c.login}</span>
+                <small>{c.contributions} کامیت</small>
+              </a>
+            ))}
+          </div>
+        )}
       </section>
 
       <footer className="landing-footer">
