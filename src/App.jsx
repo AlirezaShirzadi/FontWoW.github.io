@@ -239,17 +239,28 @@ export default function App() {
       link.id = linkId
       link.rel = 'stylesheet'
       link.href = url
-      link.onload = () => {
-        setLoadedFontIds(prev => new Set(prev).add(f.id))
-        setLoadingFontId(id => (id === f.id ? null : id))
-        resolve()
-      }
-      link.onerror = () => {
+      let settled = false
+      const fail = () => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
         link.remove()
         setLoadingFontId(id => (id === f.id ? null : id))
         setToast(t('fontError'))
         resolve()
       }
+      // Google Fonts can be blocked/throttled by some Android carriers/DNS —
+      // without a timeout a blocked request never fires onerror and the UI hangs forever
+      const timer = setTimeout(fail, 8000)
+      link.onload = () => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        setLoadedFontIds(prev => new Set(prev).add(f.id))
+        setLoadingFontId(id => (id === f.id ? null : id))
+        resolve()
+      }
+      link.onerror = fail
       document.head.appendChild(link)
     })
   }
@@ -547,7 +558,8 @@ export default function App() {
         link.click()
       }
       setToast(t('imageSaved'))
-    } catch {
+    } catch (err) {
+      console.error('exportPng failed:', err)
       setToast(t('imageError'))
     }
     setShowSave(false)
@@ -560,13 +572,14 @@ export default function App() {
       if (isNative()) {
         const dataUrl = await toPng(previewRef.current, { pixelRatio: 3, cacheBust: true })
         await copyImageNative(dataUrl, `fontwow-${Date.now()}.png`)
-        setToast(t('imageCopied'))
+        setToast(t('imageShared'))
       } else {
         const blob = await toBlob(previewRef.current, { pixelRatio: 3, cacheBust: true })
         await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })])
         setToast(t('imageCopied'))
       }
-    } catch {
+    } catch (err) {
+      console.error('copyImage failed:', err)
       try {
         if (isNative()) await copyTextNative(state.text)
         else await navigator.clipboard.writeText(state.text)
@@ -1145,6 +1158,10 @@ export default function App() {
           <a className="sheet-item" href="https://github.com/FontWoW/FontWoW.github.io" target="_blank" rel="noreferrer"><I.IconGithub size={17} /> GitHub</a>
           <a className="sheet-item" href="mailto:m4tinbeigi@gmail.com"><I.IconMail size={17} /> m4tinbeigi@gmail.com</a>
           <a className="sheet-item" href="#/about"><I.IconDownload size={17} /> معرفی برنامه و دانلود اندروید</a>
+
+          <p className="settings-label">{t('fontLicenses')}</p>
+          <p className="donate-text">{t('fontLicensesText')}</p>
+          <a className="sheet-item" href="https://fonts.google.com/attribution" target="_blank" rel="noreferrer"><I.IconExternal size={17} /> Google Fonts Attribution</a>
 
           <p className="settings-label">{t('version')}: 1.0.0</p>
           <button className="sheet-item" onClick={resetAppSettings}><I.IconRefresh size={17} /> {t('resetSettings')}</button>

@@ -169,6 +169,9 @@ export default function Landing() {
         <a href={REPO} target="_blank" rel="noreferrer">
           <I.IconGithub size={16} /> کد متن‌باز در گیت‌هاب <I.IconExternal size={11} />
         </a>
+        <a href="https://fonts.google.com/attribution" target="_blank" rel="noreferrer">
+          فونت‌ها از Google Fonts، با لایسنس متن‌باز (عمدتاً SIL OFL) <I.IconExternal size={11} />
+        </a>
         <a href={APP_URL}>بازگشت به برنامه</a>
       </footer>
     </div>

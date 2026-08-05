@@ -66,6 +66,7 @@ export const STRINGS = {
     imageSaved: 'عکس ذخیره شد',
     imageError: 'خطا در ساخت عکس',
     imageCopied: 'عکس در کلیپ‌بورد کپی شد',
+    imageShared: 'اندروید کپی عکس در کلیپ‌بورد رو پشتیبانی نمی‌کنه؛ از اشتراک‌گذاری استفاده کن',
     imageCopyFallback: 'کپی عکس پشتیبانی نشد؛ متن کپی شد',
     copyFailed: 'کپی ناموفق بود',
     textCopied: 'متن کپی شد',
@@ -83,6 +84,8 @@ export const STRINGS = {
     nameFirst: 'اول یک اسم برای استایل بنویس',
     deleteStyle: 'حذف استایل',
     styleStudioJsonHint: 'برای اضافه کردن دائمی این استایل به پروژه، این JSON رو کپی کن و به آرایه‌ی داخل src/templates.json اضافه کن.',
+    fontLicenses: 'لایسنس فونت‌ها',
+    fontLicensesText: 'تمام فونت‌های موجود در FontWoW از Google Fonts هستن و تحت لایسنس‌های متن‌باز (بیشتر SIL Open Font License، Roboto تحت Apache License 2.0) در اختیار طراح‌هاشون منتشر شدن. حق مالکیت هر فونت متعلق به طراح اصلی‌شه.',
   },
   en: {
     save: 'Save',
@@ -150,6 +153,7 @@ export const STRINGS = {
     imageSaved: 'Image saved',
     imageError: 'Failed to create image',
     imageCopied: 'Image copied to clipboard',
+    imageShared: "Android can't copy images to the clipboard; use share instead",
     imageCopyFallback: 'Image copy not supported; text copied instead',
     copyFailed: 'Copy failed',
     textCopied: 'Text copied',
@@ -167,5 +171,7 @@ export const STRINGS = {
     nameFirst: 'Give your style a name first',
     deleteStyle: 'Delete style',
     styleStudioJsonHint: 'To add this style to the project permanently, copy this JSON and add it to the array in src/templates.json.',
+    fontLicenses: 'Font Licenses',
+    fontLicensesText: 'Every font in FontWoW is served by Google Fonts under open licenses (mostly the SIL Open Font License; Roboto under Apache License 2.0), published by their original designers. Copyright for each font belongs to its designer.',
   },
 }
