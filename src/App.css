@@ -56,9 +56,17 @@
   top: -20vmax;
   inset-inline-start: -12vmax;
   background: radial-gradient(circle at center, var(--accent-glow), transparent 62%);
+  top: -20vmax;
+  inset-inline-start: -12vmax;
+  background: radial-gradient(circle at center, var(--accent-glow), transparent 62%);
+  animation: drift1 52s ease-in-out infinite alternate;
 }
 
 .aurora i:nth-child(2) {
+  bottom: -22vmax;
+  inset-inline-end: -14vmax;
+  background: radial-gradient(circle at center, rgba(126, 20, 255, 0.16), transparent 60%);
+  animation: drift2 64s ease-in-out infinite alternate;
   bottom: -22vmax;
   inset-inline-end: -14vmax;
   background: radial-gradient(circle at center, rgba(126, 20, 255, 0.16), transparent 60%);
@@ -174,8 +182,12 @@
 }
 
 @keyframes shimmer {
-  from { background-position: 200% 0; }
-  to { background-position: -80% 0; }
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
 }
 
 .header-actions {
@@ -208,7 +220,9 @@
 }
 
 .stage:focus-within::before {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), var(--glow);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    var(--glow);
 }
 
 .stage-inner {
@@ -320,7 +334,9 @@
   cursor: pointer;
   z-index: 3;
   touch-action: manipulation;
-  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
 }
 
 .add-image-layer-btn {
@@ -410,7 +426,9 @@
   background: color-mix(in srgb, var(--surface-1) 90%, transparent);
   border-top: 1px solid var(--border-1);
   border-radius: 22px 22px 0 0;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 -12px 30px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 -12px 30px rgba(0, 0, 0, 0.35);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -436,7 +454,9 @@
   border-radius: var(--r-pill);
   font-size: 13.5px;
   cursor: pointer;
-  transition: color var(--dur-med) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  transition:
+    color var(--dur-med) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
 .tab.active {
@@ -453,7 +473,9 @@
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--accent) 22%, var(--surface-2));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
-  transition: transform var(--dur-med) var(--ease-spring), width var(--dur-med) var(--ease-spring);
+  transition:
+    transform var(--dur-med) var(--ease-spring),
+    width var(--dur-med) var(--ease-spring);
   pointer-events: none;
 }
 
@@ -466,9 +488,15 @@
   animation: panelIn var(--dur-slow) var(--ease-out) backwards;
 }
 
-.panel > *:nth-child(2) { animation-delay: 0.05s; }
-.panel > *:nth-child(3) { animation-delay: 0.09s; }
-.panel > *:nth-child(n + 4) { animation-delay: 0.13s; }
+.panel > *:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.panel > *:nth-child(3) {
+  animation-delay: 0.09s;
+}
+.panel > *:nth-child(n + 4) {
+  animation-delay: 0.13s;
+}
 
 @keyframes panelIn {
   from {
@@ -555,20 +583,30 @@
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 13 4 4 10-10'/%3E%3C/svg%3E") center / 9px no-repeat;
+  background: var(--accent)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 13 4 4 10-10'/%3E%3C/svg%3E")
+    center / 9px no-repeat;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   animation: checkPop var(--dur-med) var(--ease-spring) both;
   z-index: 1;
 }
 
 @keyframes checkPop {
-  from { transform: scale(0); }
+  from {
+    transform: scale(0);
+  }
 }
 
 @keyframes pop {
-  0% { transform: scale(0.94); }
-  55% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.94);
+  }
+  55% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .chip-label {
@@ -613,7 +651,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .del-font {
@@ -659,7 +699,9 @@
 
 .swatch.selected {
   border-color: #fff;
-  box-shadow: 0 0 0 2px var(--accent), 0 0 16px var(--accent-glow);
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 0 16px var(--accent-glow);
   animation: pop var(--dur-med) var(--ease-spring);
 }
 
@@ -779,13 +821,19 @@
   border-radius: 50%;
   background: #fff;
   border: none;
-  box-shadow: 0 0 0 3px var(--accent-soft), 0 2px 8px rgba(0, 0, 0, 0.5);
-  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .row input[type='range']:active::-webkit-slider-thumb {
   transform: scale(1.25);
-  box-shadow: 0 0 0 5px var(--accent-glow), 0 2px 10px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 0 5px var(--accent-glow),
+    0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .row input[type='range']::-moz-range-track {
@@ -806,7 +854,9 @@
   border: none;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 0 0 3px var(--accent-soft), 0 2px 8px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .val {
@@ -863,19 +913,27 @@
 }
 
 @keyframes sheetIn {
-  from { transform: translateY(100%); }
+  from {
+    transform: translateY(100%);
+  }
 }
 
 @keyframes sheetOut {
-  to { transform: translateY(105%); }
+  to {
+    transform: translateY(105%);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
+  from {
+    opacity: 0;
+  }
 }
 
 @keyframes fadeOut {
-  to { opacity: 0; }
+  to {
+    opacity: 0;
+  }
 }
 
 .sheet-grab {
@@ -963,7 +1021,9 @@
   font-size: 14.5px;
   box-sizing: border-box;
   font-family: inherit;
-  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .text-input::placeholder {
@@ -1008,12 +1068,18 @@
 }
 
 @keyframes floatY {
-  to { transform: translateY(-5px); }
+  to {
+    transform: translateY(-5px);
+  }
 }
 
 @keyframes twinkle {
-  from { opacity: 0.2; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .gallery-grid {
@@ -1033,7 +1099,9 @@
   padding: 10px;
   cursor: pointer;
   overflow: hidden;
-  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
 .gallery-text {
@@ -1120,7 +1188,9 @@
 }
 
 @keyframes dashDraw {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* ===== Footer ===== */
@@ -1177,4 +1247,41 @@
   .footer a:hover {
     color: var(--text-2);
   }
+}
+.css-panel-scroll {
+  max-height: 380px;
+  overflow-y: auto;
+  padding-inline-end: 6px;
+}
+
+.css-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.code-block {
+  background: #161616;
+
+  color: #5cff93;
+
+  padding: 16px;
+
+  border-radius: 12px;
+
+  overflow: auto;
+
+  font-family: Consolas, monospace;
+
+  white-space: pre-wrap;
+
+  max-height: 300px;
+}
+
+.code-buttons {
+  display: flex;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
 }
