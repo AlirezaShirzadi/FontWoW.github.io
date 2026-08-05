@@ -181,7 +181,6 @@ function SliderRow({ label, value, display, min, max, step, onChange }) {
 
 export default function App() {
   const [cssElement, setCssElement] = useState('h1')
-  const [showCssPanel, setShowCssPanel] = useState(false)
   const [state, setState] = useState(() => ({
     ...defaultState,
     ...loadJSON(SETTINGS_KEY, {}),
