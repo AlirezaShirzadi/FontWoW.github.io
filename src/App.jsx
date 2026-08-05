@@ -500,12 +500,12 @@ export default function App() {
 
   async function copyCSS() {
     await navigator.clipboard.writeText(generatedCSS)
-    setToast('CSS copied!')
+    setToast(t('cssCopied'))
   }
 
   async function copyHTML() {
     await navigator.clipboard.writeText(generatedHTML)
-    setToast('HTML copied!')
+    setToast(t('htmlCopied'))
   }
 
   function downloadCSS() {
