@@ -487,7 +487,16 @@ export default function App() {
 }
       `.trim()
 
-  const generatedHTML = `<${cssElement}>${state.text}</${cssElement}>`
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+  }
+
+  const generatedHTML = `<${cssElement}>${escapeHtml(state.text)}</${cssElement}>`
 
   async function copyCSS() {
     await navigator.clipboard.writeText(generatedCSS)
