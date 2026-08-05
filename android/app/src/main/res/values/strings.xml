@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FontWoW</string>
+    <string name="title_activity_main">FontWoW</string>
+    <string name="package_name">ir.m4tinbeigi.fontwow</string>
+    <string name="custom_url_scheme">ir.m4tinbeigi.fontwow</string>
+</resources>
