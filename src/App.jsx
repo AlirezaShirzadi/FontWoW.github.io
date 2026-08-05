@@ -543,6 +543,12 @@ export default function App() {
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
   }
 
+  // Native failures are invisible without logcat, so surface the real reason in the toast.
+  function errorToast(key, err) {
+    const detail = err?.message || String(err ?? '')
+    return detail ? `${t(key)}: ${detail.slice(0, 120)}` : t(key)
+  }
+
   async function exportPng() {
     if (!previewRef.current) return
     const fileName = `fontwow-${Date.now()}.png`
@@ -560,7 +566,7 @@ export default function App() {
       setToast(t('imageSaved'))
     } catch (err) {
       console.error('exportPng failed:', err)
-      setToast(t('imageError'))
+      setToast(errorToast('imageError', err))
     }
     setShowSave(false)
   }
@@ -571,8 +577,9 @@ export default function App() {
       await ensureFontPainted()
       if (isNative()) {
         const dataUrl = await toPng(previewRef.current, { pixelRatio: 3, cacheBust: true })
-        await copyImageNative(dataUrl, `fontwow-${Date.now()}.png`)
-        setToast(t('imageShared'))
+        const mode = await copyImageNative(dataUrl, `fontwow-${Date.now()}.png`)
+        // 'canceled' means the user dismissed the share sheet — say nothing.
+        if (mode !== 'canceled') setToast(t(mode === 'shared' ? 'imageShared' : 'imageCopied'))
       } else {
         const blob = await toBlob(previewRef.current, { pixelRatio: 3, cacheBust: true })
         await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })])
