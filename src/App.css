@@ -349,6 +349,106 @@
   cursor: pointer;
 }
 
+.add-label-layer-btn {
+  top: 88px;
+}
+
+.label-layer {
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+}
+
+.label-layer svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.label-layer-text {
+  position: relative;
+  z-index: 1;
+  max-width: 72%;
+  text-align: center;
+  font-weight: 800;
+  line-height: 1.15;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  pointer-events: none;
+}
+
+.label-text-input {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.label-font-row .font-chip {
+  min-width: 88px;
+  padding: 7px 10px;
+}
+
+.assets-panel,
+.label-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.label-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.label-asset-card {
+  min-height: 96px;
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-m);
+  background: var(--surface-2);
+  color: var(--text-1);
+  padding: 7px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.label-asset-card svg {
+  display: block;
+  width: 100%;
+  height: 58px;
+  margin-bottom: 3px;
+}
+
+.label-asset-card:first-child svg {
+  --label-hole: var(--surface-2);
+}
+
+.label-color-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.label-color-row label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.label-color-row input {
+  width: 38px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
 .text-canvas:empty::before {
   content: attr(data-placeholder);
   opacity: 0.55;
@@ -427,7 +527,11 @@
 
 /* ===== Controls deck ===== */
 .controls {
+  display: flex;
+  flex-direction: column;
   flex-shrink: 0;
+  min-height: 0;
+  max-height: min(52svh, 470px);
   background: color-mix(in srgb, var(--surface-1) 90%, transparent);
   border-top: 1px solid var(--border-1);
   border-radius: 22px 22px 0 0;
@@ -487,6 +591,10 @@
 .panel {
   padding: 12px 12px 16px;
   min-height: 96px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .panel > * {

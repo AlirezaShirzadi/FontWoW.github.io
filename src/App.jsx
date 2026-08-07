@@ -19,6 +19,7 @@ import {
 } from './fonts'
 import * as I from './icons'
 import { STRINGS } from './strings'
+import { LABEL_ASSETS, LabelArtwork } from './labels'
 import { useDesignHistory } from './useDesignHistory'
 import googleFontsList from './google-fonts.json'
 import { UPDATES } from './updates'
@@ -214,6 +215,7 @@ export default function App() {
   const [customTemplates, setCustomTemplates] = useState(() => loadJSON(CUSTOM_TEMPLATES_KEY, []))
   const [showStyleStudio, setShowStyleStudio] = useState(false)
   const [styleName, setStyleName] = useState('')
+  const [showLabelPicker, setShowLabelPicker] = useState(false)
   const [toast, setToast] = useState('')
   const [showGoogleFontsSearch, setShowGoogleFontsSearch] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -252,6 +254,7 @@ export default function App() {
     [state.bgId]
   )
   const allTemplates = useMemo(() => [...TEMPLATES, ...customTemplates], [customTemplates])
+  const activeLabel = state.layers.find((layer) => layer.id === state.activeLayerId && layer.type === 'label')
 
   useEffect(() => {
     if (!toast) return
@@ -603,6 +606,29 @@ export default function App() {
       fontSize: 28,
     }
     update({ layers: [...state.layers, newLayer], activeLayerId: id })
+  }
+
+  function addLabel(asset) {
+    const id = `label-${Date.now()}`
+    const newLayer = {
+      id,
+      type: 'label',
+      templateId: asset.id,
+      text: t('newLabelText'),
+      x: 50,
+      y: 50,
+      rotation: 0,
+      width: asset.width,
+      aspectRatio: asset.aspectRatio,
+      color: '#8b5cf6',
+      textColor: '#ffffff',
+      fontId: state.fontId,
+      fontSize: 22,
+      textOffsetX: 0,
+      textOffsetY: 0,
+    }
+    update({ layers: [...state.layers, newLayer], activeLayerId: id })
+    setShowLabelPicker(false)
   }
 
   async function onUploadLayerImage(e) {
@@ -1012,6 +1038,7 @@ export default function App() {
     { id: 'bg', label: t('tabBg'), Icon: I.IconImage },
     { id: 'layout', label: t('tabLayout'), Icon: I.IconSliders },
     { id: 'templates', label: t('tabTemplates'), Icon: I.IconGrid },
+    { id: 'assets', label: t('tabAssets'), Icon: I.IconTag },
     {
       id: 'css',
       label: 'CSS',
@@ -1102,6 +1129,54 @@ export default function App() {
             onInput={onTextInput}
           />
           {state.layers.map((layer) => {
+            if (layer.type === 'label') {
+              const layerFont = allFonts.find((f) => f.id === layer.fontId) ?? font
+              return (
+                <div
+                  key={layer.id}
+                  className={`text-layer label-layer ${state.activeLayerId === layer.id ? 'active' : ''}`}
+                  style={{
+                    left: `${layer.x}%`,
+                    top: `${layer.y}%`,
+                    width: `${layer.width}px`,
+                    aspectRatio: layer.aspectRatio ?? '16 / 9',
+                    transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
+                  }}
+                  onPointerDown={(e) => handleLayerDrag(e, layer)}
+                  onClick={(e) => e.stopPropagation()}
+                  onDoubleClick={() => {
+                    const value = window.prompt(t('editLabelText'), layer.text)
+                    if (value != null) updateLayer(layer.id, { text: value })
+                  }}
+                >
+                  <LabelArtwork templateId={layer.templateId} color={layer.color} />
+                  <span
+                    className="label-layer-text"
+                    style={{
+                      color: layer.textColor,
+                      fontFamily: layerFont.family,
+                      fontSize: `${layer.fontSize}px`,
+                      transform: `translate(${layer.textOffsetX ?? 0}%, ${layer.textOffsetY ?? 0}%)`,
+                    }}
+                  >
+                    {layer.text}
+                  </span>
+                  {state.activeLayerId === layer.id && (
+                    <>
+                      <span className="layer-del" onPointerDown={(e) => e.stopPropagation()} onClick={() => deleteLayer(layer.id)}>
+                        <I.IconX size={11} />
+                      </span>
+                      <span className="layer-rotate-handle" onPointerDown={(e) => handleLayerRotate(e, layer)}>
+                        <I.IconRotate size={11} />
+                      </span>
+                      <span className="layer-resize-handle" onPointerDown={(e) => handleLayerResize(e, layer)}>
+                        <I.IconArrowsLR size={11} />
+                      </span>
+                    </>
+                  )}
+                </div>
+              )
+            }
             if (layer.type === 'image') {
               return (
                 <div
@@ -1193,6 +1268,9 @@ export default function App() {
           <input type="file" accept="image/*" onChange={onUploadLayerImage} hidden />
           <I.IconPlus size={12} /> <I.IconImage size={13} />
         </label>
+        <button className="add-layer-btn add-label-layer-btn" onClick={() => setShowLabelPicker(true)} aria-label={t('addLabel')}>
+          <I.IconTag size={13} />
+        </button>
         {state.text && (
           <>
             <div className="canvas-rail">
@@ -1620,6 +1698,53 @@ export default function App() {
             </div>
           )}
 
+          {tab === 'assets' && (
+            <div className="assets-panel">
+              <p className="settings-label">{t('labelAssetsHint')}</p>
+              <div className="label-asset-grid">
+                {LABEL_ASSETS.map((asset) => (
+                  <button key={asset.id} className="label-asset-card" onClick={() => addLabel(asset)}>
+                    <LabelArtwork templateId={asset.id} />
+                    <span>{t(asset.labelKey)}</span>
+                  </button>
+                ))}
+              </div>
+              {activeLabel && (
+                <div className="label-editor">
+                  <p className="settings-label">{t('editSelectedLabel')}</p>
+                  <textarea
+                    className="text-input label-text-input"
+                    rows={3}
+                    value={activeLabel.text}
+                    onChange={(e) => updateLayer(activeLabel.id, { text: e.target.value })}
+                  />
+                  <p className="settings-label">{t('labelFont')}</p>
+                  <div className="chip-row label-font-row">
+                    {visibleFonts.map((labelFont) => (
+                      <button
+                        key={labelFont.id}
+                        className={`chip font-chip ${activeLabel.fontId === labelFont.id ? 'selected' : ''}`}
+                        onClick={() => {
+                          updateLayer(activeLabel.id, { fontId: labelFont.id })
+                          loadFont(labelFont)
+                        }}
+                      >
+                        <span style={{ fontFamily: labelFont.family }}>{labelFont.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="label-color-row">
+                    <label>{t('labelColor')}<input type="color" value={activeLabel.color} onChange={(e) => updateLayer(activeLabel.id, { color: e.target.value })} /></label>
+                    <label>{t('labelTextColor')}<input type="color" value={activeLabel.textColor} onChange={(e) => updateLayer(activeLabel.id, { textColor: e.target.value })} /></label>
+                  </div>
+                  <SliderRow label={t('size')} min={12} max={56} value={activeLabel.fontSize} onChange={(e) => updateLayer(activeLabel.id, { fontSize: +e.target.value })} />
+                  <SliderRow label={t('labelTextHorizontal')} min={-45} max={45} value={activeLabel.textOffsetX ?? 0} display={`${activeLabel.textOffsetX ?? 0}%`} onChange={(e) => updateLayer(activeLabel.id, { textOffsetX: +e.target.value })} />
+                  <SliderRow label={t('labelTextVertical')} min={-45} max={45} value={activeLabel.textOffsetY ?? 0} display={`${activeLabel.textOffsetY ?? 0}%`} onChange={(e) => updateLayer(activeLabel.id, { textOffsetY: +e.target.value })} />
+                </div>
+              )}
+            </div>
+          )}
+
           {tab === 'layout' && (
             <div className="layout-panel">
               <SliderRow
@@ -1709,6 +1834,19 @@ export default function App() {
           <button className="sheet-item" onClick={saveToGallery}>
             <I.IconStar size={17} /> {t('saveToAppGallery')}
           </button>
+        </Sheet>
+      )}
+
+      {showLabelPicker && (
+        <Sheet title={t('labelAssets')} onClose={() => setShowLabelPicker(false)}>
+          <div className="label-asset-grid">
+            {LABEL_ASSETS.map((asset) => (
+              <button key={asset.id} className="label-asset-card" onClick={() => addLabel(asset)}>
+                <LabelArtwork templateId={asset.id} />
+                <span>{t(asset.labelKey)}</span>
+              </button>
+            ))}
+          </div>
         </Sheet>
       )}
 
