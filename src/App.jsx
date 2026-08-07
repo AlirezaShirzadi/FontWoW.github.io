@@ -29,7 +29,8 @@ const SETTINGS_KEY = 'fontwow_settings_v1'
 const CUSTOM_FONTS_KEY = 'fontwow_custom_fonts_v1'
 const CUSTOM_TEMPLATES_KEY = 'fontwow_custom_templates_v1'
 const APP_SETTINGS_KEY = 'fontwow_app_settings_v1'
-const DONATE_URL = '' // لینک درگاه پرداخت زیبال رو اینجا قرار بده
+const DONATE_URL = 'https://daramet.com/fontwow'
+const CRYPTO_DONATE_URL = 'https://pay.oxapay.com/15417059'
 
 function loadJSON(key, fallback) {
   try {
@@ -1784,7 +1785,7 @@ export default function App() {
       {showDonate && (
         <Sheet title={t('donate')} onClose={() => setShowDonate(false)}>
           <p className="donate-text">{t('donateText')}</p>
-          {DONATE_URL ? (
+          {DONATE_URL && (
             <a
               className="sheet-item recommended"
               href={DONATE_URL}
@@ -1793,7 +1794,17 @@ export default function App() {
             >
               <I.IconCreditCard size={17} /> {t('payViaZibal')}
             </a>
-          ) : (
+          )}
+          {CRYPTO_DONATE_URL && (
+            <a href={CRYPTO_DONATE_URL} target="_blank" rel="noreferrer" className="oxapay-donate-link">
+              <img
+                src="https://oxapay.com/donation-buttons/1.png"
+                alt="OxaPay Donation Button"
+                style={{ width: 185 }}
+              />
+            </a>
+          )}
+          {!DONATE_URL && !CRYPTO_DONATE_URL && (
             <p className="empty">{t('donateNotSet')}</p>
           )}
           <p className="settings-label">{t('suggestFontLabel')}</p>

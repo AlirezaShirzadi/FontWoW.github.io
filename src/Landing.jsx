@@ -7,6 +7,8 @@ const CONTRIBUTORS_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io
 const LATEST_RELEASE_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io/releases/tags/latest'
 const RELEASES_URL = `${REPO}/releases/tag/latest`
 const APP_URL = '#/app'
+const CRYPTO_DONATE_URL = 'https://pay.oxapay.com/15417059'
+const TOMAN_DONATE_URL = 'https://daramet.com/fontwow'
 
 function detectPlatform() {
   const ua = navigator.userAgent || ''
@@ -138,6 +140,25 @@ export default function Landing() {
         </div>
       </section>
 
+      <section className="landing-donate">
+        <h2>حمایت مالی</h2>
+        <p>
+          تمام مبالغی که حمایت مالی می‌شن صرف خرید فونت‌های جدید با لایسنس می‌شه تا رایگان و در دسترس همه توی FontWoW قرار بگیرن.
+        </p>
+        <div className="landing-donate-buttons">
+          <a className="landing-btn landing-btn-primary" href={TOMAN_DONATE_URL} target="_blank" rel="noreferrer">
+            <I.IconCreditCard size={17} /> پرداخت تومانی (درامت) <I.IconExternal size={11} />
+          </a>
+          <a href={CRYPTO_DONATE_URL} target="_blank" rel="noreferrer">
+            <img
+              src="https://oxapay.com/donation-buttons/1.png"
+              alt="OxaPay Donation Button"
+              style={{ width: 185 }}
+            />
+          </a>
+        </div>
+      </section>
+
       <section className="landing-contributors">
         <h2>مشارکت‌کنندگان</h2>
         {contributorsError && (
@@ -174,6 +195,12 @@ export default function Landing() {
         </a>
         <a href="#/share">
           پک رسانه‌ای و اشتراک‌گذاری
+        </a>
+        <a href={TOMAN_DONATE_URL} target="_blank" rel="noreferrer">
+          <I.IconHeart size={16} /> حمایت مالی تومانی <I.IconExternal size={11} />
+        </a>
+        <a href={CRYPTO_DONATE_URL} target="_blank" rel="noreferrer">
+          <I.IconHeart size={16} /> حمایت مالی با کریپتو <I.IconExternal size={11} />
         </a>
         <a href={APP_URL}>بازگشت به برنامه</a>
       </footer>

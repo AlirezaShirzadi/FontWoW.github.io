@@ -185,6 +185,39 @@
   line-height: 1.7;
 }
 
+.landing-donate {
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+  background: rgba(25, 23, 36, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-l);
+  padding: 28px 20px;
+}
+
+.landing-donate-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.landing-donate h2 {
+  font-size: 20px;
+  margin: 0 0 12px;
+}
+
+.landing-donate p {
+  margin: 0 auto 20px;
+  max-width: 560px;
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.9;
+}
+
 .landing-contributors { width: 100%; max-width: 900px; }
 
 .landing-contributors h2 {
