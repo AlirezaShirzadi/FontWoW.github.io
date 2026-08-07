@@ -59,7 +59,9 @@ export async function checkForUpdate({ force = false } = {}) {
 
   if (!force && localStorage.getItem(DISMISSED_KEY) === remoteVersion) return null
 
-  const asset = data.assets?.find((a) => a.name.endsWith('.apk'))
+  const asset = data.assets
+    ?.filter((a) => a.name.endsWith('.apk'))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
 
   return {
     version: remoteVersion,

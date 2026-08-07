@@ -78,7 +78,9 @@ export default function Landing() {
         return res.json()
       })
       .then(data => {
-        const asset = data.assets?.find(a => a.name.endsWith('.apk'))
+        const asset = data.assets
+          ?.filter(a => a.name.endsWith('.apk'))
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
         if (!cancelled) {
           if (asset) setApkUrl(asset.browser_download_url)
           else setApkError(true)
