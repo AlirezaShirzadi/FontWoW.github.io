@@ -20,6 +20,7 @@ import {
 import * as I from './icons'
 import { STRINGS } from './strings'
 import googleFontsList from './google-fonts.json'
+import { UPDATES } from './updates'
 import './App.css'
 
 const STORAGE_KEY = 'fontwow_saved_v1'
@@ -200,6 +201,7 @@ export default function App() {
   const [showDonate, setShowDonate] = useState(false)
   const [fontSuggestion, setFontSuggestion] = useState('')
   const [showSettings, setShowSettings] = useState(false)
+  const [showChangelog, setShowChangelog] = useState(false)
   const [saved, setSaved] = useState(() => loadJSON(STORAGE_KEY, []))
   const [customFonts, setCustomFonts] = useState(() => loadJSON(CUSTOM_FONTS_KEY, []))
   const [customTemplates, setCustomTemplates] = useState(() => loadJSON(CUSTOM_TEMPLATES_KEY, []))
@@ -1864,6 +1866,22 @@ export default function App() {
           <a className="sheet-item" href="#/about">
             <I.IconDownload size={17} /> معرفی برنامه و دانلود اندروید
           </a>
+          <button
+            className="sheet-item"
+            onClick={() => {
+              setShowSettings(false)
+              setShowChangelog(true)
+            }}
+          >
+            <I.IconStar size={17} style={{ color: 'var(--accent)' }} /> {t('whatsNew')}
+          </button>
+          <a
+            className="sheet-item"
+            href="#/share"
+            onClick={() => setShowSettings(false)}
+          >
+            <I.IconImages size={17} style={{ color: 'var(--accent)' }} /> {t('shareKitLink')}
+          </a>
 
           <p className="settings-label">{t('fontLicenses')}</p>
           <p className="donate-text">{t('fontLicensesText')}</p>
@@ -1880,6 +1898,77 @@ export default function App() {
           <button className="sheet-item" onClick={resetAppSettings}>
             <I.IconRefresh size={17} /> {t('resetSettings')}
           </button>
+        </Sheet>
+      )}
+
+      {showChangelog && (
+        <Sheet title={t('whatsNew')} tall onClose={() => setShowChangelog(false)}>
+          <div className="changelog-container" style={{ padding: '0 8px 24px 8px' }}>
+            {UPDATES.map((up) => {
+              const info = appSettings.lang === 'fa' ? up.fa : up.en
+              return (
+                <div
+                  key={up.version}
+                  className="changelog-version"
+                  style={{
+                    marginBottom: '24px',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                    paddingBottom: '16px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '12px',
+                    }}
+                  >
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: '1.1rem',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <span
+                        style={{
+                          background: 'var(--accent)',
+                          color: '#000',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        v{up.version}
+                      </span>
+                      <span>{info.title}</span>
+                    </h3>
+                    <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>{up.date}</span>
+                  </div>
+                  <ul
+                    style={{
+                      margin: 0,
+                      paddingLeft: appSettings.lang === 'fa' ? 0 : '20px',
+                      paddingRight: appSettings.lang === 'fa' ? '20px' : 0,
+                      listStyleType: 'disc',
+                      lineHeight: '1.6',
+                    }}
+                  >
+                    {info.changes.map((change, idx) => (
+                      <li key={idx} style={{ marginBottom: '8px', fontSize: '0.9rem', opacity: 0.9 }}>
+                        {change}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
+          </div>
         </Sheet>
       )}
 
