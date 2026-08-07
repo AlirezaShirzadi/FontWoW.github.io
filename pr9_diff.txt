@@ -1,0 +1,278 @@
+diff --git a/src/App.css b/src/App.css
+index ac74146..544bf98 100644
+--- a/src/App.css
++++ b/src/App.css
+@@ -138,6 +138,11 @@
+   padding: 9px 11px;
+ }
+ 
++.pill-btn:disabled {
++  cursor: not-allowed;
++  opacity: 0.38;
++}
++
+ .brand {
+   display: flex;
+   align-items: center;
+diff --git a/src/App.jsx b/src/App.jsx
+index 3a5b565..55afb4b 100644
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -19,6 +19,7 @@ import {
+ } from './fonts'
+ import * as I from './icons'
+ import { STRINGS } from './strings'
++import { useDesignHistory } from './useDesignHistory'
+ import './App.css'
+ 
+ const STORAGE_KEY = 'fontwow_saved_v1'
+@@ -183,10 +184,15 @@ function SliderRow({ label, value, display, min, max, step, onChange }) {
+ 
+ export default function App() {
+   const [cssElement, setCssElement] = useState('h1')
+-  const [state, setState] = useState(() => ({
+-    ...defaultState,
+-    ...loadJSON(SETTINGS_KEY, {}),
+-  }))
++  const {
++    state,
++    commit: commitState,
++    patch: update,
++    undo,
++    redo,
++    canUndo,
++    canRedo,
++  } = useDesignHistory({ ...defaultState, ...loadJSON(SETTINGS_KEY, {}) })
+   const [appSettings, setAppSettings] = useState(() => ({
+     ...defaultAppSettings,
+     ...loadJSON(APP_SETTINGS_KEY, {}),
+@@ -241,6 +247,27 @@ export default function App() {
+     localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(appSettings))
+   }, [appSettings])
+ 
++  useEffect(() => {
++    function onKeyDown(e) {
++      if (!((e.metaKey || e.ctrlKey) && !e.altKey)) return
++      if (e.target instanceof Element && e.target.closest('input, textarea, select')) return
++
++      if (e.key.toLowerCase() === 'z') {
++        if (e.shiftKey ? canRedo : canUndo) {
++          e.preventDefault()
++          if (e.shiftKey) redo()
++          else undo()
++        }
++      } else if (e.key.toLowerCase() === 'y' && canRedo) {
++        e.preventDefault()
++        redo()
++      }
++    }
++
++    window.addEventListener('keydown', onKeyDown)
++    return () => window.removeEventListener('keydown', onKeyDown)
++  }, [canRedo, canUndo, redo, undo])
++
+   useEffect(() => {
+     document.documentElement.dir = appSettings.lang === 'en' ? 'ltr' : 'rtl'
+     document.documentElement.lang = appSettings.lang
+@@ -371,10 +398,6 @@ export default function App() {
+     update({ customBgUrl: null, bgId: 'grad-1' })
+   }
+ 
+-  function update(patch) {
+-    setState((s) => ({ ...s, ...patch }))
+-  }
+-
+   function onTextInput(e) {
+     update({ text: e.currentTarget.innerText })
+   }
+@@ -426,9 +449,8 @@ export default function App() {
+   }
+ 
+   function updateLayer(id, patch) {
+-    setState((s) => ({
+-      ...s,
+-      layers: s.layers.map((l) => (l.id === id ? { ...l, ...patch } : l)),
++    update((current) => ({
++      layers: current.layers.map((layer) => (layer.id === id ? { ...layer, ...patch } : layer)),
+     }))
+   }
+ 
+@@ -441,7 +463,7 @@ export default function App() {
+ 
+   function handleLayerDrag(e, layer) {
+     e.stopPropagation()
+-    update({ activeLayerId: layer.id })
++    update({ activeLayerId: layer.id }, { record: false })
+     if (!previewRef.current) return
+     const rect = previewRef.current.getBoundingClientRect()
+     const startX = e.clientX
+@@ -760,7 +782,7 @@ export default function App() {
+   }
+ 
+   function loadEntry(entry) {
+-    setState({ ...defaultState, ...entry })
++    commitState({ ...defaultState, ...entry })
+     if (textRef.current) textRef.current.innerText = entry.text
+     setShowGallery(false)
+   }
+@@ -773,7 +795,7 @@ export default function App() {
+   }
+ 
+   function clearAll() {
+-    setState({ ...defaultState })
++    commitState({ ...defaultState })
+     if (textRef.current) textRef.current.innerText = ''
+     textRef.current?.focus()
+   }
+@@ -826,7 +848,7 @@ export default function App() {
+         <button
+           className="pill-btn"
+           onClick={() => {
+-            update({ activeLayerId: null })
++            update({ activeLayerId: null }, { record: false })
+             setShowSave(true)
+           }}
+         >
+@@ -837,6 +859,24 @@ export default function App() {
+           <span className="brand-name">FontWoW</span>
+         </div>
+         <div className="header-actions">
++          <button
++            className="pill-btn ghost icon-only"
++            onClick={undo}
++            aria-label={t('undo')}
++            title={`${t('undo')} (Ctrl/Cmd + Z)`}
++            disabled={!canUndo}
++          >
++            <I.IconUndo size={16} />
++          </button>
++          <button
++            className="pill-btn ghost icon-only"
++            onClick={redo}
++            aria-label={t('redo')}
++            title={`${t('redo')} (Ctrl/Cmd + Shift + Z)`}
++            disabled={!canRedo}
++          >
++            <I.IconRedo size={16} />
++          </button>
+           <button
+             className="pill-btn ghost icon-only"
+             onClick={() => setShowSettings(true)}
+@@ -862,7 +902,7 @@ export default function App() {
+           className="stage-inner"
+           ref={previewRef}
+           style={previewStyle}
+-          onClick={() => state.activeLayerId && update({ activeLayerId: null })}
++          onClick={() => state.activeLayerId && update({ activeLayerId: null }, { record: false })}
+         >
+           <div className="bg-layer" style={bgLayerStyle} />
+           <div
+diff --git a/src/icons.jsx b/src/icons.jsx
+index c886c4e..2dbb06e 100644
+--- a/src/icons.jsx
++++ b/src/icons.jsx
+@@ -88,6 +88,8 @@ export const IconRotate = icon(
+     <path d="M21 3v5h-5" />
+   </>,
+ )
++export const IconUndo = icon(<path d="M9 14 4 9l5-5M4 9h9a7 7 0 1 1-7 7" />)
++export const IconRedo = icon(<path d="m15 14 5-5-5-5m5 5h-9a7 7 0 1 0 7 7" />)
+ export const IconShadow = icon(
+   <>
+     <rect x="4" y="4" width="12" height="12" rx="2.5" />
+diff --git a/src/strings.js b/src/strings.js
+index 27d6b2a..6d6dd9d 100644
+--- a/src/strings.js
++++ b/src/strings.js
+@@ -4,6 +4,8 @@ export const STRINGS = {
+     gallery: 'گالری',
+     donate: 'حمایت مالی',
+     settings: 'تنظیمات',
++    undo: 'برگردان',
++    redo: 'انجام دوباره',
+     placeholder: 'اینجا بنویسید…',
+     clear: 'پاک کردن',
+     tabFont: 'فونت',
+@@ -103,6 +105,8 @@ export const STRINGS = {
+     gallery: 'Gallery',
+     donate: 'Support',
+     settings: 'Settings',
++    undo: 'Undo',
++    redo: 'Redo',
+     placeholder: 'Type here…',
+     clear: 'Clear',
+     tabFont: 'Font',
+diff --git a/src/useDesignHistory.js b/src/useDesignHistory.js
+new file mode 100644
+index 0000000..9f8ccb1
+--- /dev/null
++++ b/src/useDesignHistory.js
+@@ -0,0 +1,68 @@
++import { useCallback, useRef, useState } from 'react'
++
++const HISTORY_LIMIT = 50
++
++/**
++ * Keeps the editable design state and a bounded, in-memory undo/redo history.
++ * UI-only changes (such as selecting a layer) can opt out of history.
++ */
++export function useDesignHistory(initialState) {
++  const [state, setState] = useState(initialState)
++  const stateRef = useRef(initialState)
++  const [history, setHistory] = useState({ past: [], future: [] })
++
++  const commit = useCallback((nextState, { record = true } = {}) => {
++    const currentState = stateRef.current
++    if (nextState === currentState) return
++
++    if (record) {
++      setHistory(({ past }) => ({
++        past: [...past, currentState].slice(-HISTORY_LIMIT),
++        future: [],
++      }))
++    }
++
++    stateRef.current = nextState
++    setState(nextState)
++  }, [])
++
++  const patch = useCallback(
++    (changes, options) => {
++      const nextChanges = typeof changes === 'function' ? changes(stateRef.current) : changes
++      commit({ ...stateRef.current, ...nextChanges }, options)
++    },
++    [commit],
++  )
++
++  const undo = useCallback(() => {
++    setHistory(({ past, future }) => {
++      if (!past.length) return { past, future }
++      const previous = past[past.length - 1]
++      const current = stateRef.current
++      stateRef.current = previous
++      setState(previous)
++      return { past: past.slice(0, -1), future: [current, ...future] }
++    })
++  }, [])
++
++  const redo = useCallback(() => {
++    setHistory(({ past, future }) => {
++      if (!future.length) return { past, future }
++      const next = future[0]
++      const current = stateRef.current
++      stateRef.current = next
++      setState(next)
++      return { past: [...past, current].slice(-HISTORY_LIMIT), future: future.slice(1) }
++    })
++  }, [])
++
++  return {
++    state,
++    commit,
++    patch,
++    undo,
++    redo,
++    canUndo: history.past.length > 0,
++    canRedo: history.future.length > 0,
++  }
++}

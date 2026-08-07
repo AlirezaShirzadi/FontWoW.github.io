@@ -1,0 +1,1168 @@
+diff --git a/fontwow-features-onto-latest-main.patch b/fontwow-features-onto-latest-main.patch
+new file mode 100644
+index 0000000..8697f9b
+--- /dev/null
++++ b/fontwow-features-onto-latest-main.patch
+@@ -0,0 +1,581 @@
++diff --git a/src/App.css b/src/App.css
++index ac74146..0c3cb4d 100644
++--- a/src/App.css
+++++ b/src/App.css
++@@ -196,6 +196,18 @@
++   align-items: center;
++ }
++ 
+++.header-start {
+++  display: flex;
+++  gap: 6px;
+++  align-items: center;
+++}
+++
+++.pill-btn:disabled {
+++  opacity: 0.35;
+++  cursor: not-allowed;
+++  transform: none !important;
+++}
+++
++ /* ===== Stage ===== */
++ .stage {
++   position: relative;
++@@ -304,6 +316,58 @@
++   cursor: pointer;
++ }
++ 
+++.layer-toolbar {
+++  position: absolute;
+++  bottom: calc(100% + 18px);
+++  left: 50%;
+++  transform: translateX(-50%);
+++  display: flex;
+++  gap: 4px;
+++  background: rgba(0, 0, 0, 0.75);
+++  border-radius: var(--r-pill);
+++  padding: 3px;
+++  white-space: nowrap;
+++  z-index: 3;
+++}
+++
+++.layer-toolbar button {
+++  display: flex;
+++  align-items: center;
+++  justify-content: center;
+++  width: 22px;
+++  height: 22px;
+++  border: none;
+++  border-radius: 50%;
+++  background: transparent;
+++  color: #fff;
+++  cursor: pointer;
+++}
+++
+++.layer-toolbar button:active {
+++  background: rgba(255, 255, 255, 0.15);
+++}
+++
+++/* Rendered as siblings of .stage-inner (not inside it) using viewport coordinates, so they can
+++   never end up in the exported PNG regardless of when a drag happens to end. */
+++.snap-guide {
+++  position: fixed;
+++  background: var(--accent);
+++  z-index: 40;
+++  pointer-events: none;
+++}
+++
+++.snap-guide-v {
+++  top: 0;
+++  bottom: 0;
+++  width: 1px;
+++}
+++
+++.snap-guide-h {
+++  left: 0;
+++  right: 0;
+++  height: 1px;
+++}
+++
++ .image-layer {
++   padding: 0;
++   display: flex;
++@@ -505,6 +569,59 @@
++   }
++ }
++ 
+++.font-search-box {
+++  display: flex;
+++  align-items: center;
+++  gap: 8px;
+++  background: var(--surface-2);
+++  border: 1.5px solid var(--border-1);
+++  border-radius: var(--r-pill);
+++  padding: 8px 12px;
+++  margin: 2px 2px 10px;
+++  transition:
+++    border-color var(--dur-fast) var(--ease-out),
+++    box-shadow var(--dur-fast) var(--ease-out);
+++}
+++
+++.font-search-box:focus-within {
+++  border-color: var(--accent);
+++  box-shadow: 0 0 0 2px var(--accent-soft);
+++}
+++
+++.font-search-icon {
+++  flex-shrink: 0;
+++  color: var(--text-2);
+++}
+++
+++.font-search-input {
+++  flex: 1;
+++  min-width: 0;
+++  background: transparent;
+++  border: none;
+++  outline: none;
+++  color: var(--text-1);
+++  font-size: 13.5px;
+++  font-family: inherit;
+++}
+++
+++.font-search-input::placeholder {
+++  color: var(--text-2);
+++}
+++
+++.font-search-clear {
+++  flex-shrink: 0;
+++  display: flex;
+++  align-items: center;
+++  justify-content: center;
+++  width: 20px;
+++  height: 20px;
+++  border: none;
+++  border-radius: 50%;
+++  background: var(--surface-3, var(--surface-2));
+++  color: var(--text-2);
+++  cursor: pointer;
+++}
+++
++ .chip-row {
++   display: flex;
++   gap: 10px;
++diff --git a/src/App.jsx b/src/App.jsx
++index 3a5b565..582bfe4 100644
++--- a/src/App.jsx
+++++ b/src/App.jsx
++@@ -193,6 +193,8 @@ export default function App() {
++   }))
++   const [tab, setTab] = useState('font')
++   const [fontLang, setFontLang] = useState('fa')
+++  const [fontQuery, setFontQuery] = useState('')
+++  const [dragGuides, setDragGuides] = useState({ x: null, y: null })
++   const [bgCategory, setBgCategory] = useState('colors')
++   const [showSave, setShowSave] = useState(false)
++   const [showGallery, setShowGallery] = useState(false)
++@@ -210,13 +212,23 @@ export default function App() {
++   const textRef = useRef(null)
++   const tabsRef = useRef(null)
++ 
+++  // Undo/redo: past/future are kept in a ref (deep-cloned state snapshots) so pushing a
+++  // snapshot never forces a render by itself — historyVersion is bumped separately to make
+++  // the toolbar buttons re-render when the stacks actually change.
+++  const historyRef = useRef({ past: [], future: [] })
+++  const pendingSnapshotRef = useRef(null)
+++  const [historyVersion, setHistoryVersion] = useState(0)
+++  const HISTORY_LIMIT = 40
+++  const HISTORY_DEBOUNCE_MS = 600
+++
++   const t = (key) => STRINGS[appSettings.lang]?.[key] ?? STRINGS.fa[key] ?? key
++ 
++   const allFonts = useMemo(() => [...FONTS, ...customFonts], [customFonts])
++-  const visibleFonts = useMemo(
++-    () => allFonts.filter((f) => f.dataUrl || f.lang === fontLang),
++-    [allFonts, fontLang]
++-  )
+++  const visibleFonts = useMemo(() => {
+++    const q = fontQuery.trim().toLowerCase()
+++    if (q) return allFonts.filter((f) => f.label.toLowerCase().includes(q))
+++    return allFonts.filter((f) => f.dataUrl || f.lang === fontLang)
+++  }, [allFonts, fontLang, fontQuery])
++   const font = useMemo(
++     () => allFonts.find((f) => f.id === state.fontId) ?? allFonts[0],
++     [allFonts, state.fontId]
++@@ -233,6 +245,53 @@ export default function App() {
++     return () => clearTimeout(tm)
++   }, [toast])
++ 
+++  // Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y) for undo/redo — skipped while the user is
+++  // actually typing (contentEditable text, inputs, textareas) so we don't hijack the browser's
+++  // own native undo inside those fields.
+++  useEffect(() => {
+++    function onKeyDown(e) {
+++      if (!(e.ctrlKey || e.metaKey) || (e.key.toLowerCase() !== 'z' && e.key.toLowerCase() !== 'y'))
+++        return
+++      const el = document.activeElement
+++      const isEditing = el?.isContentEditable || el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA'
+++      if (isEditing) return
+++      const key = e.key.toLowerCase()
+++      if (key === 'y' || (key === 'z' && e.shiftKey)) {
+++        e.preventDefault()
+++        redo()
+++      } else if (key === 'z') {
+++        e.preventDefault()
+++        undo()
+++      }
+++    }
+++    window.addEventListener('keydown', onKeyDown)
+++    return () => window.removeEventListener('keydown', onKeyDown)
+++  }, [undo, redo])
+++
+++  // Arrow-key nudge for the selected layer — desktop-only bonus alongside drag; ignored while
+++  // the user is actually typing so it doesn't fight arrow-key text navigation.
+++  useEffect(() => {
+++    function onKeyDown(e) {
+++      if (!state.activeLayerId) return
+++      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return
+++      const el = document.activeElement
+++      const isEditing = el?.isContentEditable || el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA'
+++      if (isEditing) return
+++      const layer = state.layers.find((l) => l.id === state.activeLayerId)
+++      if (!layer) return
+++      e.preventDefault()
+++      const step = e.shiftKey ? 3 : 0.5
+++      const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0
+++      const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0
+++      updateLayer(layer.id, {
+++        x: Math.min(95, Math.max(5, layer.x + dx)),
+++        y: Math.min(95, Math.max(5, layer.y + dy)),
+++      })
+++    }
+++    window.addEventListener('keydown', onKeyDown)
+++    return () => window.removeEventListener('keydown', onKeyDown)
+++  }, [state.activeLayerId, state.layers])
+++
++   useEffect(() => {
++     localStorage.setItem(SETTINGS_KEY, JSON.stringify(state))
++   }, [state])
++@@ -371,7 +430,52 @@ export default function App() {
++     update({ customBgUrl: null, bgId: 'grad-1' })
++   }
++ 
+++  // Groups bursts of rapid changes (e.g. dragging a slider or a layer) into a single undo
+++  // step: the snapshot is taken once at the start of a burst, and the debounce window resets
+++  // on every call, so it only "closes" once the user pauses for HISTORY_DEBOUNCE_MS.
+++  function recordHistory(prevState) {
+++    if (!pendingSnapshotRef.current) {
+++      const h = historyRef.current
+++      h.past.push(prevState)
+++      if (h.past.length > HISTORY_LIMIT) h.past.shift()
+++      h.future = []
+++      setHistoryVersion((v) => v + 1)
+++    }
+++    clearTimeout(pendingSnapshotRef.current)
+++    pendingSnapshotRef.current = setTimeout(() => {
+++      pendingSnapshotRef.current = null
+++    }, HISTORY_DEBOUNCE_MS)
+++  }
+++
+++  function undo() {
+++    const h = historyRef.current
+++    if (!h.past.length) return
+++    clearTimeout(pendingSnapshotRef.current)
+++    pendingSnapshotRef.current = null
+++    const prev = h.past.pop()
+++    h.future.push(state)
+++    setState(prev)
+++    setHistoryVersion((v) => v + 1)
+++  }
+++
+++  function redo() {
+++    const h = historyRef.current
+++    if (!h.future.length) return
+++    clearTimeout(pendingSnapshotRef.current)
+++    pendingSnapshotRef.current = null
+++    const next = h.future.pop()
+++    h.past.push(state)
+++    setState(next)
+++    setHistoryVersion((v) => v + 1)
+++  }
+++
+++  // historyVersion is read here (even though the length checks come from the ref) purely to
+++  // make these re-evaluate on every push/pop — see recordHistory/undo/redo above.
+++  const canUndo = historyVersion >= 0 && historyRef.current.past.length > 0
+++  const canRedo = historyVersion >= 0 && historyRef.current.future.length > 0
+++
++   function update(patch) {
+++    recordHistory(state)
++     setState((s) => ({ ...s, ...patch }))
++   }
++ 
++@@ -426,12 +530,33 @@ export default function App() {
++   }
++ 
++   function updateLayer(id, patch) {
+++    recordHistory(state)
++     setState((s) => ({
++       ...s,
++       layers: s.layers.map((l) => (l.id === id ? { ...l, ...patch } : l)),
++     }))
++   }
++ 
+++  function duplicateLayer(id) {
+++    const layer = state.layers.find((l) => l.id === id)
+++    if (!layer) return
+++    const newId = `layer-${Date.now()}`
+++    const copy = { ...layer, id: newId, x: Math.min(95, layer.x + 5), y: Math.min(95, layer.y + 5) }
+++    update({ layers: [...state.layers, copy], activeLayerId: newId })
+++  }
+++
+++  // Layer stacking order is just array order — moving forward/backward means swapping the
+++  // layer with its neighbor. Already at an end -> no-op.
+++  function moveLayer(id, direction) {
+++    const layers = state.layers
+++    const i = layers.findIndex((l) => l.id === id)
+++    const j = i + direction
+++    if (i === -1 || j < 0 || j >= layers.length) return
+++    const next = [...layers]
+++    ;[next[i], next[j]] = [next[j], next[i]]
+++    update({ layers: next })
+++  }
+++
++   function deleteLayer(id) {
++     update({
++       layers: state.layers.filter((l) => l.id !== id),
++@@ -448,17 +573,45 @@ export default function App() {
++     const startY = e.clientY
++     const origX = layer.x
++     const origY = layer.y
+++    const SNAP = 2 // % of canvas width/height — snap zone around center + other layers
+++    const otherLayers = state.layers.filter((l) => l.id !== layer.id)
++     function onMove(ev) {
++       const dx = ((ev.clientX - startX) / rect.width) * 100
++       const dy = ((ev.clientY - startY) / rect.height) * 100
++-      updateLayer(layer.id, {
++-        x: Math.min(95, Math.max(5, origX + dx)),
++-        y: Math.min(95, Math.max(5, origY + dy)),
++-      })
+++      let x = Math.min(95, Math.max(5, origX + dx))
+++      let y = Math.min(95, Math.max(5, origY + dy))
+++      let guideX = null
+++      let guideY = null
+++
+++      if (Math.abs(x - 50) < SNAP) {
+++        x = 50
+++        guideX = rect.left + rect.width * 0.5
+++      } else {
+++        const match = otherLayers.find((l) => Math.abs(x - l.x) < SNAP)
+++        if (match) {
+++          x = match.x
+++          guideX = rect.left + (rect.width * match.x) / 100
+++        }
+++      }
+++
+++      if (Math.abs(y - 50) < SNAP) {
+++        y = 50
+++        guideY = rect.top + rect.height * 0.5
+++      } else {
+++        const match = otherLayers.find((l) => Math.abs(y - l.y) < SNAP)
+++        if (match) {
+++          y = match.y
+++          guideY = rect.top + (rect.height * match.y) / 100
+++        }
+++      }
+++
+++      updateLayer(layer.id, { x, y })
+++      setDragGuides({ x: guideX, y: guideY })
++     }
++     function onUp() {
++       window.removeEventListener('pointermove', onMove)
++       window.removeEventListener('pointerup', onUp)
+++      setDragGuides({ x: null, y: null })
++     }
++     window.addEventListener('pointermove', onMove)
++     window.addEventListener('pointerup', onUp)
++@@ -823,15 +976,33 @@ export default function App() {
++         <i />
++       </div>
++       <header className="topbar">
++-        <button
++-          className="pill-btn"
++-          onClick={() => {
++-            update({ activeLayerId: null })
++-            setShowSave(true)
++-          }}
++-        >
++-          <I.IconDownload size={14} /> {t('save')}
++-        </button>
+++        <div className="header-start">
+++          <button
+++            className="pill-btn"
+++            onClick={() => {
+++              update({ activeLayerId: null })
+++              setShowSave(true)
+++            }}
+++          >
+++            <I.IconDownload size={14} /> {t('save')}
+++          </button>
+++          <button
+++            className="pill-btn ghost icon-only"
+++            onClick={undo}
+++            disabled={!canUndo}
+++            aria-label={t('undo')}
+++          >
+++            <I.IconUndo size={16} />
+++          </button>
+++          <button
+++            className="pill-btn ghost icon-only"
+++            onClick={redo}
+++            disabled={!canRedo}
+++            aria-label={t('redo')}
+++          >
+++            <I.IconRedo size={16} />
+++          </button>
+++        </div>
++         <div className="brand">
++           <I.Logo size={22} />
++           <span className="brand-name">FontWoW</span>
++@@ -892,6 +1063,17 @@ export default function App() {
++                   <img src={layer.src} alt="" draggable={false} />
++                   {state.activeLayerId === layer.id && (
++                     <>
+++                      <div className="layer-toolbar" onPointerDown={(e) => e.stopPropagation()}>
+++                        <button onClick={() => moveLayer(layer.id, -1)} aria-label={t('sendBackward')}>
+++                          <I.IconArrowDown size={12} />
+++                        </button>
+++                        <button onClick={() => duplicateLayer(layer.id)} aria-label={t('duplicateLayer')}>
+++                          <I.IconCopy size={12} />
+++                        </button>
+++                        <button onClick={() => moveLayer(layer.id, 1)} aria-label={t('bringForward')}>
+++                          <I.IconArrowUp size={12} />
+++                        </button>
+++                      </div>
++                       <span
++                         className="layer-del"
++                         onPointerDown={(e) => e.stopPropagation()}
++@@ -940,6 +1122,17 @@ export default function App() {
++                 {layer.text}
++                 {state.activeLayerId === layer.id && (
++                   <>
+++                    <div className="layer-toolbar" onPointerDown={(e) => e.stopPropagation()}>
+++                      <button onClick={() => moveLayer(layer.id, -1)} aria-label={t('sendBackward')}>
+++                        <I.IconArrowDown size={12} />
+++                      </button>
+++                      <button onClick={() => duplicateLayer(layer.id)} aria-label={t('duplicateLayer')}>
+++                        <I.IconCopy size={12} />
+++                      </button>
+++                      <button onClick={() => moveLayer(layer.id, 1)} aria-label={t('bringForward')}>
+++                        <I.IconArrowUp size={12} />
+++                      </button>
+++                    </div>
++                     <span
++                       className="layer-del"
++                       onPointerDown={(e) => e.stopPropagation()}
++@@ -959,6 +1152,12 @@ export default function App() {
++             )
++           })}
++         </div>
+++        {dragGuides.x != null && (
+++          <div className="snap-guide snap-guide-v" style={{ left: dragGuides.x }} />
+++        )}
+++        {dragGuides.y != null && (
+++          <div className="snap-guide snap-guide-h" style={{ top: dragGuides.y }} />
+++        )}
++         <button className="add-layer-btn" onClick={addLayer} aria-label={t('addLayer')}>
++           <I.IconPlus size={12} /> Aa
++         </button>
++@@ -1084,17 +1283,41 @@ export default function App() {
++           )}
++           {tab === 'font' && (
++             <>
++-              <div className="chip-row sub-row">
++-                {FONT_CATEGORIES.map((c) => (
+++              <div className="font-search-box">
+++                <I.IconSearch size={15} className="font-search-icon" />
+++                <input
+++                  type="text"
+++                  className="font-search-input"
+++                  placeholder={t('fontSearchPlaceholder')}
+++                  value={fontQuery}
+++                  onChange={(e) => setFontQuery(e.target.value)}
+++                />
+++                {fontQuery && (
++                   <button
++-                    key={c.id}
++-                    className={`pill-tab ${fontLang === c.id ? 'active' : ''}`}
++-                    onClick={() => setFontLang(c.id)}
+++                    className="font-search-clear"
+++                    onClick={() => setFontQuery('')}
+++                    aria-label={t('clear')}
++                   >
++-                    {c.label}
+++                    <I.IconX size={13} />
++                   </button>
++-                ))}
+++                )}
++               </div>
+++              {!fontQuery && (
+++                <div className="chip-row sub-row">
+++                  {FONT_CATEGORIES.map((c) => (
+++                    <button
+++                      key={c.id}
+++                      className={`pill-tab ${fontLang === c.id ? 'active' : ''}`}
+++                      onClick={() => setFontLang(c.id)}
+++                    >
+++                      {c.label}
+++                    </button>
+++                  ))}
+++                </div>
+++              )}
+++              {fontQuery && visibleFonts.length === 0 && (
+++                <p className="settings-label">{t('noFontsFound')}</p>
+++              )}
++               <div className="chip-row">
++                 {visibleFonts.map((f) => (
++                   <button
++diff --git a/src/icons.jsx b/src/icons.jsx
++index c886c4e..c8b267b 100644
++--- a/src/icons.jsx
+++++ b/src/icons.jsx
++@@ -180,6 +180,26 @@ export const IconGrid = icon(
++     <rect x="14" y="14" width="7" height="7" rx="1.5" />
++   </>,
++ )
+++export const IconSearch = icon(
+++  <>
+++    <circle cx="11" cy="11" r="8" />
+++    <path d="m21 21-4.35-4.35" />
+++  </>,
+++)
+++export const IconUndo = icon(
+++  <>
+++    <path d="M9 14 4 9l5-5" />
+++    <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
+++  </>,
+++)
+++export const IconRedo = icon(
+++  <>
+++    <path d="m15 14 5-5-5-5" />
+++    <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
+++  </>,
+++)
+++export const IconArrowUp = icon(<path d="M12 19V5M5 12l7-7 7 7" />)
+++export const IconArrowDown = icon(<path d="M12 5v14M19 12l-7 7-7-7" />)
++ 
++ // Brand bolt lifted from public/favicon.svg (outer silhouette).
++ const BOLT = 'M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z'
++diff --git a/src/strings.js b/src/strings.js
++index 27d6b2a..d181f28 100644
++--- a/src/strings.js
+++++ b/src/strings.js
++@@ -23,6 +23,9 @@ export const STRINGS = {
++     addLayer: 'افزودن متن جدید',
++     addSticker: 'افزودن استیکر/عکس',
++     editLayerText: 'متن این لایه را ویرایش کن',
+++    duplicateLayer: 'کپی این لایه',
+++    bringForward: 'بیار جلو',
+++    sendBackward: 'ببر عقب',
++     deleteLayer: 'حذف لایه',
++     newLayerText: 'متن جدید',
++     bold: 'بولد',
++@@ -69,6 +72,10 @@ export const STRINGS = {
++     imageCopied: 'عکس در کلیپ‌بورد کپی شد',
++     imageShared: 'کلیپ‌بورد در دسترس نبود؛ عکس برای اشتراک‌گذاری باز شد',
++     imageCopyFallback: 'کپی عکس پشتیبانی نشد؛ متن کپی شد',
+++    fontSearchPlaceholder: 'جستجوی فونت…',
+++    noFontsFound: 'فونتی با این اسم پیدا نشد',
+++    undo: 'واگرد',
+++    redo: 'ازنو',
++     copyFailed: 'کپی ناموفق بود',
++     textCopied: 'متن کپی شد',
++     writeFirst: 'اول یک متن بنویس',
++@@ -121,6 +128,9 @@ export const STRINGS = {
++     aspectRatio: 'Aspect Ratio',
++     addLayer: 'Add text layer',
++     editLayerText: "Edit this layer's text",
+++    duplicateLayer: 'Duplicate this layer',
+++    bringForward: 'Bring forward',
+++    sendBackward: 'Send backward',
++     deleteLayer: 'Delete layer',
++     newLayerText: 'New text',
++     bold: 'Bold',
+diff --git a/src/App.css b/src/App.css
+index ac74146..0c3cb4d 100644
+--- a/src/App.css
++++ b/src/App.css
+@@ -196,6 +196,18 @@
+   align-items: center;
+ }
+ 
++.header-start {
++  display: flex;
++  gap: 6px;
++  align-items: center;
++}
++
++.pill-btn:disabled {
++  opacity: 0.35;
++  cursor: not-allowed;
++  transform: none !important;
++}
++
+ /* ===== Stage ===== */
+ .stage {
+   position: relative;
+@@ -304,6 +316,58 @@
+   cursor: pointer;
+ }
+ 
++.layer-toolbar {
++  position: absolute;
++  bottom: calc(100% + 18px);
++  left: 50%;
++  transform: translateX(-50%);
++  display: flex;
++  gap: 4px;
++  background: rgba(0, 0, 0, 0.75);
++  border-radius: var(--r-pill);
++  padding: 3px;
++  white-space: nowrap;
++  z-index: 3;
++}
++
++.layer-toolbar button {
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  width: 22px;
++  height: 22px;
++  border: none;
++  border-radius: 50%;
++  background: transparent;
++  color: #fff;
++  cursor: pointer;
++}
++
++.layer-toolbar button:active {
++  background: rgba(255, 255, 255, 0.15);
++}
++
++/* Rendered as siblings of .stage-inner (not inside it) using viewport coordinates, so they can
++   never end up in the exported PNG regardless of when a drag happens to end. */
++.snap-guide {
++  position: fixed;
++  background: var(--accent);
++  z-index: 40;
++  pointer-events: none;
++}
++
++.snap-guide-v {
++  top: 0;
++  bottom: 0;
++  width: 1px;
++}
++
++.snap-guide-h {
++  left: 0;
++  right: 0;
++  height: 1px;
++}
++
+ .image-layer {
+   padding: 0;
+   display: flex;
+@@ -505,6 +569,59 @@
+   }
+ }
+ 
++.font-search-box {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++  background: var(--surface-2);
++  border: 1.5px solid var(--border-1);
++  border-radius: var(--r-pill);
++  padding: 8px 12px;
++  margin: 2px 2px 10px;
++  transition:
++    border-color var(--dur-fast) var(--ease-out),
++    box-shadow var(--dur-fast) var(--ease-out);
++}
++
++.font-search-box:focus-within {
++  border-color: var(--accent);
++  box-shadow: 0 0 0 2px var(--accent-soft);
++}
++
++.font-search-icon {
++  flex-shrink: 0;
++  color: var(--text-2);
++}
++
++.font-search-input {
++  flex: 1;
++  min-width: 0;
++  background: transparent;
++  border: none;
++  outline: none;
++  color: var(--text-1);
++  font-size: 13.5px;
++  font-family: inherit;
++}
++
++.font-search-input::placeholder {
++  color: var(--text-2);
++}
++
++.font-search-clear {
++  flex-shrink: 0;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  width: 20px;
++  height: 20px;
++  border: none;
++  border-radius: 50%;
++  background: var(--surface-3, var(--surface-2));
++  color: var(--text-2);
++  cursor: pointer;
++}
++
+ .chip-row {
+   display: flex;
+   gap: 10px;
+diff --git a/src/App.jsx b/src/App.jsx
+index 3a5b565..582bfe4 100644
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -193,6 +193,8 @@ export default function App() {
+   }))
+   const [tab, setTab] = useState('font')
+   const [fontLang, setFontLang] = useState('fa')
++  const [fontQuery, setFontQuery] = useState('')
++  const [dragGuides, setDragGuides] = useState({ x: null, y: null })
+   const [bgCategory, setBgCategory] = useState('colors')
+   const [showSave, setShowSave] = useState(false)
+   const [showGallery, setShowGallery] = useState(false)
+@@ -210,13 +212,23 @@ export default function App() {
+   const textRef = useRef(null)
+   const tabsRef = useRef(null)
+ 
++  // Undo/redo: past/future are kept in a ref (deep-cloned state snapshots) so pushing a
++  // snapshot never forces a render by itself — historyVersion is bumped separately to make
++  // the toolbar buttons re-render when the stacks actually change.
++  const historyRef = useRef({ past: [], future: [] })
++  const pendingSnapshotRef = useRef(null)
++  const [historyVersion, setHistoryVersion] = useState(0)
++  const HISTORY_LIMIT = 40
++  const HISTORY_DEBOUNCE_MS = 600
++
+   const t = (key) => STRINGS[appSettings.lang]?.[key] ?? STRINGS.fa[key] ?? key
+ 
+   const allFonts = useMemo(() => [...FONTS, ...customFonts], [customFonts])
+-  const visibleFonts = useMemo(
+-    () => allFonts.filter((f) => f.dataUrl || f.lang === fontLang),
+-    [allFonts, fontLang]
+-  )
++  const visibleFonts = useMemo(() => {
++    const q = fontQuery.trim().toLowerCase()
++    if (q) return allFonts.filter((f) => f.label.toLowerCase().includes(q))
++    return allFonts.filter((f) => f.dataUrl || f.lang === fontLang)
++  }, [allFonts, fontLang, fontQuery])
+   const font = useMemo(
+     () => allFonts.find((f) => f.id === state.fontId) ?? allFonts[0],
+     [allFonts, state.fontId]
+@@ -233,6 +245,53 @@ export default function App() {
+     return () => clearTimeout(tm)
+   }, [toast])
+ 
++  // Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y) for undo/redo — skipped while the user is
++  // actually typing (contentEditable text, inputs, textareas) so we don't hijack the browser's
++  // own native undo inside those fields.
++  useEffect(() => {
++    function onKeyDown(e) {
++      if (!(e.ctrlKey || e.metaKey) || (e.key.toLowerCase() !== 'z' && e.key.toLowerCase() !== 'y'))
++        return
++      const el = document.activeElement
++      const isEditing = el?.isContentEditable || el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA'
++      if (isEditing) return
++      const key = e.key.toLowerCase()
++      if (key === 'y' || (key === 'z' && e.shiftKey)) {
++        e.preventDefault()
++        redo()
++      } else if (key === 'z') {
++        e.preventDefault()
++        undo()
++      }
++    }
++    window.addEventListener('keydown', onKeyDown)
++    return () => window.removeEventListener('keydown', onKeyDown)
++  }, [undo, redo])
++
++  // Arrow-key nudge for the selected layer — desktop-only bonus alongside drag; ignored while
++  // the user is actually typing so it doesn't fight arrow-key text navigation.
++  useEffect(() => {
++    function onKeyDown(e) {
++      if (!state.activeLayerId) return
++      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return
++      const el = document.activeElement
++      const isEditing = el?.isContentEditable || el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA'
++      if (isEditing) return
++      const layer = state.layers.find((l) => l.id === state.activeLayerId)
++      if (!layer) return
++      e.preventDefault()
++      const step = e.shiftKey ? 3 : 0.5
++      const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0
++      const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0
++      updateLayer(layer.id, {
++        x: Math.min(95, Math.max(5, layer.x + dx)),
++        y: Math.min(95, Math.max(5, layer.y + dy)),
++      })
++    }
++    window.addEventListener('keydown', onKeyDown)
++    return () => window.removeEventListener('keydown', onKeyDown)
++  }, [state.activeLayerId, state.layers])
++
+   useEffect(() => {
+     localStorage.setItem(SETTINGS_KEY, JSON.stringify(state))
+   }, [state])
+@@ -371,7 +430,52 @@ export default function App() {
+     update({ customBgUrl: null, bgId: 'grad-1' })
+   }
+ 
++  // Groups bursts of rapid changes (e.g. dragging a slider or a layer) into a single undo
++  // step: the snapshot is taken once at the start of a burst, and the debounce window resets
++  // on every call, so it only "closes" once the user pauses for HISTORY_DEBOUNCE_MS.
++  function recordHistory(prevState) {
++    if (!pendingSnapshotRef.current) {
++      const h = historyRef.current
++      h.past.push(prevState)
++      if (h.past.length > HISTORY_LIMIT) h.past.shift()
++      h.future = []
++      setHistoryVersion((v) => v + 1)
++    }
++    clearTimeout(pendingSnapshotRef.current)
++    pendingSnapshotRef.current = setTimeout(() => {
++      pendingSnapshotRef.current = null
++    }, HISTORY_DEBOUNCE_MS)
++  }
++
++  function undo() {
++    const h = historyRef.current
++    if (!h.past.length) return
++    clearTimeout(pendingSnapshotRef.current)
++    pendingSnapshotRef.current = null
++    const prev = h.past.pop()
++    h.future.push(state)
++    setState(prev)
++    setHistoryVersion((v) => v + 1)
++  }
++
++  function redo() {
++    const h = historyRef.current
++    if (!h.future.length) return
++    clearTimeout(pendingSnapshotRef.current)
++    pendingSnapshotRef.current = null
++    const next = h.future.pop()
++    h.past.push(state)
++    setState(next)
++    setHistoryVersion((v) => v + 1)
++  }
++
++  // historyVersion is read here (even though the length checks come from the ref) purely to
++  // make these re-evaluate on every push/pop — see recordHistory/undo/redo above.
++  const canUndo = historyVersion >= 0 && historyRef.current.past.length > 0
++  const canRedo = historyVersion >= 0 && historyRef.current.future.length > 0
++
+   function update(patch) {
++    recordHistory(state)
+     setState((s) => ({ ...s, ...patch }))
+   }
+ 
+@@ -426,12 +530,33 @@ export default function App() {
+   }
+ 
+   function updateLayer(id, patch) {
++    recordHistory(state)
+     setState((s) => ({
+       ...s,
+       layers: s.layers.map((l) => (l.id === id ? { ...l, ...patch } : l)),
+     }))
+   }
+ 
++  function duplicateLayer(id) {
++    const layer = state.layers.find((l) => l.id === id)
++    if (!layer) return
++    const newId = `layer-${Date.now()}`
++    const copy = { ...layer, id: newId, x: Math.min(95, layer.x + 5), y: Math.min(95, layer.y + 5) }
++    update({ layers: [...state.layers, copy], activeLayerId: newId })
++  }
++
++  // Layer stacking order is just array order — moving forward/backward means swapping the
++  // layer with its neighbor. Already at an end -> no-op.
++  function moveLayer(id, direction) {
++    const layers = state.layers
++    const i = layers.findIndex((l) => l.id === id)
++    const j = i + direction
++    if (i === -1 || j < 0 || j >= layers.length) return
++    const next = [...layers]
++    ;[next[i], next[j]] = [next[j], next[i]]
++    update({ layers: next })
++  }
++
+   function deleteLayer(id) {
+     update({
+       layers: state.layers.filter((l) => l.id !== id),
+@@ -448,17 +573,45 @@ export default function App() {
+     const startY = e.clientY
+     const origX = layer.x
+     const origY = layer.y
++    const SNAP = 2 // % of canvas width/height — snap zone around center + other layers
++    const otherLayers = state.layers.filter((l) => l.id !== layer.id)
+     function onMove(ev) {
+       const dx = ((ev.clientX - startX) / rect.width) * 100
+       const dy = ((ev.clientY - startY) / rect.height) * 100
+-      updateLayer(layer.id, {
+-        x: Math.min(95, Math.max(5, origX + dx)),
+-        y: Math.min(95, Math.max(5, origY + dy)),
+-      })
++      let x = Math.min(95, Math.max(5, origX + dx))
++      let y = Math.min(95, Math.max(5, origY + dy))
++      let guideX = null
++      let guideY = null
++
++      if (Math.abs(x - 50) < SNAP) {
++        x = 50
++        guideX = rect.left + rect.width * 0.5
++      } else {
++        const match = otherLayers.find((l) => Math.abs(x - l.x) < SNAP)
++        if (match) {
++          x = match.x
++          guideX = rect.left + (rect.width * match.x) / 100
++        }
++      }
++
++      if (Math.abs(y - 50) < SNAP) {
++        y = 50
++        guideY = rect.top + rect.height * 0.5
++      } else {
++        const match = otherLayers.find((l) => Math.abs(y - l.y) < SNAP)
++        if (match) {
++          y = match.y
++          guideY = rect.top + (rect.height * match.y) / 100
++        }
++      }
++
++      updateLayer(layer.id, { x, y })
++      setDragGuides({ x: guideX, y: guideY })
+     }
+     function onUp() {
+       window.removeEventListener('pointermove', onMove)
+       window.removeEventListener('pointerup', onUp)
++      setDragGuides({ x: null, y: null })
+     }
+     window.addEventListener('pointermove', onMove)
+     window.addEventListener('pointerup', onUp)
+@@ -823,15 +976,33 @@ export default function App() {
+         <i />
+       </div>
+       <header className="topbar">
+-        <button
+-          className="pill-btn"
+-          onClick={() => {
+-            update({ activeLayerId: null })
+-            setShowSave(true)
+-          }}
+-        >
+-          <I.IconDownload size={14} /> {t('save')}
+-        </button>
++        <div className="header-start">
++          <button
++            className="pill-btn"
++            onClick={() => {
++              update({ activeLayerId: null })
++              setShowSave(true)
++            }}
++          >
++            <I.IconDownload size={14} /> {t('save')}
++          </button>
++          <button
++            className="pill-btn ghost icon-only"
++            onClick={undo}
++            disabled={!canUndo}
++            aria-label={t('undo')}
++          >
++            <I.IconUndo size={16} />
++          </button>
++          <button
++            className="pill-btn ghost icon-only"
++            onClick={redo}
++            disabled={!canRedo}
++            aria-label={t('redo')}
++          >
++            <I.IconRedo size={16} />
++          </button>
++        </div>
+         <div className="brand">
+           <I.Logo size={22} />
+           <span className="brand-name">FontWoW</span>
+@@ -892,6 +1063,17 @@ export default function App() {
+                   <img src={layer.src} alt="" draggable={false} />
+                   {state.activeLayerId === layer.id && (
+                     <>
++                      <div className="layer-toolbar" onPointerDown={(e) => e.stopPropagation()}>
++                        <button onClick={() => moveLayer(layer.id, -1)} aria-label={t('sendBackward')}>
++                          <I.IconArrowDown size={12} />
++                        </button>
++                        <button onClick={() => duplicateLayer(layer.id)} aria-label={t('duplicateLayer')}>
++                          <I.IconCopy size={12} />
++                        </button>
++                        <button onClick={() => moveLayer(layer.id, 1)} aria-label={t('bringForward')}>
++                          <I.IconArrowUp size={12} />
++                        </button>
++                      </div>
+                       <span
+                         className="layer-del"
+                         onPointerDown={(e) => e.stopPropagation()}
+@@ -940,6 +1122,17 @@ export default function App() {
+                 {layer.text}
+                 {state.activeLayerId === layer.id && (
+                   <>
++                    <div className="layer-toolbar" onPointerDown={(e) => e.stopPropagation()}>
++                      <button onClick={() => moveLayer(layer.id, -1)} aria-label={t('sendBackward')}>
++                        <I.IconArrowDown size={12} />
++                      </button>
++                      <button onClick={() => duplicateLayer(layer.id)} aria-label={t('duplicateLayer')}>
++                        <I.IconCopy size={12} />
++                      </button>
++                      <button onClick={() => moveLayer(layer.id, 1)} aria-label={t('bringForward')}>
++                        <I.IconArrowUp size={12} />
++                      </button>
++                    </div>
+                     <span
+                       className="layer-del"
+                       onPointerDown={(e) => e.stopPropagation()}
+@@ -959,6 +1152,12 @@ export default function App() {
+             )
+           })}
+         </div>
++        {dragGuides.x != null && (
++          <div className="snap-guide snap-guide-v" style={{ left: dragGuides.x }} />
++        )}
++        {dragGuides.y != null && (
++          <div className="snap-guide snap-guide-h" style={{ top: dragGuides.y }} />
++        )}
+         <button className="add-layer-btn" onClick={addLayer} aria-label={t('addLayer')}>
+           <I.IconPlus size={12} /> Aa
+         </button>
+@@ -1084,17 +1283,41 @@ export default function App() {
+           )}
+           {tab === 'font' && (
+             <>
+-              <div className="chip-row sub-row">
+-                {FONT_CATEGORIES.map((c) => (
++              <div className="font-search-box">
++                <I.IconSearch size={15} className="font-search-icon" />
++                <input
++                  type="text"
++                  className="font-search-input"
++                  placeholder={t('fontSearchPlaceholder')}
++                  value={fontQuery}
++                  onChange={(e) => setFontQuery(e.target.value)}
++                />
++                {fontQuery && (
+                   <button
+-                    key={c.id}
+-                    className={`pill-tab ${fontLang === c.id ? 'active' : ''}`}
+-                    onClick={() => setFontLang(c.id)}
++                    className="font-search-clear"
++                    onClick={() => setFontQuery('')}
++                    aria-label={t('clear')}
+                   >
+-                    {c.label}
++                    <I.IconX size={13} />
+                   </button>
+-                ))}
++                )}
+               </div>
++              {!fontQuery && (
++                <div className="chip-row sub-row">
++                  {FONT_CATEGORIES.map((c) => (
++                    <button
++                      key={c.id}
++                      className={`pill-tab ${fontLang === c.id ? 'active' : ''}`}
++                      onClick={() => setFontLang(c.id)}
++                    >
++                      {c.label}
++                    </button>
++                  ))}
++                </div>
++              )}
++              {fontQuery && visibleFonts.length === 0 && (
++                <p className="settings-label">{t('noFontsFound')}</p>
++              )}
+               <div className="chip-row">
+                 {visibleFonts.map((f) => (
+                   <button
+diff --git a/src/icons.jsx b/src/icons.jsx
+index c886c4e..c8b267b 100644
+--- a/src/icons.jsx
++++ b/src/icons.jsx
+@@ -180,6 +180,26 @@ export const IconGrid = icon(
+     <rect x="14" y="14" width="7" height="7" rx="1.5" />
+   </>,
+ )
++export const IconSearch = icon(
++  <>
++    <circle cx="11" cy="11" r="8" />
++    <path d="m21 21-4.35-4.35" />
++  </>,
++)
++export const IconUndo = icon(
++  <>
++    <path d="M9 14 4 9l5-5" />
++    <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
++  </>,
++)
++export const IconRedo = icon(
++  <>
++    <path d="m15 14 5-5-5-5" />
++    <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
++  </>,
++)
++export const IconArrowUp = icon(<path d="M12 19V5M5 12l7-7 7 7" />)
++export const IconArrowDown = icon(<path d="M12 5v14M19 12l-7 7-7-7" />)
+ 
+ // Brand bolt lifted from public/favicon.svg (outer silhouette).
+ const BOLT = 'M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z'
+diff --git a/src/strings.js b/src/strings.js
+index 27d6b2a..d181f28 100644
+--- a/src/strings.js
++++ b/src/strings.js
+@@ -23,6 +23,9 @@ export const STRINGS = {
+     addLayer: 'افزودن متن جدید',
+     addSticker: 'افزودن استیکر/عکس',
+     editLayerText: 'متن این لایه را ویرایش کن',
++    duplicateLayer: 'کپی این لایه',
++    bringForward: 'بیار جلو',
++    sendBackward: 'ببر عقب',
+     deleteLayer: 'حذف لایه',
+     newLayerText: 'متن جدید',
+     bold: 'بولد',
+@@ -69,6 +72,10 @@ export const STRINGS = {
+     imageCopied: 'عکس در کلیپ‌بورد کپی شد',
+     imageShared: 'کلیپ‌بورد در دسترس نبود؛ عکس برای اشتراک‌گذاری باز شد',
+     imageCopyFallback: 'کپی عکس پشتیبانی نشد؛ متن کپی شد',
++    fontSearchPlaceholder: 'جستجوی فونت…',
++    noFontsFound: 'فونتی با این اسم پیدا نشد',
++    undo: 'واگرد',
++    redo: 'ازنو',
+     copyFailed: 'کپی ناموفق بود',
+     textCopied: 'متن کپی شد',
+     writeFirst: 'اول یک متن بنویس',
+@@ -121,6 +128,9 @@ export const STRINGS = {
+     aspectRatio: 'Aspect Ratio',
+     addLayer: 'Add text layer',
+     editLayerText: "Edit this layer's text",
++    duplicateLayer: 'Duplicate this layer',
++    bringForward: 'Bring forward',
++    sendBackward: 'Send backward',
+     deleteLayer: 'Delete layer',
+     newLayerText: 'New text',
+     bold: 'Bold',

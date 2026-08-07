@@ -48,29 +48,36 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 12px 24px;
   border-radius: var(--r-pill);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   text-decoration: none;
-  transition: transform var(--dur-fast) var(--ease-out), filter var(--dur-fast);
+  transition: transform var(--dur-fast) var(--ease-out), filter var(--dur-fast), box-shadow var(--dur-fast);
 }
 
-.landing-btn:active { transform: scale(0.97); }
+.landing-btn:active { transform: scale(0.95); }
 
 .landing-btn-primary {
-  background: var(--theme-color, #8b5cf6);
+  background: linear-gradient(135deg, var(--theme-color, #8b5cf6), #6d28d9);
   color: #fff;
-  box-shadow: var(--shadow-1);
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 .landing-btn-secondary {
-  background: var(--surface-2);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: var(--text-1);
   border: 1px solid var(--border-2);
 }
 
-.landing-btn:hover { filter: brightness(1.08); }
+.landing-btn:hover { 
+  filter: brightness(1.1); 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
 
 .landing-btn.disabled {
   opacity: 0.6;
@@ -138,10 +145,20 @@
 }
 
 .landing-card {
-  background: var(--surface-1);
-  border: 1px solid var(--border-1);
+  background: rgba(25, 23, 36, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--r-l);
-  padding: 18px;
+  padding: 20px;
+  transition: transform var(--dur-med), box-shadow var(--dur-med), background var(--dur-med);
+}
+
+.landing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+  background: rgba(34, 31, 49, 0.8);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .landing-card-icon {
