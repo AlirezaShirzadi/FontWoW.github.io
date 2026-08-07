@@ -67,6 +67,15 @@ jobs:
           name: ${{ steps.rename.outputs.apk_name }}
           path: ${{ steps.rename.outputs.apk_path }}
 
+      - name: Publish versioned release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.sync-version.outputs.app_version }}
+          name: FontWoW v${{ steps.sync-version.outputs.app_version }}
+          body_path: release-notes.txt
+          prerelease: false
+          files: ${{ steps.rename.outputs.apk_path }}
+
       - name: Publish rolling release
         uses: softprops/action-gh-release@v2
         with:
