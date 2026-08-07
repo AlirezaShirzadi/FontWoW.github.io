@@ -24,7 +24,10 @@ import { useDesignHistory } from './useDesignHistory'
 import googleFontsList from './google-fonts.json'
 import { UPDATES, APP_VERSION } from './updates'
 import { checkForUpdate, dismissUpdate } from './updateCheck'
+import { FONT_GOALS } from './goals'
+import { FEATURES } from './features'
 import './App.css'
+import './Landing.css'
 
 const STORAGE_KEY = 'fontwow_saved_v1'
 const SETTINGS_KEY = 'fontwow_settings_v1'
@@ -33,6 +36,8 @@ const CUSTOM_TEMPLATES_KEY = 'fontwow_custom_templates_v1'
 const APP_SETTINGS_KEY = 'fontwow_app_settings_v1'
 const DONATE_URL = 'https://daramet.com/fontwow'
 const CRYPTO_DONATE_URL = 'https://pay.oxapay.com/15417059'
+const REPO_URL = 'https://github.com/FontWoW/FontWoW.github.io'
+const CONTRIBUTORS_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io/contributors'
 
 function loadJSON(key, fallback) {
   try {
@@ -211,6 +216,11 @@ export default function App() {
   const [fontSuggestion, setFontSuggestion] = useState('')
   const [showSettings, setShowSettings] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
+  const [contributors, setContributors] = useState(null)
+  const [contributorsError, setContributorsError] = useState(false)
+  const [donations, setDonations] = useState(null)
+  const [donationsError, setDonationsError] = useState(false)
   const [saved, setSaved] = useState(() => loadJSON(STORAGE_KEY, []))
   const [customFonts, setCustomFonts] = useState(() => loadJSON(CUSTOM_FONTS_KEY, []))
   const [customTemplates, setCustomTemplates] = useState(() => loadJSON(CUSTOM_TEMPLATES_KEY, []))
@@ -225,6 +235,19 @@ export default function App() {
   const previewRef = useRef(null)
   const textRef = useRef(null)
   const tabsRef = useRef(null)
+
+  const [showIOSPrompt, setShowIOSPrompt] = useState(() => {
+    if (isNative()) return false
+    const dismissed = localStorage.getItem('fontwow_dismissed_ios_prompt') === 'true'
+    if (dismissed) return false
+    const ua = navigator.userAgent || ''
+    const isStandalone = window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true
+    if (isStandalone) return false
+    const isIOS = /iphone|ipad|ipod/i.test(ua) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+                  (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1)
+    return isIOS
+  })
 
   const filteredGoogleFonts = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -269,6 +292,40 @@ export default function App() {
       if (update) setAvailableUpdate(update)
     })
   }, [])
+
+  useEffect(() => {
+    if (!showAbout || contributors || contributorsError) return
+    let cancelled = false
+    fetch(CONTRIBUTORS_API)
+      .then((res) => {
+        if (!res.ok) throw new Error('bad response')
+        return res.json()
+      })
+      .then((data) => {
+        if (!cancelled) setContributors(Array.isArray(data) ? data : [])
+      })
+      .catch(() => {
+        if (!cancelled) setContributorsError(true)
+      })
+    return () => { cancelled = true }
+  }, [showAbout, contributors, contributorsError])
+
+  useEffect(() => {
+    if (!showAbout || donations || donationsError) return
+    let cancelled = false
+    fetch('/donations.json')
+      .then((res) => {
+        if (!res.ok) throw new Error('bad response')
+        return res.json()
+      })
+      .then((data) => {
+        if (!cancelled) setDonations(Array.isArray(data.donations) ? data.donations : [])
+      })
+      .catch(() => {
+        if (!cancelled) setDonationsError(true)
+      })
+    return () => { cancelled = true }
+  }, [showAbout, donations, donationsError])
 
   useEffect(() => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(state))
@@ -1342,6 +1399,15 @@ export default function App() {
       </main>
 
       <section className="controls">
+        <div className="pinned-size-row">
+          <SliderRow
+            label={t('size')}
+            min={16}
+            max={120}
+            value={state.fontSize}
+            onChange={(e) => update({ fontSize: +e.target.value })}
+          />
+        </div>
         <div className="tabs" ref={tabsRef}>
           <span className="tab-indicator" aria-hidden="true" />
           {TABS.map((tb) => (
@@ -1756,13 +1822,6 @@ export default function App() {
           {tab === 'layout' && (
             <div className="layout-panel">
               <SliderRow
-                label={t('size')}
-                min={16}
-                max={120}
-                value={state.fontSize}
-                onChange={(e) => update({ fontSize: +e.target.value })}
-              />
-              <SliderRow
                 label={t('letterSpacing')}
                 min={-4}
                 max={20}
@@ -2060,9 +2119,15 @@ export default function App() {
           <a className="sheet-item" href="mailto:m4tinbeigi@gmail.com">
             <I.IconMail size={17} /> m4tinbeigi@gmail.com
           </a>
-          <a className="sheet-item" href="#/about">
-            <I.IconDownload size={17} /> معرفی برنامه و دانلود اندروید
-          </a>
+          <button
+            className="sheet-item"
+            onClick={() => {
+              setShowSettings(false)
+              setShowAbout(true)
+            }}
+          >
+            <I.IconSparkles size={17} /> درباره‌ی FontWoW
+          </button>
           <button
             className="sheet-item"
             onClick={() => {
@@ -2169,6 +2234,131 @@ export default function App() {
         </Sheet>
       )}
 
+      {showAbout && (
+        <Sheet title="درباره‌ی FontWoW" tall onClose={() => setShowAbout(false)}>
+          <div className="about-sheet" dir="rtl">
+            <p className="donate-text">
+              متن‌آرایی آنلاین — بنویس، استایل بده، عکس بگیر. کاملاً رایگان و client-side، بدون حساب کاربری.
+            </p>
+
+            <p className="settings-label">امکانات</p>
+            <div className="landing-grid">
+              {FEATURES.map((f, i) => {
+                const Icon = I[f.iconName]
+                return (
+                  <div className="landing-card" key={i}>
+                    <div className="landing-card-icon"><Icon size={20} /></div>
+                    <h3>{f.title}</h3>
+                    <p>{f.text}</p>
+                  </div>
+                )
+              })}
+            </div>
+
+            <p className="settings-label">حمایت مالی</p>
+            <p className="donate-text">
+              تمام مبالغی که حمایت مالی می‌شن صرف خرید فونت‌های جدید با لایسنس می‌شه تا رایگان و در دسترس همه توی FontWoW قرار بگیرن.
+            </p>
+            <button
+              className="sheet-item recommended"
+              onClick={() => {
+                setShowAbout(false)
+                setShowDonate(true)
+              }}
+            >
+              <I.IconHeart size={17} /> حمایت مالی
+            </button>
+
+            <p className="settings-label">آخرین حمایت‌های مالی</p>
+            {donationsError && (
+              <p className="landing-recent-donations-fallback">فهرست دونیت‌ها فعلاً در دسترس نیست.</p>
+            )}
+            {!donationsError && !donations && <p className="landing-recent-donations-loading">در حال بارگذاری…</p>}
+            {donations && donations.length === 0 && !donationsError && (
+              <p className="landing-recent-donations-fallback">هنوز دونیتی ثبت نشده — اولین نفر باش!</p>
+            )}
+            {donations && donations.length > 0 && (
+              <ul className="landing-recent-donations-list">
+                {donations.map((d, i) => (
+                  <li key={i} className="landing-recent-donation">
+                    <I.IconHeart size={14} />
+                    <span className="landing-recent-donation-amount">{Number(d.amount).toLocaleString('fa-IR')} تومان</span>
+                    <span className="landing-recent-donation-project">برای FontWoW</span>
+                    {d.date && <span className="landing-recent-donation-date">{d.date}</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <p className="settings-label">اهداف بعدی</p>
+            <p className="donate-text">
+              فونت‌هایی که در نوبت خریدن هستن، به‌ترتیب اولویت — با کمک شما زودتر آزاد می‌شن.
+            </p>
+            <div className="landing-goals-list">
+              {FONT_GOALS.map((g, i) => {
+                const percent = g.price > 0 ? Math.min(100, Math.round((g.raised / g.price) * 100)) : 0
+                return (
+                  <div className="landing-goal" key={g.name}>
+                    <span className="landing-goal-rank">{i + 1}</span>
+                    <img
+                      className="landing-goal-img"
+                      src={g.image}
+                      alt={g.name}
+                      loading="lazy"
+                      onError={(e) => { e.currentTarget.src = '/favicon.svg' }}
+                    />
+                    <div className="landing-goal-info">
+                      <div className="landing-goal-head">
+                        <h3>
+                          {g.url ? (
+                            <a href={g.url} target="_blank" rel="noreferrer">{g.name}</a>
+                          ) : g.name}
+                        </h3>
+                        <span className="landing-goal-price">{g.price.toLocaleString('fa-IR')} تومان (نامحدود)</span>
+                      </div>
+                      <div className="landing-goal-bar">
+                        <div className="landing-goal-bar-fill" style={{ width: `${percent}%` }} />
+                      </div>
+                      <div className="landing-goal-foot">
+                        <span>{g.raised.toLocaleString('fa-IR')} از {g.price.toLocaleString('fa-IR')} تومان</span>
+                        <span className="landing-goal-percent">{percent}٪</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <p className="settings-label">مشارکت‌کنندگان</p>
+            {contributorsError && (
+              <p className="landing-contributors-fallback">
+                فهرست مشارکت‌کنندگان فعلاً در دسترس نیست — <a href={`${REPO_URL}/graphs/contributors`} target="_blank" rel="noreferrer">مشاهده در گیت‌هاب</a>
+              </p>
+            )}
+            {!contributorsError && !contributors && <p className="landing-contributors-loading">در حال بارگذاری…</p>}
+            {contributors && contributors.length > 0 && (
+              <div className="landing-contributors-grid">
+                {contributors.map((c) => (
+                  <a key={c.id} className="landing-contributor" href={c.html_url} target="_blank" rel="noreferrer">
+                    <img src={c.avatar_url} alt={c.login} width="56" height="56" loading="lazy" />
+                    <span>{c.login}</span>
+                    <small>{c.contributions} کامیت</small>
+                  </a>
+                ))}
+              </div>
+            )}
+
+            <p className="settings-label">لینک‌ها</p>
+            <a className="sheet-item" href={REPO_URL} target="_blank" rel="noreferrer">
+              <I.IconGithub size={17} /> کد متن‌باز در گیت‌هاب
+            </a>
+            <a className="sheet-item" href="https://fonts.google.com/attribution" target="_blank" rel="noreferrer">
+              <I.IconExternal size={17} /> فونت‌ها از Google Fonts
+            </a>
+          </div>
+        </Sheet>
+      )}
+
       {toast && (
         <div className="toast" key={toast}>
           <I.ToastCheck size={19} />
@@ -2176,7 +2366,7 @@ export default function App() {
         </div>
       )}
 
-      {availableUpdate && (
+      {availableUpdate ? (
         <div className="update-banner">
           <div className="update-banner-text">
             <strong>{t('updateAvailable')} v{availableUpdate.version}</strong>
@@ -2210,7 +2400,29 @@ export default function App() {
             </button>
           </div>
         </div>
-      )}
+      ) : showIOSPrompt ? (
+        <div className="update-banner">
+          <div className="update-banner-text">
+            <strong>{appSettings.lang === 'fa' ? 'نصب اپلیکیشن' : 'Install App'}</strong>
+            <span style={{ fontSize: '12.5px', lineHeight: '1.5' }}>
+              {appSettings.lang === 'fa' 
+                ? 'روی آیفون/آیپد هستی؟ برای تجربه‌ی بهتر، دکمه‌ی Share را بزن و «Add to Home Screen» را انتخاب کن.' 
+                : 'On iOS? Tap Share and select "Add to Home Screen" to install FontWoW.'}
+            </span>
+          </div>
+          <div className="update-banner-actions">
+            <button
+              className="update-banner-dismiss"
+              onClick={() => {
+                localStorage.setItem('fontwow_dismissed_ios_prompt', 'true')
+                setShowIOSPrompt(false)
+              }}
+            >
+              <I.IconX size={15} />
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <footer className="footer">
         <a href="https://github.com/FontWoW/FontWoW.github.io" target="_blank" rel="noreferrer">

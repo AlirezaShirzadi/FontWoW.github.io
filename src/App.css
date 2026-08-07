@@ -541,6 +541,16 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+.pinned-size-row {
+  flex-shrink: 0;
+  padding: 12px 12px 0;
+  border-bottom: 1px solid var(--border-1);
+}
+
+.pinned-size-row .row {
+  margin: 0 0 12px;
+}
+
 .tabs {
   position: relative;
   display: flex;

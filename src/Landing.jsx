@@ -17,7 +17,10 @@ function detectPlatform() {
   const isStandalone = window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true
   if (isStandalone) return null
   if (/android/i.test(ua)) return 'android'
-  if (/iphone|ipad|ipod/i.test(ua)) return 'ios'
+  const isIOS = /iphone|ipad|ipod/i.test(ua) || 
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+                (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1)
+  if (isIOS) return 'ios'
   return null
 }
 
@@ -129,7 +132,7 @@ export default function Landing() {
         <div className="landing-platform-banner">
           <I.IconExternal size={18} />
           <span>
-            روی آیفون هستی؟ FontWoW رو به‌عنوان اپ نصب کن: دکمه‌ی Share را بزن و «Add to Home Screen» را انتخاب کن.
+            روی آیفون/آیپد هستی؟ FontWoW رو به‌عنوان اپ نصب کن: دکمه‌ی Share را بزن و «Add to Home Screen» را انتخاب کن.
           </span>
         </div>
       )}
@@ -241,6 +244,26 @@ export default function Landing() {
             )
           })}
         </div>
+      </section>
+
+      <section className="landing-ai-contribute">
+        <h2>هوش مصنوعی خودت رو به کمک پروژه بفرست</h2>
+        <p>
+          FontWoW متن‌بازه و از کمک هر کسی استقبال می‌کنه — حتی اگه خودت وقت کدنویسی نداری. کافیه یک
+          دستیار هوش مصنوعی برنامه‌نویسی (مثل Claude Code) رو روی این ریپوی گیت‌هاب اجرا کنی و بهش
+          بگی «باگ‌ها رو رفع کن» یا «یه قابلیت جدید اضافه کن». دستیار خودش از بین ایشوهای باز پروژه
+          می‌گرده، تشخیص می‌ده کدوم باگه و کدوم قابلیت جدیده، یکی رو انتخاب و پیاده‌سازی می‌کنه و در
+          نهایت یک Pull Request می‌زنه تا خودم بررسی و تأیید کنم.
+        </p>
+        <ol className="landing-ai-contribute-steps">
+          <li>اگه اکانت گیت‌هاب نداری، یکی بساز: <a href="https://github.com/signup" target="_blank" rel="noreferrer">github.com/signup</a></li>
+          <li>ریپو رو فورک و کلون کن، بعد با <code>gh auth login</code> وارد شو</li>
+          <li>به دستیارت بگو «به این پروژه کمک کن» یا صریحاً «باگ‌ها رو رفع کن» / «قابلیت جدید اضافه کن»</li>
+          <li>دستیار خودکار ایشو مناسب رو پیدا، پیاده و برات یک PR باز می‌کنه — منتظر تأیید من می‌مونه</li>
+        </ol>
+        <a className="landing-ai-contribute-link" href={`${REPO}/issues`} target="_blank" rel="noreferrer">
+          <I.IconGithub size={16} /> مشاهده ایشوهای باز پروژه <I.IconExternal size={11} />
+        </a>
       </section>
 
       <section className="landing-contributors">
