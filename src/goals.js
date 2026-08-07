@@ -1,24 +1,49 @@
 // فهرست فونت‌های هدف، به‌ترتیب اولویت خرید. برای افزودن یا ویرایش فونت، همین آرایه را تغییر بده.
-// image: مسیر تصویر پیش‌نمایش فونت (مثلاً در public/goals/name.png بگذار و اینجا '/goals/name.png' بنویس)
-// price: قیمت لایسنس به تومان
+// image: مسیر تصویر پیش‌نمایش فونت (در public/goals/ قرار داره)
+// price: قیمت لایسنس نسخه‌ی نامحدود (unlimited license) به تومان — طبق fontiran.com
 // raised: مبلغی که تا الان برای این فونت جمع شده (تومان)
+// url: صفحه‌ی خرید فونت
 export const FONT_GOALS = [
   {
-    name: 'Yekan Bakh',
-    image: '/goals/yekan-bakh.png',
-    price: 2500000,
-    raised: 1800000,
-  },
-  {
-    name: 'IRANSansX',
-    image: '/goals/iransansx.png',
-    price: 3200000,
-    raised: 900000,
-  },
-  {
-    name: 'Peyda',
-    image: '/goals/peyda.png',
-    price: 1500000,
+    name: 'سپیدار (Sepidar)',
+    image: '/goals/sepidar.svg',
+    price: 6000000,
     raised: 0,
+    url: 'https://fontiran.com/fonts/sepidar',
+  },
+  {
+    name: 'طرلان (Tarlan)',
+    image: '/goals/tarlan.svg',
+    price: 6000000,
+    raised: 0,
+    url: 'https://fontiran.com/fonts/tarlan',
+  },
+  {
+    name: 'ایران‌سنس (IranSans)',
+    image: '/goals/iransans.svg',
+    price: 8500000,
+    raised: 0,
+    url: 'https://fontiran.com/fonts/iransans',
+  },
+  {
+    name: 'دامون (Damoon)',
+    image: '/goals/damoon.svg',
+    price: 7000000,
+    raised: 0,
+    url: 'https://fontiran.com/fonts/damoon',
+  },
+  {
+    name: 'سمرقند (Samarqand)',
+    image: '/goals/samarqand.svg',
+    price: 8500000,
+    raised: 0,
+    url: 'https://fontiran.com/fonts/samarqand',
+  },
+  {
+    name: 'کولاک (Colak)',
+    image: '/goals/colak.svg',
+    price: 8500000,
+    raised: 0,
+    url: 'https://fontiran.com/fonts/colak',
   },
 ]

@@ -208,6 +208,7 @@ export default function Landing() {
         <h2>اهداف بعدی</h2>
         <p>
           فونت‌هایی که در نوبت خریدن هستن، به‌ترتیب اولویت — با کمک شما زودتر آزاد می‌شن.
+          قیمت‌ها مربوط به لایسنس نسخه‌ی نامحدود (Unlimited License) هر فونت هست.
         </p>
         <div className="landing-goals-list">
           {FONT_GOALS.map((g, i) => {
@@ -224,8 +225,12 @@ export default function Landing() {
                 />
                 <div className="landing-goal-info">
                   <div className="landing-goal-head">
-                    <h3>{g.name}</h3>
-                    <span className="landing-goal-price">{g.price.toLocaleString('fa-IR')} تومان</span>
+                    <h3>
+                      {g.url ? (
+                        <a href={g.url} target="_blank" rel="noreferrer">{g.name}</a>
+                      ) : g.name}
+                    </h3>
+                    <span className="landing-goal-price">{g.price.toLocaleString('fa-IR')} تومان (نامحدود)</span>
                   </div>
                   <div className="landing-goal-bar">
                     <div className="landing-goal-bar-fill" style={{ width: `${percent}%` }} />
