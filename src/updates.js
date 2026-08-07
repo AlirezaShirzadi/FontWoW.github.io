@@ -1,3 +1,8 @@
+// Single source of truth for the app's current version. The Android CI build
+// (.github/workflows/android.yml) reads this same value to stamp
+// android/app/build.gradle's versionName and the GitHub release notes, so
+// bumping it here is what makes update-checkForUpdate() below detect a newer
+// build once that release goes out.
 export const UPDATES = [
   {
     version: '1.2.0',
@@ -62,3 +67,5 @@ export const UPDATES = [
     }
   }
 ];
+
+export const APP_VERSION = UPDATES[0].version

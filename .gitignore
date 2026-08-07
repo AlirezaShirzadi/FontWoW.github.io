@@ -23,6 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
+release-notes.txt
+
 # Android / Capacitor
 android/local.properties
 android/.gradle

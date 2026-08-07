@@ -21,7 +21,8 @@ import * as I from './icons'
 import { STRINGS } from './strings'
 import { useDesignHistory } from './useDesignHistory'
 import googleFontsList from './google-fonts.json'
-import { UPDATES } from './updates'
+import { UPDATES, APP_VERSION } from './updates'
+import { checkForUpdate, dismissUpdate } from './updateCheck'
 import './App.css'
 
 const STORAGE_KEY = 'fontwow_saved_v1'
@@ -215,6 +216,7 @@ export default function App() {
   const [showStyleStudio, setShowStyleStudio] = useState(false)
   const [styleName, setStyleName] = useState('')
   const [toast, setToast] = useState('')
+  const [availableUpdate, setAvailableUpdate] = useState(null)
   const [showGoogleFontsSearch, setShowGoogleFontsSearch] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCanvasTool, setActiveCanvasTool] = useState(null)
@@ -258,6 +260,12 @@ export default function App() {
     const tm = setTimeout(() => setToast(''), 2200)
     return () => clearTimeout(tm)
   }, [toast])
+
+  useEffect(() => {
+    checkForUpdate().then((update) => {
+      if (update) setAvailableUpdate(update)
+    })
+  }, [])
 
   useEffect(() => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(state))
@@ -1945,7 +1953,7 @@ export default function App() {
             <I.IconExternal size={17} /> Google Fonts Attribution
           </a>
 
-          <p className="settings-label">{t('version')}: 1.0.0</p>
+          <p className="settings-label">{t('version')}: {APP_VERSION}</p>
           <button className="sheet-item" onClick={resetAppSettings}>
             <I.IconRefresh size={17} /> {t('resetSettings')}
           </button>
@@ -2027,6 +2035,42 @@ export default function App() {
         <div className="toast" key={toast}>
           <I.ToastCheck size={19} />
           <span>{toast}</span>
+        </div>
+      )}
+
+      {availableUpdate && (
+        <div className="update-banner">
+          <div className="update-banner-text">
+            <strong>{t('updateAvailable')} v{availableUpdate.version}</strong>
+            {availableUpdate.changes.length > 0 && (
+              <ul>
+                {availableUpdate.changes.map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="update-banner-actions">
+            {availableUpdate.downloadUrl && (
+              <a
+                className="update-banner-download"
+                href={availableUpdate.downloadUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t('updateDownload')}
+              </a>
+            )}
+            <button
+              className="update-banner-dismiss"
+              onClick={() => {
+                dismissUpdate(availableUpdate.version)
+                setAvailableUpdate(null)
+              }}
+            >
+              <I.IconX size={15} />
+            </button>
+          </div>
         </div>
       )}
 
