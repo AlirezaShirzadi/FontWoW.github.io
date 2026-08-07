@@ -20,6 +20,9 @@ import {
 import * as I from './icons'
 import { STRINGS } from './strings'
 import { LABEL_ASSETS, LabelArtwork } from './labels'
+import { useDesignHistory } from './useDesignHistory'
+import googleFontsList from './google-fonts.json'
+import { UPDATES } from './updates'
 import './App.css'
 
 const STORAGE_KEY = 'fontwow_saved_v1'
@@ -184,10 +187,15 @@ function SliderRow({ label, value, display, min, max, step, onChange }) {
 
 export default function App() {
   const [cssElement, setCssElement] = useState('h1')
-  const [state, setState] = useState(() => ({
-    ...defaultState,
-    ...loadJSON(SETTINGS_KEY, {}),
-  }))
+  const {
+    state,
+    commit: commitState,
+    patch: update,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  } = useDesignHistory({ ...defaultState, ...loadJSON(SETTINGS_KEY, {}) })
   const [appSettings, setAppSettings] = useState(() => ({
     ...defaultAppSettings,
     ...loadJSON(APP_SETTINGS_KEY, {}),
@@ -200,6 +208,7 @@ export default function App() {
   const [showDonate, setShowDonate] = useState(false)
   const [fontSuggestion, setFontSuggestion] = useState('')
   const [showSettings, setShowSettings] = useState(false)
+  const [showChangelog, setShowChangelog] = useState(false)
   const [saved, setSaved] = useState(() => loadJSON(STORAGE_KEY, []))
   const [customFonts, setCustomFonts] = useState(() => loadJSON(CUSTOM_FONTS_KEY, []))
   const [customTemplates, setCustomTemplates] = useState(() => loadJSON(CUSTOM_TEMPLATES_KEY, []))
@@ -207,10 +216,26 @@ export default function App() {
   const [styleName, setStyleName] = useState('')
   const [showLabelPicker, setShowLabelPicker] = useState(false)
   const [toast, setToast] = useState('')
+  const [showGoogleFontsSearch, setShowGoogleFontsSearch] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const [activeCanvasTool, setActiveCanvasTool] = useState(null)
   const previewRef = useRef(null)
   const textRef = useRef(null)
   const tabsRef = useRef(null)
+
+  const filteredGoogleFonts = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return googleFontsList.arabic
+    }
+    const q = searchQuery.toLowerCase()
+    const matchedArabic = googleFontsList.arabic.filter(f => f.family.toLowerCase().includes(q))
+    const matchedAll = googleFontsList.all.filter(name => name.toLowerCase().includes(q) && !googleFontsList.arabic.some(a => a.family === name))
+    
+    return [
+      ...matchedArabic,
+      ...matchedAll.map(name => ({ family: name, category: 'General', weights: [] }))
+    ]
+  }, [searchQuery])
 
   const t = (key) => STRINGS[appSettings.lang]?.[key] ?? STRINGS.fa[key] ?? key
 
@@ -245,6 +270,27 @@ export default function App() {
   }, [appSettings])
 
   useEffect(() => {
+    function onKeyDown(e) {
+      if (!((e.metaKey || e.ctrlKey) && !e.altKey)) return
+      if (e.target instanceof Element && e.target.closest('input, textarea, select')) return
+
+      if (e.key.toLowerCase() === 'z') {
+        if (e.shiftKey ? canRedo : canUndo) {
+          e.preventDefault()
+          if (e.shiftKey) redo()
+          else undo()
+        }
+      } else if (e.key.toLowerCase() === 'y' && canRedo) {
+        e.preventDefault()
+        redo()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [canRedo, canUndo, redo, undo])
+
+  useEffect(() => {
     document.documentElement.dir = appSettings.lang === 'en' ? 'ltr' : 'rtl'
     document.documentElement.lang = appSettings.lang
   }, [appSettings.lang])
@@ -257,6 +303,23 @@ export default function App() {
         .then((loaded) => document.fonts.add(loaded))
         .catch(() => {})
     })
+
+    let styleEl = document.getElementById('fontwow-custom-fonts-style')
+    if (!styleEl) {
+      styleEl = document.createElement('style')
+      styleEl.id = 'fontwow-custom-fonts-style'
+      document.head.appendChild(styleEl)
+    }
+    styleEl.textContent = customFonts
+      .map(
+        (f) => `
+        @font-face {
+          font-family: ${f.family};
+          src: url(${f.dataUrl});
+        }
+      `
+      )
+      .join('\n')
   }, [customFonts])
 
   useLayoutEffect(() => {
@@ -277,8 +340,132 @@ export default function App() {
   const [loadedFontIds, setLoadedFontIds] = useState(() => new Set())
   const [loadingFontId, setLoadingFontId] = useState(null)
 
+  async function loadFontNative(f) {
+    const { Filesystem, Directory } = await import('@capacitor/filesystem')
+    const fontKey = `cached-font-${f.id}`
+    const cssPath = `fonts/${fontKey}.css`
+
+    try {
+      const cssExists = await Filesystem.stat({
+        path: cssPath,
+        directory: Directory.Data
+      }).then(() => true).catch(() => false)
+
+      if (cssExists) {
+        const cssFile = await Filesystem.readFile({
+          path: cssPath,
+          directory: Directory.Data,
+          encoding: 'utf8'
+        })
+        injectStyleBlock(f.id, cssFile.data)
+        setLoadedFontIds((prev) => new Set(prev).add(f.id))
+        return
+      }
+
+      const url = googleFontsUrlForFont(f)
+      if (!url) return
+
+      setLoadingFontId(f.id)
+
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      })
+      if (!res.ok) throw new Error('Failed to fetch stylesheet')
+      const cssText = await res.text()
+
+      const urlMatches = [...cssText.matchAll(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/g)]
+      const gstaticUrls = [...new Set(urlMatches.map(m => m[1]))]
+
+      let localCssText = cssText
+
+      await Filesystem.mkdir({
+        path: 'fonts',
+        directory: Directory.Data,
+        recursive: true
+      }).catch(() => {})
+
+      for (const fontUrl of gstaticUrls) {
+        const hash = btoa(fontUrl).replace(/[^a-zA-Z0-9]/g, '').substring(0, 16)
+        const fontFilePath = `fonts/${fontKey}-${hash}.woff2`
+
+        const woff2Exists = await Filesystem.stat({
+          path: fontFilePath,
+          directory: Directory.Data
+        }).then(() => true).catch(() => false)
+
+        let base64Data = ''
+
+        if (woff2Exists) {
+          const woff2File = await Filesystem.readFile({
+            path: fontFilePath,
+            directory: Directory.Data
+          })
+          base64Data = woff2File.data
+        } else {
+          const fontRes = await fetch(fontUrl)
+          if (!fontRes.ok) throw new Error(`Failed to download font file: ${fontUrl}`)
+          const arrayBuffer = await fontRes.arrayBuffer()
+          
+          base64Data = arrayBufferToBase64(arrayBuffer)
+
+          await Filesystem.writeFile({
+            path: fontFilePath,
+            directory: Directory.Data,
+            data: base64Data
+          })
+        }
+
+        const dataUri = `data:font/woff2;charset=utf-8;base64,${base64Data}`
+        localCssText = localCssText.split(fontUrl).join(dataUri)
+      }
+
+      await Filesystem.writeFile({
+        path: cssPath,
+        directory: Directory.Data,
+        data: localCssText,
+        encoding: 'utf8'
+      })
+
+      injectStyleBlock(f.id, localCssText)
+      setLoadedFontIds((prev) => new Set(prev).add(f.id))
+      setLoadingFontId((id) => (id === f.id ? null : id))
+    } catch (err) {
+      console.error('Error loading native font:', err)
+      setToast(t('fontError'))
+      setLoadingFontId((id) => (id === f.id ? null : id))
+    }
+  }
+
+  function injectStyleBlock(fontId, cssContent) {
+    const styleId = `local-style-${fontId}`
+    let style = document.getElementById(styleId)
+    if (!style) {
+      style = document.createElement('style')
+      style.id = styleId
+      document.head.appendChild(style)
+    }
+    style.textContent = cssContent
+  }
+
+  function arrayBufferToBase64(buffer) {
+    let binary = ''
+    const bytes = new Uint8Array(buffer)
+    const len = bytes.byteLength
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i])
+    }
+    return window.btoa(binary)
+  }
+
   function loadFont(f) {
     if (!f || f.dataUrl || loadedFontIds.has(f.id)) return Promise.resolve()
+    
+    if (isNative()) {
+      return loadFontNative(f)
+    }
+
     const linkId = `google-font-${f.id}`
     const existing = document.getElementById(linkId)
     if (existing) {
@@ -303,8 +490,6 @@ export default function App() {
         setToast(t('fontError'))
         resolve()
       }
-      // Google Fonts can be blocked/throttled by some Android carriers/DNS —
-      // without a timeout a blocked request never fires onerror and the UI hangs forever
       const timer = setTimeout(fail, 8000)
       link.onload = () => {
         if (settled) return
@@ -356,6 +541,34 @@ export default function App() {
     if (state.fontId === id) update({ fontId: 'vazirmatn' })
   }
 
+  function addGoogleFont(gf) {
+    const isArabic = googleFontsList.arabic.some(a => a.family === gf.family)
+    const weights = gf.weights || []
+    const weightsStr = weights.includes(400) && weights.includes(700) ? '400;700' : (weights.includes(400) ? '400' : (weights[0] || ''))
+    const googleParam = weightsStr ? `${gf.family.replace(/\s+/g, '+')}:wght@${weightsStr}` : gf.family.replace(/\s+/g, '+')
+
+    const id = `gfont-${gf.family.toLowerCase().replace(/\s+/g, '-')}`
+    const entry = {
+      id,
+      label: gf.family,
+      family: `'${gf.family}', sans-serif`,
+      rtl: isArabic,
+      lang: isArabic ? 'fa' : 'en',
+      google: googleParam,
+      license: 'OFL-1.1'
+    }
+
+    const next = [...customFonts, entry]
+    setCustomFonts(next)
+    localStorage.setItem(CUSTOM_FONTS_KEY, JSON.stringify(next))
+    
+    update({ fontId: id, direction: isArabic ? 'rtl' : 'ltr' })
+    loadFont(entry)
+    
+    setToast(t('fontAdded'))
+    setShowGoogleFontsSearch(false)
+  }
+
   async function onUploadBgImage(e) {
     const file = e.target.files?.[0]
     e.target.value = ''
@@ -372,10 +585,6 @@ export default function App() {
   function removeBgImage(e) {
     e.stopPropagation()
     update({ customBgUrl: null, bgId: 'grad-1' })
-  }
-
-  function update(patch) {
-    setState((s) => ({ ...s, ...patch }))
   }
 
   function onTextInput(e) {
@@ -414,6 +623,8 @@ export default function App() {
       textColor: '#ffffff',
       fontId: state.fontId,
       fontSize: 22,
+      textOffsetX: 0,
+      textOffsetY: 0,
     }
     update({ layers: [...state.layers, newLayer], activeLayerId: id })
     setShowLabelPicker(false)
@@ -450,9 +661,8 @@ export default function App() {
   }
 
   function updateLayer(id, patch) {
-    setState((s) => ({
-      ...s,
-      layers: s.layers.map((l) => (l.id === id ? { ...l, ...patch } : l)),
+    update((current) => ({
+      layers: current.layers.map((layer) => (layer.id === id ? { ...layer, ...patch } : layer)),
     }))
   }
 
@@ -465,7 +675,7 @@ export default function App() {
 
   function handleLayerDrag(e, layer) {
     e.stopPropagation()
-    update({ activeLayerId: layer.id })
+    update({ activeLayerId: layer.id }, { record: false })
     if (!previewRef.current) return
     const rect = previewRef.current.getBoundingClientRect()
     const startX = e.clientX
@@ -784,7 +994,7 @@ export default function App() {
   }
 
   function loadEntry(entry) {
-    setState({ ...defaultState, ...entry })
+    commitState({ ...defaultState, ...entry })
     if (textRef.current) textRef.current.innerText = entry.text
     setShowGallery(false)
   }
@@ -797,7 +1007,7 @@ export default function App() {
   }
 
   function clearAll() {
-    setState({ ...defaultState })
+    commitState({ ...defaultState })
     if (textRef.current) textRef.current.innerText = ''
     textRef.current?.focus()
   }
@@ -851,7 +1061,7 @@ export default function App() {
         <button
           className="pill-btn"
           onClick={() => {
-            update({ activeLayerId: null })
+            update({ activeLayerId: null }, { record: false })
             setShowSave(true)
           }}
         >
@@ -862,6 +1072,24 @@ export default function App() {
           <span className="brand-name">FontWoW</span>
         </div>
         <div className="header-actions">
+          <button
+            className="pill-btn ghost icon-only"
+            onClick={undo}
+            aria-label={t('undo')}
+            title={`${t('undo')} (Ctrl/Cmd + Z)`}
+            disabled={!canUndo}
+          >
+            <I.IconUndo size={16} />
+          </button>
+          <button
+            className="pill-btn ghost icon-only"
+            onClick={redo}
+            aria-label={t('redo')}
+            title={`${t('redo')} (Ctrl/Cmd + Shift + Z)`}
+            disabled={!canRedo}
+          >
+            <I.IconRedo size={16} />
+          </button>
           <button
             className="pill-btn ghost icon-only"
             onClick={() => setShowSettings(true)}
@@ -887,7 +1115,7 @@ export default function App() {
           className="stage-inner"
           ref={previewRef}
           style={previewStyle}
-          onClick={() => state.activeLayerId && update({ activeLayerId: null })}
+          onClick={() => state.activeLayerId && update({ activeLayerId: null }, { record: false })}
         >
           <div className="bg-layer" style={bgLayerStyle} />
           <div
@@ -923,7 +1151,12 @@ export default function App() {
                   <LabelArtwork templateId={layer.templateId} color={layer.color} />
                   <span
                     className="label-layer-text"
-                    style={{ color: layer.textColor, fontFamily: layerFont.family, fontSize: `${layer.fontSize}px` }}
+                    style={{
+                      color: layer.textColor,
+                      fontFamily: layerFont.family,
+                      fontSize: `${layer.fontSize}px`,
+                      transform: `translate(${layer.textOffsetX ?? 0}%, ${layer.textOffsetY ?? 0}%)`,
+                    }}
                   >
                     {layer.text}
                   </span>
@@ -1176,7 +1409,7 @@ export default function App() {
                       loadFont(f)
                     }}
                   >
-                    {f.dataUrl && (
+                    {(f.dataUrl || f.id.startsWith('gfont-')) && (
                       <span className="del-font" onClick={(e) => deleteCustomFont(f.id, e)}>
                         <I.IconX size={9} />
                       </span>
@@ -1200,6 +1433,10 @@ export default function App() {
                   <I.IconPlus size={17} />
                   <span className="chip-label">{t('yourFont')}</span>
                 </label>
+                <button className="chip font-chip upload-chip" onClick={() => setShowGoogleFontsSearch(true)}>
+                  <I.IconSearch size={17} />
+                  <span className="chip-label">{t('addGoogleFont')}</span>
+                </button>
               </div>
             </>
           )}
@@ -1474,7 +1711,12 @@ export default function App() {
               {activeLabel && (
                 <div className="label-editor">
                   <p className="settings-label">{t('editSelectedLabel')}</p>
-                  <input className="text-input" value={activeLabel.text} onChange={(e) => updateLayer(activeLabel.id, { text: e.target.value })} />
+                  <textarea
+                    className="text-input label-text-input"
+                    rows={3}
+                    value={activeLabel.text}
+                    onChange={(e) => updateLayer(activeLabel.id, { text: e.target.value })}
+                  />
                   <p className="settings-label">{t('labelFont')}</p>
                   <div className="chip-row label-font-row">
                     {visibleFonts.map((labelFont) => (
@@ -1495,6 +1737,8 @@ export default function App() {
                     <label>{t('labelTextColor')}<input type="color" value={activeLabel.textColor} onChange={(e) => updateLayer(activeLabel.id, { textColor: e.target.value })} /></label>
                   </div>
                   <SliderRow label={t('size')} min={12} max={56} value={activeLabel.fontSize} onChange={(e) => updateLayer(activeLabel.id, { fontSize: +e.target.value })} />
+                  <SliderRow label={t('labelTextHorizontal')} min={-45} max={45} value={activeLabel.textOffsetX ?? 0} display={`${activeLabel.textOffsetX ?? 0}%`} onChange={(e) => updateLayer(activeLabel.id, { textOffsetX: +e.target.value })} />
+                  <SliderRow label={t('labelTextVertical')} min={-45} max={45} value={activeLabel.textOffsetY ?? 0} display={`${activeLabel.textOffsetY ?? 0}%`} onChange={(e) => updateLayer(activeLabel.id, { textOffsetY: +e.target.value })} />
                 </div>
               )}
             </div>
@@ -1707,6 +1951,49 @@ export default function App() {
         </Sheet>
       )}
 
+      {showGoogleFontsSearch && (
+        <Sheet title={t('addGoogleFont')} tall onClose={() => {
+          setShowGoogleFontsSearch(false)
+          setSearchQuery('')
+        }}>
+          <div className="google-fonts-search-box">
+            <input
+              type="text"
+              className="text-input"
+              style={{ marginBottom: '16px' }}
+              placeholder={t('searchFontsPlaceholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="google-fonts-results" style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '55vh', overflowY: 'auto', paddingBottom: '20px' }}>
+            {filteredGoogleFonts.slice(0, 30).map((gf) => {
+              const alreadyAdded = allFonts.some((f) => f.label.toLowerCase() === gf.family.toLowerCase())
+              return (
+                <div key={gf.family} className="sheet-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'default' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'right' }}>
+                    <span style={{ fontWeight: 'bold', fontSize: '15px' }}>{gf.family}</span>
+                    <span style={{ fontSize: '12px', opacity: 0.6 }}>{gf.category} {gf.weights && gf.weights.length > 0 ? `• ${gf.weights.length} weights` : ''}</span>
+                  </div>
+                  <button
+                    className="pill-btn soft"
+                    disabled={alreadyAdded}
+                    onClick={() => addGoogleFont(gf)}
+                    style={{ fontSize: '13px', padding: '6px 12px' }}
+                  >
+                    {alreadyAdded ? t('alreadyAdded') : t('save')}
+                  </button>
+                </div>
+              )
+            })}
+            {filteredGoogleFonts.length === 0 && (
+              <p style={{ textAlign: 'center', opacity: 0.5, padding: '20px 0' }}>{t('noFontsFound')}</p>
+            )}
+          </div>
+        </Sheet>
+      )}
+
       {showSettings && (
         <Sheet title={t('settings')} tall onClose={() => setShowSettings(false)}>
           <p className="settings-label">{t('themeColor')}</p>
@@ -1757,6 +2044,22 @@ export default function App() {
           <a className="sheet-item" href="#/about">
             <I.IconDownload size={17} /> معرفی برنامه و دانلود اندروید
           </a>
+          <button
+            className="sheet-item"
+            onClick={() => {
+              setShowSettings(false)
+              setShowChangelog(true)
+            }}
+          >
+            <I.IconStar size={17} style={{ color: 'var(--accent)' }} /> {t('whatsNew')}
+          </button>
+          <a
+            className="sheet-item"
+            href="#/share"
+            onClick={() => setShowSettings(false)}
+          >
+            <I.IconImages size={17} style={{ color: 'var(--accent)' }} /> {t('shareKitLink')}
+          </a>
 
           <p className="settings-label">{t('fontLicenses')}</p>
           <p className="donate-text">{t('fontLicensesText')}</p>
@@ -1773,6 +2076,77 @@ export default function App() {
           <button className="sheet-item" onClick={resetAppSettings}>
             <I.IconRefresh size={17} /> {t('resetSettings')}
           </button>
+        </Sheet>
+      )}
+
+      {showChangelog && (
+        <Sheet title={t('whatsNew')} tall onClose={() => setShowChangelog(false)}>
+          <div className="changelog-container" style={{ padding: '0 8px 24px 8px' }}>
+            {UPDATES.map((up) => {
+              const info = appSettings.lang === 'fa' ? up.fa : up.en
+              return (
+                <div
+                  key={up.version}
+                  className="changelog-version"
+                  style={{
+                    marginBottom: '24px',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                    paddingBottom: '16px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '12px',
+                    }}
+                  >
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: '1.1rem',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <span
+                        style={{
+                          background: 'var(--accent)',
+                          color: '#000',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        v{up.version}
+                      </span>
+                      <span>{info.title}</span>
+                    </h3>
+                    <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>{up.date}</span>
+                  </div>
+                  <ul
+                    style={{
+                      margin: 0,
+                      paddingLeft: appSettings.lang === 'fa' ? 0 : '20px',
+                      paddingRight: appSettings.lang === 'fa' ? '20px' : 0,
+                      listStyleType: 'disc',
+                      lineHeight: '1.6',
+                    }}
+                  >
+                    {info.changes.map((change, idx) => (
+                      <li key={idx} style={{ marginBottom: '8px', fontSize: '0.9rem', opacity: 0.9 }}>
+                        {change}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
+          </div>
         </Sheet>
       )}
 

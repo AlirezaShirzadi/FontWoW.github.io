@@ -94,6 +94,8 @@ export const IconTag = icon(
     <circle cx="7" cy="9" r="1" fill="currentColor" stroke="none" />
   </>,
 )
+export const IconUndo = icon(<path d="M9 14 4 9l5-5M4 9h9a7 7 0 1 1-7 7" />)
+export const IconRedo = icon(<path d="m15 14 5-5-5-5m5 5h-9a7 7 0 1 0 7 7" />)
 export const IconShadow = icon(
   <>
     <rect x="4" y="4" width="12" height="12" rx="2.5" />
@@ -232,6 +234,13 @@ export function ToastCheck({ size = 20 }) {
     </svg>
   )
 }
+
+export const IconSearch = icon(
+  <>
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.3-4.3" />
+  </>
+)
 
 export function EmptyArt() {
   return (
