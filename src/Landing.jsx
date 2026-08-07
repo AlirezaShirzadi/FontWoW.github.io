@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import * as I from './icons'
 import { FONT_GOALS } from './goals'
+import { FEATURES } from './features'
 import './Landing.css'
 
 const REPO = 'https://github.com/FontWoW/FontWoW.github.io'
@@ -19,15 +20,6 @@ function detectPlatform() {
   if (/iphone|ipad|ipod/i.test(ua)) return 'ios'
   return null
 }
-
-const FEATURES = [
-  { icon: I.IconType, title: 'ده‌ها فونت چندزبانه', text: 'فارسی، عربی، انگلیسی، ژاپنی، کره‌ای، چینی، روسی، هندی و بیشتر — به‌علاوه‌ی آپلود فونت دلخواه خودت.' },
-  { icon: I.IconPalette, title: 'استایل و افکت متن', text: 'بولد، ایتالیک، زیرخط، سایه، دورخط، گرادیان، نئون و جعبه‌های متن آماده.' },
-  { icon: I.IconGrid, title: 'قالب‌های آماده', text: 'ترکیب‌های آماده‌ی فونت + رنگ + جعبه + پس‌زمینه + افکت برای شروع سریع.' },
-  { icon: I.IconImages, title: 'چند لایه‌ی متن', text: 'افزودن، جابجایی، چرخش و ویرایش چند لایه‌ی متن مستقل روی یک بوم.' },
-  { icon: I.IconSliders, title: 'کنترل کامل چیدمان', text: 'اندازه‌ی فونت، فاصله‌ی حروف و خطوط، چیدمان و نسبت ابعاد خروجی.' },
-  { icon: I.IconDownload, title: 'خروجی و ذخیره', text: 'خروجی PNG با کیفیت بالا، کپی در کلیپ‌بورد، و ذخیره‌ی طرح‌ها در گالری برنامه.' },
-]
 
 export default function Landing() {
   const [contributors, setContributors] = useState(null)
@@ -151,13 +143,16 @@ export default function Landing() {
       <section className="landing-features">
         <h2>امکانات</h2>
         <div className="landing-grid">
-          {FEATURES.map((f, i) => (
-            <div className="landing-card" key={i}>
-              <div className="landing-card-icon"><f.icon size={20} /></div>
-              <h3>{f.title}</h3>
-              <p>{f.text}</p>
-            </div>
-          ))}
+          {FEATURES.map((f, i) => {
+            const Icon = I[f.iconName]
+            return (
+              <div className="landing-card" key={i}>
+                <div className="landing-card-icon"><Icon size={20} /></div>
+                <h3>{f.title}</h3>
+                <p>{f.text}</p>
+              </div>
+            )
+          })}
         </div>
       </section>
 
