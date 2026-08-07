@@ -28,9 +28,10 @@ if (!res.ok) {
 }
 
 const data = await res.json()
-const list = Array.isArray(data) ? data : data.data || data.result || data.Donates || []
+// The API returns literal `null` (not `[]`) when there are no donations yet — that's a valid empty state.
+const list = Array.isArray(data) ? data : (data && (data.data || data.result || data.Donates)) || []
 
-if (!Array.isArray(list) || list.length === 0) {
+if (!Array.isArray(list)) {
   console.error('Unexpected Daramet API response shape:', JSON.stringify(data).slice(0, 500))
   process.exit(1)
 }
