@@ -9,17 +9,20 @@ const HISTORY_LIMIT = 50
 export function useDesignHistory(initialState) {
   const [state, setState] = useState(initialState)
   const stateRef = useRef(initialState)
-  const [history, setHistory] = useState({ past: [], future: [] })
+  const historyRef = useRef({ past: [], future: [] })
+  const [history, setHistory] = useState(historyRef.current)
 
   const commit = useCallback((nextState, { record = true } = {}) => {
     const currentState = stateRef.current
     if (nextState === currentState) return
 
     if (record) {
-      setHistory(({ past }) => ({
-        past: [...past, currentState].slice(-HISTORY_LIMIT),
+      const nextHistory = {
+        past: [...historyRef.current.past, currentState].slice(-HISTORY_LIMIT),
         future: [],
-      }))
+      }
+      historyRef.current = nextHistory
+      setHistory(nextHistory)
     }
 
     stateRef.current = nextState
@@ -35,25 +38,27 @@ export function useDesignHistory(initialState) {
   )
 
   const undo = useCallback(() => {
-    setHistory(({ past, future }) => {
-      if (!past.length) return { past, future }
-      const previous = past[past.length - 1]
-      const current = stateRef.current
-      stateRef.current = previous
-      setState(previous)
-      return { past: past.slice(0, -1), future: [current, ...future] }
-    })
+    const { past, future } = historyRef.current
+    if (!past.length) return
+
+    const previous = past[past.length - 1]
+    const nextHistory = { past: past.slice(0, -1), future: [stateRef.current, ...future] }
+    historyRef.current = nextHistory
+    stateRef.current = previous
+    setHistory(nextHistory)
+    setState(previous)
   }, [])
 
   const redo = useCallback(() => {
-    setHistory(({ past, future }) => {
-      if (!future.length) return { past, future }
-      const next = future[0]
-      const current = stateRef.current
-      stateRef.current = next
-      setState(next)
-      return { past: [...past, current].slice(-HISTORY_LIMIT), future: future.slice(1) }
-    })
+    const { past, future } = historyRef.current
+    if (!future.length) return
+
+    const next = future[0]
+    const nextHistory = { past: [...past, stateRef.current].slice(-HISTORY_LIMIT), future: future.slice(1) }
+    historyRef.current = nextHistory
+    stateRef.current = next
+    setHistory(nextHistory)
+    setState(next)
   }, [])
 
   return {

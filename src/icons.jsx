@@ -88,6 +88,12 @@ export const IconRotate = icon(
     <path d="M21 3v5h-5" />
   </>,
 )
+export const IconTag = icon(
+  <>
+    <path d="M20 13 11 22 2 13V4h9l9 9Z" />
+    <circle cx="7" cy="9" r="1" fill="currentColor" stroke="none" />
+  </>,
+)
 export const IconUndo = icon(<path d="M9 14 4 9l5-5M4 9h9a7 7 0 1 1-7 7" />)
 export const IconRedo = icon(<path d="m15 14 5-5-5-5m5 5h-9a7 7 0 1 0 7 7" />)
 export const IconShadow = icon(
