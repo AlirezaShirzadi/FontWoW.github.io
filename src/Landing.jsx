@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import * as I from './icons'
+import { FONT_GOALS } from './goals'
 import './Landing.css'
 
 const REPO = 'https://github.com/FontWoW/FontWoW.github.io'
@@ -34,6 +35,8 @@ export default function Landing() {
   const [apkUrl, setApkUrl] = useState(null)
   const [apkError, setApkError] = useState(false)
   const [platform] = useState(detectPlatform)
+  const [donations, setDonations] = useState(null)
+  const [donationsError, setDonationsError] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -47,6 +50,22 @@ export default function Landing() {
       })
       .catch(() => {
         if (!cancelled) setContributorsError(true)
+      })
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/donations.json')
+      .then(res => {
+        if (!res.ok) throw new Error('bad response')
+        return res.json()
+      })
+      .then(data => {
+        if (!cancelled) setDonations(Array.isArray(data.donations) ? data.donations : [])
+      })
+      .catch(() => {
+        if (!cancelled) setDonationsError(true)
       })
     return () => { cancelled = true }
   }, [])
@@ -156,6 +175,69 @@ export default function Landing() {
               style={{ width: 185 }}
             />
           </a>
+        </div>
+      </section>
+
+      <section className="landing-recent-donations">
+        <h2>آخرین حمایت‌های مالی</h2>
+        <p>مبالغی که به‌تازگی برای پروژه‌ی FontWoW حمایت مالی شده‌اند.</p>
+        {donationsError && (
+          <p className="landing-recent-donations-fallback">
+            فهرست دونیت‌ها فعلاً در دسترس نیست.
+          </p>
+        )}
+        {!donationsError && !donations && <p className="landing-recent-donations-loading">در حال بارگذاری…</p>}
+        {donations && donations.length === 0 && !donationsError && (
+          <p className="landing-recent-donations-fallback">هنوز دونیتی ثبت نشده — اولین نفر باش!</p>
+        )}
+        {donations && donations.length > 0 && (
+          <ul className="landing-recent-donations-list">
+            {donations.map((d, i) => (
+              <li key={i} className="landing-recent-donation">
+                <I.IconHeart size={14} />
+                <span className="landing-recent-donation-amount">{Number(d.amount).toLocaleString('fa-IR')} تومان</span>
+                <span className="landing-recent-donation-project">برای FontWoW</span>
+                {d.date && <span className="landing-recent-donation-date">{d.date}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="landing-goals">
+        <h2>اهداف بعدی</h2>
+        <p>
+          فونت‌هایی که در نوبت خریدن هستن، به‌ترتیب اولویت — با کمک شما زودتر آزاد می‌شن.
+        </p>
+        <div className="landing-goals-list">
+          {FONT_GOALS.map((g, i) => {
+            const percent = g.price > 0 ? Math.min(100, Math.round((g.raised / g.price) * 100)) : 0
+            return (
+              <div className="landing-goal" key={g.name}>
+                <span className="landing-goal-rank">{i + 1}</span>
+                <img
+                  className="landing-goal-img"
+                  src={g.image}
+                  alt={g.name}
+                  loading="lazy"
+                  onError={e => { e.currentTarget.src = '/favicon.svg' }}
+                />
+                <div className="landing-goal-info">
+                  <div className="landing-goal-head">
+                    <h3>{g.name}</h3>
+                    <span className="landing-goal-price">{g.price.toLocaleString('fa-IR')} تومان</span>
+                  </div>
+                  <div className="landing-goal-bar">
+                    <div className="landing-goal-bar-fill" style={{ width: `${percent}%` }} />
+                  </div>
+                  <div className="landing-goal-foot">
+                    <span>{g.raised.toLocaleString('fa-IR')} از {g.price.toLocaleString('fa-IR')} تومان</span>
+                    <span className="landing-goal-percent">{percent}٪</span>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </section>
 
