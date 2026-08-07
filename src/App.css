@@ -1292,3 +1292,191 @@
 
   flex-wrap: wrap;
 }
+
+/* UI Text Box Styles */
+.tb-mac {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(200, 200, 200, 0.5);
+  border-radius: 12px;
+  padding: 45px 20px 20px 20px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+.tb-mac::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 28px;
+  background: rgba(240, 240, 240, 0.9);
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid rgba(200, 200, 200, 0.5);
+}
+.tb-mac::after {
+  content: "";
+  position: absolute;
+  top: 10px; left: 12px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #ff5f56;
+  box-shadow: 16px 0 0 #ffbd2e, 32px 0 0 #27c93f;
+}
+
+.tb-terminal {
+  background: rgba(30, 30, 30, 0.9);
+  border: 1px solid rgba(60, 60, 60, 0.8);
+  border-radius: 8px;
+  padding: 40px 20px 20px 20px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  color: #27c93f !important;
+}
+.tb-terminal::before {
+  content: "bash ~";
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: monospace;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 24px;
+  background: rgba(50, 50, 50, 0.9);
+  border-radius: 8px 8px 0 0;
+}
+.tb-terminal::after {
+  content: "";
+  position: absolute;
+  top: 8px; left: 10px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #ff5f56;
+  box-shadow: 14px 0 0 #ffbd2e, 28px 0 0 #27c93f;
+}
+
+.tb-tweet {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(200, 200, 200, 0.4);
+  border-radius: 16px;
+  padding: 70px 20px 50px 20px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  min-width: 250px;
+}
+.tb-tweet::before {
+  content: "";
+  position: absolute;
+  top: 15px; right: 15px; /* right for RTL */
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+}
+[dir='ltr'] .tb-tweet::before {
+  right: auto;
+  left: 15px;
+}
+.tb-tweet::after {
+  content: "♡   ↻   ➦";
+  position: absolute;
+  bottom: 15px; left: 20px;
+  color: rgba(0,0,0,0.4);
+  font-size: 14px;
+  letter-spacing: 20px;
+}
+
+.tb-note {
+  background: rgba(253, 253, 250, 0.95);
+  border-radius: 20px;
+  padding: 60px 25px 25px 25px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+.tb-note::before {
+  content: "";
+  position: absolute;
+  top: 45px; left: 0; right: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.tb-note::after {
+  content: "<";
+  position: absolute;
+  top: 12px; left: 15px;
+  color: rgba(255, 204, 0, 1);
+  font-weight: bold;
+  font-family: sans-serif;
+  font-size: 22px;
+}
+[dir='rtl'] .tb-note::after {
+  content: ">";
+  left: auto;
+  right: 15px;
+}
+
+.tb-sms {
+  background: rgba(52, 199, 89, 0.9);
+  border-radius: 20px;
+  padding: 12px 18px !important;
+  color: white !important;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border-bottom-right-radius: 4px;
+}
+[dir='ltr'] .tb-sms {
+  border-bottom-right-radius: 20px;
+  border-bottom-left-radius: 4px;
+}
+.tb-sms::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background: rgba(52, 199, 89, 0.9);
+  border-bottom-left-radius: 16px;
+  z-index: -1;
+}
+[dir='ltr'] .tb-sms::before {
+  right: auto;
+  left: -8px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 16px;
+}
+
+.tb-notif {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 65px 20px 20px 20px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.5);
+  min-width: 200px;
+}
+.tb-notif::before {
+  content: "";
+  position: absolute;
+  top: 15px; right: 15px;
+  width: 35px; height: 35px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.1);
+}
+[dir='ltr'] .tb-notif::before {
+  right: auto;
+  left: 15px;
+}
+
+.tb-white {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 25px 30px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.tb-black {
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 25px 30px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  color: #ffffff !important;
+}

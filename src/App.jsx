@@ -1092,7 +1092,7 @@ export default function App() {
         >
           <div className="bg-layer" style={bgLayerStyle} />
           <div
-            className="text-canvas"
+            className={`text-canvas tb-${state.textBoxStyle}`}
             ref={textRef}
             style={textStyle}
             contentEditable

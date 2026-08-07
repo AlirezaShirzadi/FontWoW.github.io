@@ -178,6 +178,12 @@ export const TEXT_BOX_STYLES = [
   { id: 'underline', label: 'زیرخط ضخیم' },
   { id: 'frame', label: 'قاب' },
   { id: 'glass', label: 'شیشه‌ای' },
+  { id: 'note', label: 'نوت آیفون' },
+  { id: 'sms', label: 'پیامک' },
+  { id: 'notif', label: 'نوتیفیکیشن' },
+  { id: 'mac', label: 'پنجره مک' },
+  { id: 'terminal', label: 'ترمینال' },
+  { id: 'tweet', label: 'توییت' },
 ]
 
 export const TEXT_COLORS = [
