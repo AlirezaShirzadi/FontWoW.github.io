@@ -309,6 +309,58 @@
   cursor: pointer;
 }
 
+.layer-toolbar {
+  position: absolute;
+  bottom: calc(100% + 18px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: var(--r-pill);
+  padding: 3px;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+.layer-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.layer-toolbar button:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Rendered as siblings of .stage-inner (not inside it) using viewport coordinates, so they can
+   never end up in the exported PNG regardless of when a drag happens to end. */
+.snap-guide {
+  position: fixed;
+  background: var(--accent);
+  z-index: 40;
+  pointer-events: none;
+}
+
+.snap-guide-v {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.snap-guide-h {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
 .image-layer {
   padding: 0;
   display: flex;

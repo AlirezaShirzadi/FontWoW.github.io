@@ -11,7 +11,6 @@ node_modules
 dist
 dist-ssr
 *.local
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,9 +21,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
 release-notes.txt
-
 # Android / Capacitor
 android/local.properties
 android/.gradle
@@ -33,3 +30,4 @@ android/app/build
 android/captures
 android/.idea
 *.iml
+*.patch
