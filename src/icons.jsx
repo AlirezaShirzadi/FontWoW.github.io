@@ -39,6 +39,8 @@ export const IconDownload = icon(
     <path d="M12 15V3" />
   </>,
 )
+export const IconArrowUp = icon(<path d="M12 19V5M5 12l7-7 7 7" />)
+export const IconArrowDown = icon(<path d="M12 5v14M19 12l-7 7-7-7" />)
 export const IconImages = icon(
   <>
     <rect x="7" y="3" width="14" height="14" rx="2" />

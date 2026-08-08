@@ -193,6 +193,24 @@ function SliderRow({ label, value, display, min, max, step, onChange }) {
   )
 }
 
+// Shared duplicate/reorder toolbar rendered above the active layer, used by all three layer
+// kinds (text, image, label).
+function LayerToolbar({ layer, onMoveLayer, onDuplicateLayer, t }) {
+  return (
+    <div className="layer-toolbar" onPointerDown={(e) => e.stopPropagation()}>
+      <button onClick={() => onMoveLayer(layer.id, -1)} aria-label={t('sendBackward')}>
+        <I.IconArrowDown size={12} />
+      </button>
+      <button onClick={() => onDuplicateLayer(layer.id)} aria-label={t('duplicateLayer')}>
+        <I.IconCopy size={12} />
+      </button>
+      <button onClick={() => onMoveLayer(layer.id, 1)} aria-label={t('bringForward')}>
+        <I.IconArrowUp size={12} />
+      </button>
+    </div>
+  )
+}
+
 export default function App() {
   const [cssElement, setCssElement] = useState('h1')
   const {
@@ -210,6 +228,7 @@ export default function App() {
   }))
   const [tab, setTab] = useState('font')
   const [fontLang, setFontLang] = useState('fa')
+  const [dragGuides, setDragGuides] = useState({ x: null, y: null })
   const [bgCategory, setBgCategory] = useState('colors')
   const [showSave, setShowSave] = useState(false)
   const [showGallery, setShowGallery] = useState(false)
@@ -362,6 +381,31 @@ export default function App() {
     document.documentElement.dir = appSettings.lang === 'en' ? 'ltr' : 'rtl'
     document.documentElement.lang = appSettings.lang
   }, [appSettings.lang])
+
+  // Arrow-key nudge for the selected layer — desktop-only bonus alongside drag; ignored while
+  // the user is actually typing so it doesn't fight arrow-key text navigation, and ignored
+  // when nothing is selected so it never steals arrow keys from normal page use.
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (!state.activeLayerId) return
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return
+      const el = document.activeElement
+      const isEditing = el?.isContentEditable || el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA'
+      if (isEditing) return
+      const layer = state.layers.find((l) => l.id === state.activeLayerId)
+      if (!layer) return
+      e.preventDefault()
+      const step = e.shiftKey ? 3 : 0.5
+      const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0
+      const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0
+      updateLayer(layer.id, {
+        x: Math.min(95, Math.max(5, layer.x + dx)),
+        y: Math.min(95, Math.max(5, layer.y + dy)),
+      })
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [state.activeLayerId, state.layers])
 
   useEffect(() => {
     customFonts.forEach((f) => {
@@ -750,20 +794,68 @@ export default function App() {
     const startY = e.clientY
     const origX = layer.x
     const origY = layer.y
+    const SNAP = 2 // % of canvas width/height — snap zone around center + other layers
+    const otherLayers = state.layers.filter((l) => l.id !== layer.id)
     function onMove(ev) {
       const dx = ((ev.clientX - startX) / rect.width) * 100
       const dy = ((ev.clientY - startY) / rect.height) * 100
-      updateLayer(layer.id, {
-        x: Math.min(95, Math.max(5, origX + dx)),
-        y: Math.min(95, Math.max(5, origY + dy)),
-      })
+      let x = Math.min(95, Math.max(5, origX + dx))
+      let y = Math.min(95, Math.max(5, origY + dy))
+      let guideX = null
+      let guideY = null
+
+      if (Math.abs(x - 50) < SNAP) {
+        x = 50
+        guideX = rect.left + rect.width * 0.5
+      } else {
+        const match = otherLayers.find((l) => Math.abs(x - l.x) < SNAP)
+        if (match) {
+          x = match.x
+          guideX = rect.left + (rect.width * match.x) / 100
+        }
+      }
+
+      if (Math.abs(y - 50) < SNAP) {
+        y = 50
+        guideY = rect.top + rect.height * 0.5
+      } else {
+        const match = otherLayers.find((l) => Math.abs(y - l.y) < SNAP)
+        if (match) {
+          y = match.y
+          guideY = rect.top + (rect.height * match.y) / 100
+        }
+      }
+
+      updateLayer(layer.id, { x, y })
+      setDragGuides({ x: guideX, y: guideY })
     }
     function onUp() {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
+      setDragGuides({ x: null, y: null })
     }
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
+  }
+
+  function duplicateLayer(id) {
+    const layer = state.layers.find((l) => l.id === id)
+    if (!layer) return
+    const newId = `layer-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+    const copy = { ...layer, id: newId, x: Math.min(95, Math.max(5, layer.x + 5)), y: Math.min(95, Math.max(5, layer.y + 5)) }
+    update({ layers: [...state.layers, copy], activeLayerId: newId })
+  }
+
+  // Layer stacking order is just array order — moving forward/backward means swapping the
+  // layer with its neighbor. Already at an end -> no-op.
+  function moveLayer(id, direction) {
+    const layers = state.layers
+    const i = layers.findIndex((l) => l.id === id)
+    const j = i + direction
+    if (i === -1 || j < 0 || j >= layers.length) return
+    const next = [...layers]
+    ;[next[i], next[j]] = [next[j], next[i]]
+    update({ layers: next })
   }
 
   function handleLayerRotate(e, layer) {
@@ -1240,6 +1332,7 @@ export default function App() {
                   </span>
                   {state.activeLayerId === layer.id && (
                     <>
+                      <LayerToolbar layer={layer} onMoveLayer={moveLayer} onDuplicateLayer={duplicateLayer} t={t} />
                       <span className="layer-del" onPointerDown={(e) => e.stopPropagation()} onClick={() => deleteLayer(layer.id)}>
                         <I.IconX size={11} />
                       </span>
@@ -1271,6 +1364,7 @@ export default function App() {
                   <img src={layer.src} alt="" draggable={false} />
                   {state.activeLayerId === layer.id && (
                     <>
+                      <LayerToolbar layer={layer} onMoveLayer={moveLayer} onDuplicateLayer={duplicateLayer} t={t} />
                       <span
                         className="layer-del"
                         onPointerDown={(e) => e.stopPropagation()}
@@ -1318,6 +1412,7 @@ export default function App() {
                 {layer.text}
                 {state.activeLayerId === layer.id && (
                   <>
+                    <LayerToolbar layer={layer} onMoveLayer={moveLayer} onDuplicateLayer={duplicateLayer} t={t} />
                     <span
                       className="layer-del"
                       onPointerDown={(e) => e.stopPropagation()}
@@ -1337,6 +1432,12 @@ export default function App() {
             )
           })}
         </div>
+        {dragGuides.x != null && (
+          <div className="snap-guide snap-guide-v" style={{ left: dragGuides.x }} />
+        )}
+        {dragGuides.y != null && (
+          <div className="snap-guide snap-guide-h" style={{ top: dragGuides.y }} />
+        )}
         <button className="add-layer-btn" onClick={addLayer} aria-label={t('addLayer')}>
           <I.IconPlus size={12} /> Aa
         </button>
