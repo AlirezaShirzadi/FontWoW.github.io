@@ -26,6 +26,7 @@ import { UPDATES, APP_VERSION } from './updates'
 import { checkForUpdate, dismissUpdate } from './updateCheck'
 import { FONT_GOALS } from './goals'
 import { FEATURES } from './features'
+import PromptSheet from './PromptSheet'
 import './App.css'
 import './Landing.css'
 
@@ -232,6 +233,7 @@ export default function App() {
   const [showGoogleFontsSearch, setShowGoogleFontsSearch] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCanvasTool, setActiveCanvasTool] = useState(null)
+  const [promptState, setPromptState] = useState(null)
   const previewRef = useRef(null)
   const textRef = useRef(null)
   const tabsRef = useRef(null)
@@ -1095,6 +1097,17 @@ export default function App() {
     window.location.reload()
   }
 
+  function handlePromptSubmit(value) {
+    if (value == null || !promptState) return
+    const trimmed = value.trim()
+    if (trimmed) {
+      updateLayer(promptState.layerId, { text: trimmed })
+    } else {
+      deleteLayer(promptState.layerId)
+    }
+    setPromptState(null)
+  }
+
   const TABS = [
     { id: 'font', label: t('tabFont'), Icon: I.IconType },
     { id: 'style', label: t('tabStyle'), Icon: I.IconSparkles },
@@ -1210,8 +1223,7 @@ export default function App() {
                   onPointerDown={(e) => handleLayerDrag(e, layer)}
                   onClick={(e) => e.stopPropagation()}
                   onDoubleClick={() => {
-                    const value = window.prompt(t('editLabelText'), layer.text)
-                    if (value != null) updateLayer(layer.id, { text: value })
+                    setPromptState({ layerId: layer.id, initialText: layer.text, promptKey: 'editLabelText' })
                   }}
                 >
                   <LabelArtwork templateId={layer.templateId} color={layer.color} />
@@ -1300,8 +1312,7 @@ export default function App() {
                 onPointerDown={(e) => handleLayerDrag(e, layer)}
                 onClick={(e) => e.stopPropagation()}
                 onDoubleClick={() => {
-                  const val = window.prompt(t('editLayerText'), layer.text)
-                  if (val != null) updateLayer(layer.id, { text: val })
+                  setPromptState({ layerId: layer.id, initialText: layer.text, promptKey: 'editLayerText' })
                 }}
               >
                 {layer.text}
@@ -2364,6 +2375,18 @@ export default function App() {
           <I.ToastCheck size={19} />
           <span>{toast}</span>
         </div>
+      )}
+
+      {promptState && (
+        <PromptSheet
+          title={t(promptState.promptKey)}
+          initialValue={promptState.initialText}
+          placeholder={t('placeholder')}
+          submitLabel={promptState.promptKey === 'editLabelText' ? (t('save')) : (t('save'))}
+          cancelLabel={t('clear')}
+          onSubmit={handlePromptSubmit}
+          onClose={() => setPromptState(null)}
+        />
       )}
 
       {availableUpdate ? (
