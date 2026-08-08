@@ -3,6 +3,7 @@ package ir.m4tinbeigi.fontwow;
 import android.Manifest;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Intent;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -214,6 +215,23 @@ public class FontWowNativePlugin extends Plugin {
             call.resolve(result);
         } catch (Exception e) {
             call.reject("Copying the image failed: " + e.getMessage(), e);
+        }
+    }
+
+    @PluginMethod
+    public void openUrl(PluginCall call) {
+        String url = call.getString("url");
+        if (url == null || url.trim().isEmpty()) {
+            call.reject("URL is missing");
+            return;
+        }
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("Could not open URL: " + e.getMessage(), e);
         }
     }
 

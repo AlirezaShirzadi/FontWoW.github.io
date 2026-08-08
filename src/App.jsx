@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toPng, toBlob } from 'html-to-image'
-import { isNative, saveImageNative, copyImageNative, copyTextNative } from './native'
+import { isNative, saveImageNative, copyImageNative, copyTextNative, openExternalUrl } from './native'
 import {
   FONTS,
   FONT_CATEGORIES,
@@ -2136,12 +2136,29 @@ export default function App() {
               href={DONATE_URL}
               target="_blank"
               rel="noreferrer"
+              onClick={(e) => {
+                if (isNative()) {
+                  e.preventDefault()
+                  openExternalUrl(DONATE_URL)
+                }
+              }}
             >
               <I.IconCreditCard size={17} /> {t('payViaZibal')}
             </a>
           )}
           {CRYPTO_DONATE_URL && (
-            <a href={CRYPTO_DONATE_URL} target="_blank" rel="noreferrer" className="oxapay-donate-link">
+            <a
+              href={CRYPTO_DONATE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="oxapay-donate-link"
+              onClick={(e) => {
+                if (isNative()) {
+                  e.preventDefault()
+                  openExternalUrl(CRYPTO_DONATE_URL)
+                }
+              }}
+            >
               <img
                 src="https://oxapay.com/donation-buttons/1.png"
                 alt="OxaPay Donation Button"

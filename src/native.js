@@ -55,4 +55,17 @@ export async function copyTextNative(text) {
   await Clipboard.write({ string: text })
 }
 
+export async function openExternalUrl(url) {
+  if (isNative()) {
+    try {
+      await FontWowNative.openUrl({ url })
+    } catch (err) {
+      console.warn('native openUrl failed, falling back to window.open:', err)
+      window.open(url, '_system')
+    }
+  } else {
+    window.open(url, '_blank')
+  }
+}
+
 export { isNative }

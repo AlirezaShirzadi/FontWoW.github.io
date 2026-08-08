@@ -76,7 +76,7 @@ export const STRINGS = {
     emptyGallery: 'چیزی ذخیره نشده. یک متن بساز و ذخیره کن.',
     donateText:
       'تمام مبالغی که حمایت مالی می‌شن صرف خرید فونت‌های جدید با لایسنس می‌شه تا رایگان و در دسترس همه توی FontWoW قرار بگیرن.',
-    payViaZibal: 'پرداخت تومانی (درامت)',
+    payViaZibal: 'پرداخت تومانی',
     payViaCrypto: 'پرداخت با کریپتو',
     donateNotSet: 'لینک درگاه هنوز تنظیم نشده.',
     suggestFontLabel: 'دوست داری چه فونتی اضافه بشه؟',
@@ -250,7 +250,7 @@ export const STRINGS = {
     emptyGallery: 'Nothing saved yet. Create something and save it.',
     donateText:
       'Every donation goes toward buying licensed fonts, added to FontWoW for free and available to everyone.',
-    payViaZibal: 'Pay via Daramet (Toman)',
+    payViaZibal: 'Toman Payment',
     payViaCrypto: 'Pay with crypto',
     donateNotSet: 'Payment link is not set yet.',
     suggestFontLabel: 'Which font would you like added?',

@@ -166,7 +166,7 @@ export default function Landing() {
         </p>
         <div className="landing-donate-buttons">
           <a className="landing-btn landing-btn-primary" href={TOMAN_DONATE_URL} target="_blank" rel="noreferrer">
-            <I.IconCreditCard size={17} /> پرداخت تومانی (درامت) <I.IconExternal size={11} />
+            <I.IconCreditCard size={17} /> پرداخت تومانی <I.IconExternal size={11} />
           </a>
           <a href={CRYPTO_DONATE_URL} target="_blank" rel="noreferrer">
             <img
