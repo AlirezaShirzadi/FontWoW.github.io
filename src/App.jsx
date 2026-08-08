@@ -251,7 +251,6 @@ export default function App() {
   const [availableUpdate, setAvailableUpdate] = useState(null)
   const [showGoogleFontsSearch, setShowGoogleFontsSearch] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeCanvasTool, setActiveCanvasTool] = useState(null)
   const [promptState, setPromptState] = useState(null)
   const previewRef = useRef(null)
   const textRef = useRef(null)
@@ -301,6 +300,8 @@ export default function App() {
   )
   const allTemplates = useMemo(() => [...TEMPLATES, ...customTemplates], [customTemplates])
   const activeLabel = state.layers.find((layer) => layer.id === state.activeLayerId && layer.type === 'label')
+  const activeTextLayer = state.layers.find((layer) => layer.id === state.activeLayerId && layer.type === 'text')
+  const editableFontSize = activeTextLayer?.fontSize ?? state.fontSize
 
   useEffect(() => {
     if (!toast) return
@@ -1178,8 +1179,12 @@ export default function App() {
     update({ align: next })
   }
 
-  function toggleCanvasTool(tool) {
-    setActiveCanvasTool((cur) => (cur === tool ? null : tool))
+  function updateEditableFontSize(fontSize) {
+    if (activeTextLayer) {
+      updateLayer(activeTextLayer.id, { fontSize })
+      return
+    }
+    update({ fontSize })
   }
 
   function resetAppSettings() {
@@ -1449,15 +1454,7 @@ export default function App() {
           <I.IconTag size={13} />
         </button>
         {state.text && (
-          <>
-            <div className="canvas-rail">
-              <button
-                className={`rail-btn ${activeCanvasTool === 'size' ? 'on' : ''}`}
-                onClick={() => toggleCanvasTool('size')}
-                aria-label={t('size')}
-              >
-                <I.IconTextSize size={16} />
-              </button>
+          <div className="canvas-rail">
               <button
                 className="rail-btn"
                 onClick={cycleAlign}
@@ -1492,32 +1489,19 @@ export default function App() {
               <button className="rail-btn danger" onClick={clearAll} aria-label={t('clear')}>
                 <I.IconTrash size={15} />
               </button>
-            </div>
-            {activeCanvasTool === 'size' && (
-              <div className="canvas-size-slider">
-                <span className="val">{state.fontSize}</span>
-                <input
-                  type="range"
-                  min="16"
-                  max="120"
-                  value={state.fontSize}
-                  onChange={(e) => update({ fontSize: +e.target.value })}
-                  orient="vertical"
-                />
-              </div>
-            )}
-          </>
+          </div>
         )}
       </main>
 
       <section className="controls">
         <div className="pinned-size-row">
+          {activeTextLayer && <p className="settings-label">{t('editingSelectedText')}</p>}
           <SliderRow
             label={t('size')}
             min={16}
             max={120}
-            value={state.fontSize}
-            onChange={(e) => update({ fontSize: +e.target.value })}
+            value={editableFontSize}
+            onChange={(e) => updateEditableFontSize(+e.target.value)}
           />
         </div>
         <div className="tabs" ref={tabsRef}>
