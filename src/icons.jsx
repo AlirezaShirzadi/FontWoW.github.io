@@ -244,6 +244,12 @@ export const IconSearch = icon(
   </>
 )
 
+export const IconTerminal = icon(
+  <>
+    <path d="m5 17 5-5-5-5M12 19h8" />
+  </>
+)
+
 export function EmptyArt() {
   return (
     <svg viewBox="0 0 120 92" width="132" height="101" fill="none" className="empty-art" aria-hidden="true">

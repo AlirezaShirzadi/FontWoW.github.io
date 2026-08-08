@@ -1,3 +1,6 @@
+import logger from './logger'
+logger.init()
+
 import { StrictMode, useEffect, useState, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Capacitor } from '@capacitor/core'

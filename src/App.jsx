@@ -27,6 +27,7 @@ import { checkForUpdate, dismissUpdate } from './updateCheck'
 import { FONT_GOALS } from './goals'
 import { FEATURES } from './features'
 import PromptSheet from './PromptSheet'
+import logger from './logger'
 import './App.css'
 import './Landing.css'
 
@@ -237,6 +238,12 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
+  const [showDiagnostics, setShowDiagnostics] = useState(false)
+  const [logs, setLogs] = useState([])
+  const [filterLevel, setFilterLevel] = useState('all')
+  const [logSearch, setLogSearch] = useState('')
+  const [systemHealth, setSystemHealth] = useState(() => logger.checkHealth())
+  const [expandedLogId, setExpandedLogId] = useState(null)
   const [contributors, setContributors] = useState(null)
   const [contributorsError, setContributorsError] = useState(false)
   const [donations, setDonations] = useState(null)
@@ -313,6 +320,14 @@ export default function App() {
     checkForUpdate().then((update) => {
       if (update) setAvailableUpdate(update)
     })
+  }, [])
+
+  useEffect(() => {
+    const unsubscribe = logger.subscribe((newLogs) => {
+      setLogs(newLogs)
+      setSystemHealth(logger.checkHealth())
+    })
+    return unsubscribe
   }, [])
 
   useEffect(() => {
@@ -655,6 +670,8 @@ export default function App() {
   }
 
   function addGoogleFont(gf) {
+    logger.info('Font', `شروع افزودن فونت گوگل: ${gf.family}`)
+    logger.preflightCheck('add_font')
     const isArabic = googleFontsList.arabic.some(a => a.family === gf.family)
     const weights = gf.weights || []
     const weightsStr = weights.includes(400) && weights.includes(700) ? '400;700' : (weights.includes(400) ? '400' : (weights[0] || ''))
@@ -678,6 +695,7 @@ export default function App() {
     update({ fontId: id, direction: isArabic ? 'rtl' : 'ltr' })
     loadFont(entry)
     
+    logger.info('Font', `فونت گوگل با موفقیت اضافه شد: ${gf.family}`)
     setToast(t('fontAdded'))
     setShowGoogleFontsSearch(false)
   }
@@ -686,11 +704,15 @@ export default function App() {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
+    logger.info('Background', `شروع بارگذاری پس‌زمینه سفارشی: ${file.name}`)
+    logger.preflightCheck('upload_bg')
     try {
       const dataUrl = await fileToDataUrl(file)
       update({ bgId: 'custom-image', customBgUrl: dataUrl })
+      logger.info('Background', 'پس‌زمینه سفارشی با موفقیت اعمال شد.')
       setToast(t('bgAdded'))
     } catch {
+      logger.error('Background', 'خطا در خواندن فایل پس‌زمینه سفارشی')
       setToast(t('bgError'))
     }
   }
@@ -1084,6 +1106,8 @@ export default function App() {
   async function exportPng() {
     if (!previewRef.current) return
     const fileName = `fontwow-${Date.now()}.png`
+    logger.info('Export', 'شروع استخراج تصویر PNG')
+    logger.preflightCheck('export_png')
     try {
       await ensureFontPainted()
       const dataUrl = await toPng(previewRef.current, { pixelRatio: 3, cacheBust: true })
@@ -1095,8 +1119,10 @@ export default function App() {
         link.href = dataUrl
         link.click()
       }
+      logger.info('Export', `تصویر PNG با موفقیت ذخیره شد: ${fileName}`)
       setToast(t('imageSaved'))
     } catch (err) {
+      logger.error('Export', 'خطا در خروجی PNG', err.stack || err.message)
       console.error('exportPng failed:', err)
       setToast(errorToast('imageError', err))
     }
@@ -1105,25 +1131,36 @@ export default function App() {
 
   async function copyImage() {
     if (!previewRef.current) return
+    logger.info('Clipboard', 'شروع کپی تصویر در کلیپ‌بورد')
+    logger.preflightCheck('copy_image')
     try {
       await ensureFontPainted()
       if (isNative()) {
         const dataUrl = await toPng(previewRef.current, { pixelRatio: 3, cacheBust: true })
         const mode = await copyImageNative(dataUrl, `fontwow-${Date.now()}.png`)
         // 'canceled' means the user dismissed the share sheet — say nothing.
-        if (mode !== 'canceled') setToast(t(mode === 'shared' ? 'imageShared' : 'imageCopied'))
+        if (mode !== 'canceled') {
+          logger.info('Clipboard', `تصویر با حالت ${mode} کپی یا اشتراک‌گذاری شد.`)
+          setToast(t(mode === 'shared' ? 'imageShared' : 'imageCopied'))
+        } else {
+          logger.info('Clipboard', 'عملیات کپی/اشتراک‌گذاری تصویر توسط کاربر لغو شد.')
+        }
       } else {
         const blob = await toBlob(previewRef.current, { pixelRatio: 3, cacheBust: true })
         await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })])
+        logger.info('Clipboard', 'تصویر با موفقیت در کلیپ‌بورد کپی شد.')
         setToast(t('imageCopied'))
       }
     } catch (err) {
+      logger.error('Clipboard', 'خطا در کپی تصویر', err.stack || err.message)
       console.error('copyImage failed:', err)
       try {
         if (isNative()) await copyTextNative(state.text)
         else await navigator.clipboard.writeText(state.text)
+        logger.info('Clipboard', 'حالت پشتیبان: متن جایگزین کپی شد.')
         setToast(t('imageCopyFallback'))
       } catch {
+        logger.error('Clipboard', 'حالت پشتیبان کپی متن نیز با خطا مواجه شد.')
         setToast(t('copyFailed'))
       }
     }
@@ -1131,11 +1168,15 @@ export default function App() {
   }
 
   async function copyText() {
+    logger.info('Clipboard', 'شروع کپی متن')
+    logger.preflightCheck('copy_text')
     try {
       if (isNative()) await copyTextNative(state.text)
       else await navigator.clipboard.writeText(state.text)
+      logger.info('Clipboard', 'متن با موفقیت کپی شد.')
       setToast(t('textCopied'))
     } catch {
+      logger.error('Clipboard', 'خطا در کپی متن')
       setToast(t('copyFailed'))
     }
     setShowSave(false)
@@ -1146,10 +1187,13 @@ export default function App() {
       setToast(t('writeFirst'))
       return
     }
+    logger.info('Gallery', 'ذخیره در گالری برنامه')
+    logger.preflightCheck('save_gallery')
     const entry = { ...state, id: `${Date.now()}` }
     const next = [entry, ...saved].slice(0, 40)
     setSaved(next)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    logger.info('Gallery', `طرح با شناسه ${entry.id} در گالری داخلی برنامه ذخیره شد.`)
     setToast(t('savedToGallery'))
     setShowSave(false)
   }
@@ -1241,7 +1285,7 @@ export default function App() {
             setShowSave(true)
           }}
         >
-          <I.IconDownload size={14} /> {t('save')}
+          <I.IconDownload size={14} /> <span className="btn-text">{t('save')}</span>
         </button>
         <div className="brand">
           <I.Logo size={22} />
@@ -1281,7 +1325,7 @@ export default function App() {
             <I.IconHeart size={16} />
           </button>
           <button className="pill-btn soft" onClick={() => setShowGallery(true)}>
-            <I.IconImages size={14} /> {t('gallery')}
+            <I.IconImages size={14} /> <span className="btn-text">{t('gallery')}</span>
           </button>
         </div>
       </header>
@@ -2225,6 +2269,15 @@ export default function App() {
             <I.IconSparkles size={17} /> درباره‌ی FontWoW
           </button>
           <button
+            className="sheet-item recommended"
+            onClick={() => {
+              setShowSettings(false)
+              setShowDonate(true)
+            }}
+          >
+            <I.IconHeart size={17} style={{ color: 'var(--accent)' }} /> {t('donate')}
+          </button>
+          <button
             className="sheet-item"
             onClick={() => {
               setShowSettings(false)
@@ -2240,6 +2293,35 @@ export default function App() {
           >
             <I.IconImages size={17} style={{ color: 'var(--accent)' }} /> {t('shareKitLink')}
           </a>
+
+          <button
+            className="sheet-item"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', border: 'none', background: 'none', textAlign: 'inherit', padding: '12px 16px', color: 'inherit', cursor: 'pointer' }}
+            onClick={() => {
+              setShowSettings(false)
+              setShowDiagnostics(true)
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <I.IconTerminal size={17} style={{ color: 'var(--accent)' }} />
+              <span>{t('diagnosticsTitle')}</span>
+            </div>
+            <span
+              className={`health-dot ${systemHealth.hasError ? 'red' : systemHealth.hasWarning ? 'yellow' : 'green'}`}
+              style={{
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                display: 'inline-block',
+                background: systemHealth.hasError ? '#ef4444' : systemHealth.hasWarning ? '#eab308' : '#22c55e',
+                boxShadow: systemHealth.hasError 
+                  ? '0 0 10px #ef4444' 
+                  : systemHealth.hasWarning 
+                    ? '0 0 10px #eab308' 
+                    : '0 0 10px #22c55e'
+              }}
+            />
+          </button>
 
           <p className="settings-label">{t('fontLicenses')}</p>
           <p className="donate-text">{t('fontLicensesText')}</p>
