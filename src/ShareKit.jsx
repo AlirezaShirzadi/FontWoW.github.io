@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import * as I from './icons'
 import { STRINGS } from './strings'
+import { APP_VERSION } from './updates'
 import './ShareKit.css'
 
 const SETTINGS_KEY = 'fontwow_app_settings_v1'
@@ -22,6 +23,7 @@ export default function ShareKit() {
   const [toast, setToast] = useState('')
   const [apkUrl, setApkUrl] = useState(null)
   const [apkError, setApkError] = useState(false)
+  const [apkVersion, setApkVersion] = useState(APP_VERSION)
   const [isDownloading, setIsDownloading] = useState(false)
 
   const t = (key) => STRINGS[appSettings.lang][key] || key
@@ -44,7 +46,13 @@ export default function ShareKit() {
           ?.filter(a => a.name.endsWith('.apk'))
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
         if (!cancelled) {
-          if (asset) setApkUrl(asset.browser_download_url)
+          if (asset) {
+            setApkUrl(asset.browser_download_url)
+            const match = asset.name.match(/FontWoW-v?([\d.]+)\.apk/)
+            if (match) {
+              setApkVersion(match[1])
+            }
+          }
           else setApkError(true)
         }
       })
@@ -319,7 +327,7 @@ export default function ShareKit() {
               >
                 <I.IconDownload size={18} />
                 <div className="market-btn-text">
-                  <span className="market-btn-sub">{isRtl ? 'دانلود نسخه اندروید' : 'Direct Download'}</span>
+                  <span className="market-btn-sub">{isRtl ? `دانلود نسخه اندروید (نسخه ${apkVersion})` : `Direct Download (v${apkVersion})`}</span>
                   <span className="market-btn-main">{isRtl ? 'فایل مستقیم APK' : 'APK Package'}</span>
                 </div>
               </a>

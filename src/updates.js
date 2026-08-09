@@ -5,6 +5,22 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.3.1',
+    date: '2026-08-09',
+    fa: {
+      title: 'نمایش نسخه اندروید در صفحه دانلود',
+      changes: [
+        'نمایش شماره نسخه برنامه اندروید در دکمه‌ها و لینک‌های دانلود فایل APK برای اطلاع دقیق کاربران.'
+      ]
+    },
+    en: {
+      title: 'Display Android Version on Download Page',
+      changes: [
+        'Show the Android app version number on download buttons and APK links to inform users.'
+      ]
+    }
+  },
+  {
     version: '1.3.0',
     date: '2026-08-09',
     fa: {

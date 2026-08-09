@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import * as I from './icons'
 import { FONT_GOALS } from './goals'
 import { FEATURES } from './features'
+import { APP_VERSION } from './updates'
 import './Landing.css'
 
 const REPO = 'https://github.com/FontWoW/FontWoW.github.io'
@@ -29,6 +30,7 @@ export default function Landing() {
   const [contributorsError, setContributorsError] = useState(false)
   const [apkUrl, setApkUrl] = useState(null)
   const [apkError, setApkError] = useState(false)
+  const [apkVersion, setApkVersion] = useState(APP_VERSION)
   const [platform] = useState(detectPlatform)
   const [donations, setDonations] = useState(null)
   const [donationsError, setDonationsError] = useState(false)
@@ -77,7 +79,13 @@ export default function Landing() {
           ?.filter(a => a.name.endsWith('.apk'))
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
         if (!cancelled) {
-          if (asset) setApkUrl(asset.browser_download_url)
+          if (asset) {
+            setApkUrl(asset.browser_download_url)
+            const match = asset.name.match(/FontWoW-v?([\d.]+)\.apk/)
+            if (match) {
+              setApkVersion(match[1])
+            }
+          }
           else setApkError(true)
         }
       })
@@ -105,7 +113,7 @@ export default function Landing() {
             rel={apkError ? 'noreferrer' : undefined}
           >
             <I.IconDownload size={16} />
-            {apkUrl ? 'دانلود نسخه‌ی اندروید (APK)' : apkError ? 'مشاهده‌ی نسخه‌ها در گیت‌هاب' : 'در حال یافتن آخرین نسخه…'}
+            {apkUrl ? `دانلود نسخه‌ی اندروید (نسخه ${apkVersion})` : apkError ? 'مشاهده‌ی نسخه‌ها در گیت‌هاب' : 'در حال یافتن آخرین نسخه…'}
           </a>
         </div>
         <p className="landing-note">
@@ -124,7 +132,7 @@ export default function Landing() {
             target={apkError ? '_blank' : undefined}
             rel={apkError ? 'noreferrer' : undefined}
           >
-            دانلود اپ اندروید
+            دانلود اپ اندروید (نسخه {apkVersion})
           </a>
         </div>
       )}
