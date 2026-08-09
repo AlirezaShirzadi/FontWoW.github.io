@@ -398,6 +398,12 @@ export default function App() {
     document.documentElement.lang = appSettings.lang
   }, [appSettings.lang])
 
+  const updateLayer = useCallback((id, patch) => {
+    update((current) => ({
+      layers: current.layers.map((layer) => (layer.id === id ? { ...layer, ...patch } : layer)),
+    }))
+  }, [update])
+
   // Arrow-key nudge for the selected layer — desktop-only bonus alongside drag; ignored while
   // the user is actually typing so it doesn't fight arrow-key text navigation, and ignored
   // when nothing is selected so it never steals arrow keys from normal page use.
@@ -794,12 +800,6 @@ export default function App() {
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
   }
-
-  const updateLayer = useCallback((id, patch) => {
-    update((current) => ({
-      layers: current.layers.map((layer) => (layer.id === id ? { ...layer, ...patch } : layer)),
-    }))
-  }, [update])
 
   function deleteLayer(id) {
     update({

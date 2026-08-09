@@ -1,40 +1,15 @@
 import logger from './logger'
 logger.init()
 
-import { Component, StrictMode, useEffect, useState, lazy, Suspense } from 'react'
+import { Component, StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Capacitor } from '@capacitor/core'
+import App from './App.jsx'
+import Landing from './Landing.jsx'
+import ShareKit from './ShareKit.jsx'
 import './index.css'
 
 const CHUNK_RELOAD_KEY = 'fontwow_chunk_reload'
-
-function isChunkLoadError(error) {
-  const message = String(error?.message || error || '')
-  return /Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk|error loading dynamically imported module/i.test(message)
-}
-
-function lazyWithRecovery(importer) {
-  return lazy(async () => {
-    try {
-      const module = await importer()
-      sessionStorage.removeItem(CHUNK_RELOAD_KEY)
-      return module
-    } catch (error) {
-      // A cached HTML file can briefly point at a chunk removed by a newer deploy.
-      // Reload once to fetch the current asset manifest, then surface a useful error.
-      if (isChunkLoadError(error) && !sessionStorage.getItem(CHUNK_RELOAD_KEY)) {
-        sessionStorage.setItem(CHUNK_RELOAD_KEY, '1')
-        window.location.reload()
-        return new Promise(() => {})
-      }
-      throw error
-    }
-  })
-}
-
-const App = lazyWithRecovery(() => import('./App.jsx'))
-const Landing = lazyWithRecovery(() => import('./Landing.jsx'))
-const ShareKit = lazyWithRecovery(() => import('./ShareKit.jsx'))
 
 class StartupErrorBoundary extends Component {
   constructor(props) {
@@ -95,14 +70,6 @@ if (Capacitor.isNativePlatform() && getRoute() !== 'app') {
   window.location.hash = '#/app'
 }
 
-function LoadingFallback() {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw', background: 'var(--surface)' }}>
-      <div className="spinner"></div>
-    </div>
-  )
-}
-
 function Root() {
   const [route, setRoute] = useState(getRoute)
 
@@ -117,11 +84,11 @@ function Root() {
   }, [route])
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <>
       {route === 'share' && <ShareKit />}
       {route === 'app' && <App />}
       {route === 'landing' && <Landing />}
-    </Suspense>
+    </>
   )
 }
 

@@ -13,24 +13,6 @@ export default defineConfig({
   ],
   build: {
     minify: 'esbuild',
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('@capacitor')) {
-              return 'capacitor';
-            }
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'vendor';
-            }
-            if (id.includes('html-to-image')) {
-              return 'html-to-image';
-            }
-            return 'dependencies';
-          }
-        }
-      }
-    }
   },
   esbuild: {
     drop: ['console', 'debugger'],

@@ -5,6 +5,24 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.3.3',
+    date: '2026-08-09',
+    fa: {
+      title: 'رفع خطای راه‌اندازی نسخه ۱.۳.۲',
+      changes: [
+        'رفع خطای «Cannot access before initialization» که به‌دلیل تقسیم دستی و وابستگی دوری فایل‌های JavaScript ایجاد شده بود.',
+        'واگذاری ترتیب بسته‌بندی فایل‌ها به Vite برای راه‌اندازی پایدار نسخه وب و اندروید.'
+      ]
+    },
+    en: {
+      title: 'Fix v1.3.2 Startup Error',
+      changes: [
+        'Fix the “Cannot access before initialization” error caused by manual chunking and circular JavaScript dependencies.',
+        'Let Vite determine safe chunk boundaries for reliable web and Android startup.'
+      ]
+    }
+  },
+  {
     version: '1.3.2',
     date: '2026-08-09',
     fa: {
