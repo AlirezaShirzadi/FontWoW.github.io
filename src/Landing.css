@@ -605,6 +605,8 @@
 }
 
 .media-supporter {
+  display: flex;
+  flex-direction: column;
   padding: 18px;
   border: 1px solid var(--border-1);
   border-radius: var(--r-l);
@@ -630,9 +632,14 @@
 .media-supporter-profile h3 { margin: 0 0 3px; font-size: 17px; }
 .media-supporter-profile span { color: var(--text-3); font-size: 13px; }
 
-.media-supporter-socials { display: grid; gap: 8px; }
+.media-supporter-socials {
+  display: grid;
+  align-content: center;
+  flex: 1 1 auto;
+  gap: 8px;
+}
 
-.media-supporter-socials a {
+.media-supporter-socials > :is(a, .media-social-unavailable) {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr) auto;
   align-items: center;
@@ -649,6 +656,15 @@
 
 .media-supporter-socials a:hover { border-color: var(--border-2); transform: translateY(-1px); }
 
+.media-social-unavailable {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.media-social-unavailable .media-social-icon {
+  filter: grayscale(1);
+}
+
 .media-social-icon {
   display: grid;
   place-items: center;
@@ -656,8 +672,9 @@
   height: 34px;
   border-radius: 10px;
   color: #fff;
-  font: 700 16px/1 sans-serif;
 }
+
+.media-social-icon svg { display: block; }
 
 .media-social-icon.telegram { background: #229ed9; }
 .media-social-icon.github { background: #24292f; }
@@ -673,7 +690,10 @@
 .media-supporters-grid.compact .media-supporter-profile img { width: 58px; height: 58px; flex-basis: 58px; }
 
 @media (max-width: 480px) {
-  .media-supporter-socials a { grid-template-columns: 34px minmax(0, 1fr); }
+  .media-supporter-socials > :is(a, .media-social-unavailable) {
+    grid-template-columns: 34px minmax(0, 1fr);
+    height: 80px;
+  }
   .media-social-audience { grid-column: 2; }
 }
 

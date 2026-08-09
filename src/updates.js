@@ -5,6 +5,24 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.3.5',
+    date: '2026-08-09',
+    fa: {
+      title: 'بهبود کارت‌های حامیان رسانه‌ای',
+      changes: [
+        'یکسان‌سازی اندازه کارت‌های حامیان رسانه‌ای و متعادل‌کردن چیدمان داخلی برای حذف فضای خالی ناموزون.',
+        'نمایش کوتاه‌تر و خواناتر تعداد دنبال‌کنندگان با قالب K.'
+      ]
+    },
+    en: {
+      title: 'Improved Media Supporter Cards',
+      changes: [
+        'Keep media supporter cards the same size and balance their internal layout to avoid uneven empty space.',
+        'Show audience counts in a shorter, clearer K format.'
+      ]
+    }
+  },
+  {
     version: '1.3.4',
     date: '2026-08-09',
     fa: {

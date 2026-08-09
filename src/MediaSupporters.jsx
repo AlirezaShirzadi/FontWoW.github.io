@@ -1,11 +1,12 @@
 import { MEDIA_SUPPORTERS } from './mediaSupporterData'
+import * as I from './icons'
 
 const SOCIALS = {
-  github: { label: 'گیت‌هاب', mark: '⌘' },
-  telegram: { label: 'تلگرام', mark: '✈' },
-  instagram: { label: 'اینستاگرام', mark: '◎' },
-  twitter: { label: 'توییتر', mark: '𝕏' },
-  youtube: { label: 'یوتیوب', mark: '▶' },
+  github: { label: 'گیت‌هاب', Icon: I.IconGithub },
+  telegram: { label: 'تلگرام', Icon: I.IconTelegram },
+  instagram: { label: 'اینستاگرام', Icon: I.IconInstagram },
+  twitter: { label: 'توییتر', Icon: I.IconTwitter },
+  youtube: { label: 'یوتیوب', Icon: I.IconYoutube },
 }
 
 export default function MediaSupporters({ compact = false }) {
@@ -21,18 +22,27 @@ export default function MediaSupporters({ compact = false }) {
             </div>
           </div>
           <div className="media-supporter-socials">
-            {Object.entries(supporter.socials).map(([network, account]) => {
-              const social = SOCIALS[network]
-              if (!social || !account) return null
-              return (
-                <a href={account.url} target="_blank" rel="noreferrer" key={network} aria-label={`${social.label} ${supporter.name}`}>
-                  <span className={`media-social-icon ${network}`} aria-hidden="true">{social.mark}</span>
+            {Object.entries(SOCIALS).map(([network, social]) => {
+              const account = supporter.socials[network]
+              const SocialIcon = social.Icon
+              const content = (
+                <>
+                  <span className={`media-social-icon ${network}`} aria-hidden="true"><SocialIcon size={19} /></span>
                   <span className="media-social-account">
                     <b>{social.label}</b>
-                    <small dir="ltr">@{account.handle}</small>
+                    {account ? <small dir="ltr">@{account.handle}</small> : <small>ثبت نشده</small>}
                   </span>
-                  {account.audience && <span className="media-social-audience">{account.audience}</span>}
+                  {account?.audience && <span className="media-social-audience">{account.audience}</span>}
+                </>
+              )
+              return account ? (
+                <a href={account.url} target="_blank" rel="noreferrer" key={network} aria-label={`${social.label} ${supporter.name}`}>
+                  {content}
                 </a>
+              ) : (
+                <div className="media-social-unavailable" key={network} aria-label={`${social.label} ثبت نشده`}>
+                  {content}
+                </div>
               )
             })}
           </div>
