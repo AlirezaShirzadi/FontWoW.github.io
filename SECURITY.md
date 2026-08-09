@@ -1,0 +1,24 @@
+# Security Policy
+
+## Automated security checks
+
+FontWoW runs public, automated security checks in GitHub Actions:
+
+- CodeQL scans the JavaScript/TypeScript and Android Java source on every change to `main`, on pull requests, and weekly.
+- Dependency Review rejects pull requests that introduce dependencies with known high or critical vulnerabilities.
+- `npm audit` checks the locked dependency tree for high or critical vulnerabilities.
+- OWASP ZAP performs a non-destructive baseline scan against the deployed website after successful deployments and weekly.
+- Every Android APK is scanned by VirusTotal before publication. A release is blocked if the analysis is incomplete or reports a malicious or suspicious detection, and the public report link and SHA-256 are added to the release notes automatically.
+- Dependabot proposes updates for npm, Gradle, and GitHub Actions dependencies.
+
+CodeQL results are available in the repository's **Security → Code scanning** section. ZAP reports are attached to each workflow run and the scanner keeps a GitHub issue open while alerts remain.
+
+The APK release check requires a repository Actions secret named `VIRUSTOTAL_API_KEY`. Because APK releases are public, the submitted APK and its analysis are also treated as public on VirusTotal.
+
+Automated scans reduce risk but cannot prove that software is vulnerability-free. Releases should also receive human review, especially when permissions, network requests, or file handling change.
+
+## Reporting a vulnerability
+
+Please do not disclose a suspected vulnerability in a public issue. Use GitHub's **Security → Report a vulnerability** form if private vulnerability reporting is enabled for this repository. Otherwise, contact the maintainers through the contact method listed in the application and ask for a private reporting channel.
+
+Include the affected version or URL, reproduction steps, expected impact, and any suggested mitigation. Please avoid accessing other users' data or running destructive tests.

@@ -1719,13 +1719,23 @@
 /* ===== Topbar Mobile Responsiveness ===== */
 @media (max-width: 600px) {
   .brand-name {
-    display: none;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+  }
+  .brand {
+    gap: 4px;
+  }
+  .topbar {
+    padding-inline: 8px;
+  }
+  .header-actions {
+    gap: 3px;
   }
   .topbar .pill-btn .btn-text {
     display: none;
   }
   .topbar .pill-btn {
-    padding: 9px 11px;
+    padding: 9px 8px;
   }
 }
 

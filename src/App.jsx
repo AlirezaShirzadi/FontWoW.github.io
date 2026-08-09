@@ -27,6 +27,7 @@ import { checkForUpdate, dismissUpdate } from './updateCheck'
 import { FONT_GOALS } from './goals'
 import { FEATURES } from './features'
 import PromptSheet from './PromptSheet'
+import MediaSupporters from './MediaSupporters'
 import logger from './logger'
 import './App.css'
 import './Landing.css'
@@ -2542,6 +2543,10 @@ export default function App() {
                 ))}
               </div>
             )}
+
+            <p className="settings-label">حامیان رسانه‌ای</p>
+            <p className="donate-text">از همراهانی که FontWoW را به مخاطبان بیشتری معرفی می‌کنند، صمیمانه سپاسگزاریم.</p>
+            <MediaSupporters compact />
 
             <p className="settings-label">لینک‌ها</p>
             <a className="sheet-item" href={REPO_URL} target="_blank" rel="noreferrer">
