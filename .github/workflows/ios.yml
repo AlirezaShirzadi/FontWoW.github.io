@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - 'src/**'
-      - 'ios/**'
       - 'capacitor.config.json'
       - 'package.json'
       - '.github/workflows/ios.yml'
@@ -31,12 +30,15 @@ jobs:
       - name: Build web application
         run: npm run build
 
-      - name: Sync Capacitor iOS
+      - name: Add Capacitor iOS Platform (CocoaPods)
+        run: npx cap add ios --packagemanager cocoapods
+
+      - name: Sync iOS and run pod install
         run: npx cap sync ios
 
       - name: Build iOS App (.app Simulator Build)
         run: |
-          xcodebuild -project ios/App/App.xcodeproj \
+          xcodebuild -workspace ios/App/App.xcworkspace \
             -scheme App \
             -configuration Release \
             -sdk iphonesimulator \
