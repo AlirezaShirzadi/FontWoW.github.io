@@ -26,19 +26,28 @@ class CentralLogger {
     const originalWarn = console.warn
     const originalError = console.error
 
+    const safeStringify = (obj) => {
+      if (obj instanceof Error) return obj.stack || obj.message;
+      try {
+        return JSON.stringify(obj);
+      } catch {
+        return String(obj);
+      }
+    };
+
     console.log = (...args) => {
       originalLog.apply(console, args)
-      this.addLog('info', args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '))
+      this.addLog('info', args.map(a => typeof a === 'object' && a !== null ? safeStringify(a) : String(a)).join(' '))
     }
 
     console.warn = (...args) => {
       originalWarn.apply(console, args)
-      this.addLog('warn', args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '))
+      this.addLog('warn', args.map(a => typeof a === 'object' && a !== null ? safeStringify(a) : String(a)).join(' '))
     }
 
     console.error = (...args) => {
       originalError.apply(console, args)
-      this.addLog('error', args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '))
+      this.addLog('error', args.map(a => typeof a === 'object' && a !== null ? safeStringify(a) : String(a)).join(' '))
     }
 
     // Capture global errors

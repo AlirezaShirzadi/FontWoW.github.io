@@ -5,6 +5,28 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.3.2',
+    date: '2026-08-09',
+    fa: {
+      title: 'رفع مشکل بارگذاری برنامه روی موبایل',
+      changes: [
+        'افزودن خروجی سازگار با Android 7 و iOS 12 به بالا برای جلوگیری از ماندن برنامه در صفحه بارگذاری.',
+        'بازیابی خودکار فایل‌های قدیمی کش‌شده پس از انتشار نسخه جدید و نمایش خطای قابل‌فهم در صورت قطع اینترنت.',
+        'ایمن‌سازی ثبت خطاهای سیستمی برای جلوگیری از بسته‌شدن برنامه هنگام دریافت خطاهای پیچیده.',
+        'تغییر نام نمایشی برنامه روی گوشی‌های با زبان فارسی به «فونت واو» و روی زبان‌های انگلیسی و غیره به «FontWoW».'
+      ]
+    },
+    en: {
+      title: 'Fix Mobile App Loading',
+      changes: [
+        'Add compatible bundles for Android 7+ and iOS 12+ to prevent the app from getting stuck while loading.',
+        'Recover automatically from stale cached chunks after deployments and show an actionable offline error.',
+        'Harden system error logging so complex errors cannot crash the app.',
+        'Show localized app name "فونت واو" on Persian devices and "FontWoW" on English or other devices.'
+      ]
+    }
+  },
+  {
     version: '1.3.1',
     date: '2026-08-09',
     fa: {
