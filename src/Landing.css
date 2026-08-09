@@ -599,53 +599,54 @@
 
 .media-supporters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 8px;
   text-align: start;
 }
 
 .media-supporter {
   display: flex;
   flex-direction: column;
-  padding: 18px;
+  padding: 8px;
   border: 1px solid var(--border-1);
-  border-radius: var(--r-l);
+  border-radius: var(--r-m);
   background: var(--surface-1);
 }
 
 .media-supporter-profile {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-block-end: 16px;
+  gap: 7px;
+  margin-block-end: 7px;
 }
 
 .media-supporter-profile img {
-  width: 76px;
-  height: 76px;
-  flex: 0 0 76px;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
   object-fit: cover;
   border-radius: 50%;
   border: 2px solid var(--border-2);
 }
 
-.media-supporter-profile h3 { margin: 0 0 3px; font-size: 17px; }
-.media-supporter-profile span { color: var(--text-3); font-size: 13px; }
+.media-supporter-profile h3 { margin: 0 0 1px; font-size: 14px; }
+.media-supporter-profile span { color: var(--text-3); font-size: 11px; }
 
 .media-supporter-socials {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-content: center;
   flex: 1 1 auto;
-  gap: 8px;
+  gap: 5px;
 }
 
 .media-supporter-socials > :is(a, .media-social-unavailable) {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 9px;
-  min-height: 48px;
-  padding: 7px 9px;
+  gap: 5px;
+  min-height: 36px;
+  padding: 4px 5px;
   color: var(--text-1);
   text-decoration: none;
   background: var(--surface-2);
@@ -657,8 +658,7 @@
 .media-supporter-socials a:hover { border-color: var(--border-2); transform: translateY(-1px); }
 
 .media-social-unavailable {
-  opacity: 0.42;
-  cursor: default;
+  display: none !important;
 }
 
 .media-social-unavailable .media-social-icon {
@@ -668,13 +668,13 @@
 .media-social-icon {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
   color: #fff;
 }
 
-.media-social-icon svg { display: block; }
+.media-social-icon svg { display: block; width: 15px; height: 15px; }
 
 .media-social-icon.telegram { background: #229ed9; }
 .media-social-icon.github { background: #24292f; }
@@ -682,19 +682,58 @@
 .media-social-icon.twitter { background: #111; }
 .media-social-icon.youtube { background: #f00; }
 .media-social-account { display: grid; min-width: 0; }
-.media-social-account b { font-size: 12px; }
-.media-social-account small { overflow: hidden; color: var(--text-3); font-size: 11px; text-overflow: ellipsis; }
-.media-social-audience { color: var(--text-2); font-size: 11.5px; white-space: nowrap; }
+.media-social-account b { font-size: 10.5px; }
+.media-social-account small { overflow: hidden; color: var(--text-3); font-size: 9.5px; text-overflow: ellipsis; white-space: nowrap; }
+.media-social-audience { color: var(--text-2); font-size: 9.5px; white-space: nowrap; }
 
-.media-supporters-grid.compact .media-supporter { padding: 12px; }
-.media-supporters-grid.compact .media-supporter-profile img { width: 58px; height: 58px; flex-basis: 58px; }
+.media-supporters-grid.compact .media-supporter { padding: 7px; }
+.media-supporters-grid.compact .media-supporter-profile img { width: 38px; height: 38px; flex-basis: 38px; }
 
-@media (max-width: 480px) {
-  .media-supporter-socials > :is(a, .media-social-unavailable) {
-    grid-template-columns: 34px minmax(0, 1fr);
-    height: 80px;
+@media (max-width: 600px) {
+  .media-supporters-grid { gap: 6px; }
+
+  .media-supporter,
+  .media-supporters-grid.compact .media-supporter {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 7px;
   }
-  .media-social-audience { grid-column: 2; }
+
+  .media-supporter-profile {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 6px;
+    margin-block-end: 0;
+  }
+
+  .media-supporter-profile img,
+  .media-supporters-grid.compact .media-supporter-profile img {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .media-supporter-profile h3 { font-size: 12px; }
+  .media-supporter-profile span { font-size: 9px; }
+
+  .media-supporter-socials {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 4px;
+  }
+
+  .media-supporter-socials > a {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 30px;
+    min-height: 30px;
+    padding: 2px;
+    border-radius: 8px;
+  }
+
+  .media-social-account,
+  .media-social-audience { display: none; }
 }
 
 .landing-footer {
