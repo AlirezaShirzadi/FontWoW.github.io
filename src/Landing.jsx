@@ -7,6 +7,7 @@ import MediaSupporters from './MediaSupporters'
 import './Landing.css'
 
 const REPO = 'https://github.com/FontWoW/FontWoW.github.io'
+const REPO_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io'
 const CONTRIBUTORS_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io/contributors'
 const LATEST_RELEASE_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io/releases/tags/latest'
 const RELEASES_URL = `${REPO}/releases/tag/latest`
@@ -35,6 +36,26 @@ export default function Landing() {
   const [platform] = useState(detectPlatform)
   const [donations, setDonations] = useState(null)
   const [donationsError, setDonationsError] = useState(false)
+  const [repoStats, setRepoStats] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(REPO_API)
+      .then(res => {
+        if (!res.ok) throw new Error('bad response')
+        return res.json()
+      })
+      .then(data => {
+        if (!cancelled) {
+          setRepoStats({
+            stars: Number(data.stargazers_count) || 0,
+            forks: Number(data.forks_count) || 0,
+          })
+        }
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -121,6 +142,16 @@ export default function Landing() {
           بدون نصب، بدون حساب کاربری، کاملاً رایگان و client-side — هیچ داده‌ای به سرور فرستاده نمی‌شود.
           نسخه‌ی اندروید فعلاً یک build آزمایشی (debug) است؛ ممکن است هنگام نصب هشدار «منبع ناشناس» ببینید.
         </p>
+        <div className="landing-github-stats" aria-label="آمار مخزن FontWoW در گیت‌هاب">
+          <div className="landing-github-counts">
+            <span><I.IconStar size={17} /> <b>{repoStats ? repoStats.stars.toLocaleString('fa-IR') : '…'}</b> ستاره</span>
+            <span><I.IconFork size={17} /> <b>{repoStats ? repoStats.forks.toLocaleString('fa-IR') : '…'}</b> فورک</span>
+          </div>
+          <p>FontWoW متن‌باز و رایگان است؛ با یک ستاره در گیت‌هاب کمک کنید افراد بیشتری پیدایش کنند.</p>
+          <a className="landing-github-star" href={REPO} target="_blank" rel="noreferrer">
+            <I.IconStar size={17} /> به FontWoW ستاره بدهید <I.IconExternal size={12} />
+          </a>
+        </div>
       </header>
 
       {platform === 'android' && (

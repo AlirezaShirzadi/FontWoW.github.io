@@ -129,6 +129,14 @@ export const IconType = icon(
 export const IconStar = icon(
   <path d="m12 3 2.7 5.6 6.1.8-4.5 4.3 1.1 6.1-5.4-2.9-5.4 2.9 1.1-6.1L3.2 9.4l6.1-.8L12 3z" />,
 )
+export const IconFork = icon(
+  <>
+    <circle cx="6" cy="4" r="2" />
+    <circle cx="18" cy="4" r="2" />
+    <circle cx="12" cy="20" r="2" />
+    <path d="M6 6v3a3 3 0 0 0 3 3h3M18 6v3a3 3 0 0 1-3 3h-3v6" />
+  </>,
+)
 export const IconCreditCard = icon(
   <>
     <rect x="2" y="5" width="20" height="14" rx="2" />
