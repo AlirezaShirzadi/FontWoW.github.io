@@ -121,3 +121,55 @@ input, textarea, [contenteditable] {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+/* Startup fallback must stay self-contained because feature styles load lazily. */
+.startup-error {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  background: #0b0a12;
+  color: #f8f7ff;
+  font-family: Vazirmatn, system-ui, sans-serif;
+  text-align: center;
+}
+
+.startup-error__card {
+  width: min(100%, 420px);
+  padding: 28px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  background: #171521;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+}
+
+.startup-error__icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: #ffca5c;
+  color: #17110a;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.startup-error h1 { margin: 0 0 10px; font-size: 21px; }
+.startup-error p { margin: 0; color: #c9c5d8; line-height: 1.9; }
+.startup-error button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 22px;
+  border: 0;
+  border-radius: 12px;
+  background: #8b5cf6;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.startup-error button:focus-visible { outline: 3px solid #ffca5c; outline-offset: 3px; }
+.startup-error details { margin-top: 18px; color: #aaa5b9; font-size: 12px; }
+.startup-error code { display: block; margin-top: 8px; overflow-wrap: anywhere; text-align: left; }
