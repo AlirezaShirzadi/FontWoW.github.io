@@ -54,7 +54,7 @@ jobs:
           ZIP_NAME="FontWoW-v${VERSION_NAME}-iOS.zip"
           mkdir -p dist-ios
           cd build/Build/Products/Release-iphonesimulator
-          zip -r "../../../dist-ios/${ZIP_NAME}" App.app
+          zip -r "$GITHUB_WORKSPACE/dist-ios/${ZIP_NAME}" App.app
           echo "zip_name=${ZIP_NAME}" >> "$GITHUB_ENV"
           echo "zip_path=dist-ios/${ZIP_NAME}" >> "$GITHUB_ENV"
 
