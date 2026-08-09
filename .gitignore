@@ -31,3 +31,15 @@ android/captures
 android/.idea
 *.iml
 *.patch
+
+# API, PR & temp files
+token.txt
+token_err.txt
+curl_err.txt
+curl_out.json
+prs.json
+prs_err.txt
+*.diff
+pr*_diff.txt
+out.css
+out.js

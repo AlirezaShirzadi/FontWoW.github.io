@@ -1,1 +1,0 @@
-Post "https://api.github.com/graphql": tls: failed to verify certificate: x509: “api.github.com” certificate is not trusted
