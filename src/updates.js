@@ -5,6 +5,24 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.4.2',
+    date: '2026-08-09',
+    fa: {
+      title: 'تخفیف فونت‌ها با حمایت فونت‌ایران',
+      changes: [
+        'اعمال تخفیف ۲۰ درصدی فونت‌ایران روی قیمت تمام فونت‌های در نوبت خرید.',
+        'نمایش لوگو و پیام حمایت فونت‌ایران در کنار قیمت اصلی و قیمت نهایی هر فونت.'
+      ]
+    },
+    en: {
+      title: 'Discounted Fonts with FontIran Support',
+      changes: [
+        'Apply FontIran’s 20% discount to every font queued for purchase.',
+        'Show FontIran’s logo and support message alongside each font’s original and discounted prices.'
+      ]
+    }
+  },
+  {
     version: '1.4.1',
     date: '2026-08-09',
     fa: {

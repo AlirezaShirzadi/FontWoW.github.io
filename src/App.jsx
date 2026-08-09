@@ -24,10 +24,10 @@ import { useDesignHistory } from './useDesignHistory'
 import googleFontsList from './google-fonts.json'
 import { UPDATES, APP_VERSION } from './updates'
 import { checkForUpdate, dismissUpdate } from './updateCheck'
-import { FONT_GOALS } from './goals'
 import { FEATURES } from './features'
 import PromptSheet from './PromptSheet'
 import MediaSupporters from './MediaSupporters'
+import FontGoals from './FontGoals'
 import logger from './logger'
 import './App.css'
 import './Landing.css'
@@ -2489,41 +2489,9 @@ export default function App() {
             <p className="settings-label">اهداف بعدی</p>
             <p className="donate-text">
               فونت‌هایی که در نوبت خریدن هستن، به‌ترتیب اولویت — با کمک شما زودتر آزاد می‌شن.
+              قیمت نهایی هر لایسنس نامحدود با تخفیف اختصاصی فونت‌ایران محاسبه شده.
             </p>
-            <div className="landing-goals-list">
-              {FONT_GOALS.map((g, i) => {
-                const percent = g.price > 0 ? Math.min(100, Math.round((g.raised / g.price) * 100)) : 0
-                return (
-                  <div className="landing-goal" key={g.name}>
-                    <span className="landing-goal-rank">{i + 1}</span>
-                    <img
-                      className="landing-goal-img"
-                      src={g.image}
-                      alt={g.name}
-                      loading="lazy"
-                      onError={(e) => { e.currentTarget.src = '/favicon.svg' }}
-                    />
-                    <div className="landing-goal-info">
-                      <div className="landing-goal-head">
-                        <h3>
-                          {g.url ? (
-                            <a href={g.url} target="_blank" rel="noreferrer">{g.name}</a>
-                          ) : g.name}
-                        </h3>
-                        <span className="landing-goal-price">{g.price.toLocaleString('fa-IR')} تومان (نامحدود)</span>
-                      </div>
-                      <div className="landing-goal-bar">
-                        <div className="landing-goal-bar-fill" style={{ width: `${percent}%` }} />
-                      </div>
-                      <div className="landing-goal-foot">
-                        <span>{g.raised.toLocaleString('fa-IR')} از {g.price.toLocaleString('fa-IR')} تومان</span>
-                        <span className="landing-goal-percent">{percent}٪</span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+            <FontGoals strings={t} />
 
             <p className="settings-label">مشارکت‌کنندگان</p>
             {contributorsError && (

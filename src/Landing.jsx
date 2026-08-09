@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import * as I from './icons'
-import { FONT_GOALS } from './goals'
 import { FEATURES } from './features'
 import { APP_VERSION } from './updates'
 import MediaSupporters from './MediaSupporters'
+import FontGoals from './FontGoals'
+import { STRINGS } from './strings'
 import './Landing.css'
 
 const REPO = 'https://github.com/FontWoW/FontWoW.github.io'
@@ -248,42 +249,9 @@ export default function Landing() {
         <h2>اهداف بعدی</h2>
         <p>
           فونت‌هایی که در نوبت خریدن هستن، به‌ترتیب اولویت — با کمک شما زودتر آزاد می‌شن.
-          قیمت‌ها مربوط به لایسنس نسخه‌ی نامحدود (Unlimited License) هر فونت هست.
+          قیمت نهایی هر لایسنس نامحدود با تخفیف اختصاصی فونت‌ایران محاسبه شده.
         </p>
-        <div className="landing-goals-list">
-          {FONT_GOALS.map((g, i) => {
-            const percent = g.price > 0 ? Math.min(100, Math.round((g.raised / g.price) * 100)) : 0
-            return (
-              <div className="landing-goal" key={g.name}>
-                <span className="landing-goal-rank">{i + 1}</span>
-                <img
-                  className="landing-goal-img"
-                  src={g.image}
-                  alt={g.name}
-                  loading="lazy"
-                  onError={e => { e.currentTarget.src = '/favicon.svg' }}
-                />
-                <div className="landing-goal-info">
-                  <div className="landing-goal-head">
-                    <h3>
-                      {g.url ? (
-                        <a href={g.url} target="_blank" rel="noreferrer">{g.name}</a>
-                      ) : g.name}
-                    </h3>
-                    <span className="landing-goal-price">{g.price.toLocaleString('fa-IR')} تومان (نامحدود)</span>
-                  </div>
-                  <div className="landing-goal-bar">
-                    <div className="landing-goal-bar-fill" style={{ width: `${percent}%` }} />
-                  </div>
-                  <div className="landing-goal-foot">
-                    <span>{g.raised.toLocaleString('fa-IR')} از {g.price.toLocaleString('fa-IR')} تومان</span>
-                    <span className="landing-goal-percent">{percent}٪</span>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        <FontGoals strings={STRINGS.fa} />
       </section>
 
       <section className="landing-ai-contribute">

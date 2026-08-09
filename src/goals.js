@@ -47,3 +47,9 @@ export const FONT_GOALS = [
     url: 'https://fontiran.com/fonts/colak',
   },
 ]
+
+export const FONTIRAN_DISCOUNT_PERCENT = 20
+
+export function getDiscountedFontPrice(price) {
+  return Math.round(price * (100 - FONTIRAN_DISCOUNT_PERCENT) / 100)
+}
