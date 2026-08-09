@@ -1,12 +1,13 @@
 import logger from './logger'
 logger.init()
 
-import { Component, StrictMode, useEffect, useState } from 'react'
+import { Component, StrictMode, useCallback, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Capacitor } from '@capacitor/core'
 import App from './App.jsx'
 import Landing from './Landing.jsx'
 import ShareKit from './ShareKit.jsx'
+import StartupLoader from './StartupLoader.jsx'
 import { copyTextNative } from './native.js'
 import './index.css'
 
@@ -121,6 +122,8 @@ if (Capacitor.isNativePlatform() && getRoute() !== 'app') {
 
 function Root() {
   const [route, setRoute] = useState(getRoute)
+  const [isStarting, setIsStarting] = useState(true)
+  const finishStartup = useCallback(() => setIsStarting(false), [])
 
   useEffect(() => {
     const onHashChange = () => setRoute(getRoute())
@@ -134,9 +137,12 @@ function Root() {
 
   return (
     <>
-      {route === 'share' && <ShareKit />}
-      {route === 'app' && <App />}
-      {route === 'landing' && <Landing />}
+      <div className="startup-content" aria-hidden={isStarting || undefined}>
+        {route === 'share' && <ShareKit />}
+        {route === 'app' && <App />}
+        {route === 'landing' && <Landing />}
+      </div>
+      {isStarting && <StartupLoader onComplete={finishStartup} />}
     </>
   )
 }
@@ -148,3 +154,13 @@ createRoot(document.getElementById('root')).render(
     </StartupErrorBoundary>
   </StrictMode>,
 )
+
+// The native bundle already lives on-device. On the web, keep the application
+// shell and every font fetched through the app available for later offline use.
+if (!Capacitor.isNativePlatform() && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((error) => {
+      logger.warn('Offline', 'Service worker registration failed', error?.message || String(error))
+    })
+  })
+}

@@ -5,6 +5,44 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.4.1',
+    date: '2026-08-09',
+    fa: {
+      title: 'لودینگ اختصاصی FontWoW',
+      changes: [
+        'افزودن تجربه شروع یکپارچه و متحرک با لوگوی FontWoW برای نسخه وب و برنامه اندروید.',
+        'بهینه‌سازی حرکت‌ها برای نمایشگرهای کوچک و پشتیبانی از تنظیم کاهش حرکت دستگاه.'
+      ]
+    },
+    en: {
+      title: 'Custom FontWoW Loading Experience',
+      changes: [
+        'Add a unified animated startup experience with the FontWoW logo to the web and Android app.',
+        'Optimize motion for small screens and respect the device reduced-motion preference.'
+      ]
+    }
+  },
+  {
+    version: '1.4.0',
+    date: '2026-08-09',
+    fa: {
+      title: 'اجرای آفلاین و کش پایدار دانلودها',
+      changes: [
+        'امکان اجرای نسخه وب پس از اولین بارگذاری کامل، حتی بدون اتصال اینترنت.',
+        'ذخیره پایدار فونت‌های دانلودشده برای استفاده‌های بعدی بدون دانلود دوباره.',
+        'به‌روزرسانی هوشمند پوسته برنامه در حالت آنلاین، بدون سنگین‌کردن مسیر خروجی‌گیری.'
+      ]
+    },
+    en: {
+      title: 'Offline Use and Persistent Download Cache',
+      changes: [
+        'Allow the web app to launch without an internet connection after its first complete load.',
+        'Persist downloaded fonts for future use without downloading them again.',
+        'Refresh the app shell intelligently while online without adding overhead to exports.'
+      ]
+    }
+  },
+  {
     version: '1.3.6',
     date: '2026-08-09',
     fa: {
