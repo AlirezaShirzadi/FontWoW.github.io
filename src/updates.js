@@ -5,6 +5,28 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.3.0',
+    date: '2026-08-09',
+    fa: {
+      title: 'رابط کاربری عیب‌یابی سیستم و بهینه‌سازی‌ها',
+      changes: [
+        'افزودن بخش عیب‌یابی و بررسی وضعیت سلامت سیستم (پوشه فونت‌ها، حافظه، شبکه و مرورگر).',
+        'امکان مشاهده لاگ‌های سیستم، جستجو در آن‌ها و کپی مستقیم برای پشتیبانی.',
+        'قابلیت رفع خودکار مشکلات حافظه محلی و بهینه‌سازی بارگذاری برنامه.',
+        'بهبود و ثبات بیشتر در بارگذاری فونت‌ها به همراه رفع هشدارهای کارایی.'
+      ]
+    },
+    en: {
+      title: 'System Diagnostics & Optimizations',
+      changes: [
+        'Added a full system diagnostics panel to check storage, network, fonts, and capabilities.',
+        'Support viewing, filtering, searching, and copying event logs.',
+        'Auto-Fix capabilities for corrupted local storage and optimizations.',
+        'Improved font loading performance and resolved reactivity warnings.'
+      ]
+    }
+  },
+  {
     version: '1.2.0',
     date: '2026-08-07',
     fa: {

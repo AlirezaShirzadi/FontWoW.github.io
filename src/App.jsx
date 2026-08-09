@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { toPng, toBlob } from 'html-to-image'
 import { isNative, saveImageNative, copyImageNative, copyTextNative, openExternalUrl } from './native'
 import {
@@ -290,7 +290,7 @@ export default function App() {
     ]
   }, [searchQuery])
 
-  const t = (key) => STRINGS[appSettings.lang]?.[key] ?? STRINGS.fa[key] ?? key
+  const t = useCallback((key) => STRINGS[appSettings.lang]?.[key] ?? STRINGS.fa[key] ?? key, [appSettings.lang])
 
   const allFonts = useMemo(() => [...FONTS, ...customFonts], [customFonts])
   const visibleFonts = useMemo(
@@ -421,7 +421,7 @@ export default function App() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [state.activeLayerId, state.layers])
+  }, [state.activeLayerId, state.layers, updateLayer])
 
   useEffect(() => {
     customFonts.forEach((f) => {
@@ -468,7 +468,7 @@ export default function App() {
   const [loadedFontIds, setLoadedFontIds] = useState(() => new Set())
   const [loadingFontId, setLoadingFontId] = useState(null)
 
-  async function loadFontNative(f) {
+  const loadFontNative = useCallback(async (f) => {
     const { Filesystem, Directory } = await import('@capacitor/filesystem')
     const fontKey = `cached-font-${f.id}`
     const cssPath = `fonts/${fontKey}.css`
@@ -564,7 +564,7 @@ export default function App() {
       setToast(t('fontError'))
       setLoadingFontId((id) => (id === f.id ? null : id))
     }
-  }
+  }, [t])
 
   function injectStyleBlock(fontId, cssContent) {
     const styleId = `local-style-${fontId}`
@@ -587,7 +587,7 @@ export default function App() {
     return window.btoa(binary)
   }
 
-  function loadFont(f) {
+  const loadFont = useCallback((f) => {
     if (!f || f.dataUrl || loadedFontIds.has(f.id)) return Promise.resolve()
     
     if (isNative()) {
@@ -630,11 +630,11 @@ export default function App() {
       link.onerror = fail
       document.head.appendChild(link)
     })
-  }
+  }, [loadedFontIds, loadFontNative, t])
 
   useEffect(() => {
     loadFont(font)
-  }, [font])
+  }, [font, loadFont])
 
   async function onUploadFont(e) {
     const file = e.target.files?.[0]
@@ -795,11 +795,11 @@ export default function App() {
     window.addEventListener('pointerup', onUp)
   }
 
-  function updateLayer(id, patch) {
+  const updateLayer = useCallback((id, patch) => {
     update((current) => ({
       layers: current.layers.map((layer) => (layer.id === id ? { ...layer, ...patch } : layer)),
     }))
-  }
+  }, [update])
 
   function deleteLayer(id) {
     update({
@@ -2550,6 +2550,177 @@ export default function App() {
             <a className="sheet-item" href="https://fonts.google.com/attribution" target="_blank" rel="noreferrer">
               <I.IconExternal size={17} /> فونت‌ها از Google Fonts
             </a>
+          </div>
+        </Sheet>
+      )}
+
+      {showDiagnostics && (
+        <Sheet title={t('diagnosticsTitle')} tall onClose={() => setShowDiagnostics(false)}>
+          <div className="diagnostics-container" dir={appSettings.lang === 'fa' ? 'rtl' : 'ltr'}>
+            
+            {/* System Health Summary Card */}
+            <div className={`status-card ${systemHealth.hasError ? 'red' : systemHealth.hasWarning ? 'yellow' : 'green'}`}>
+              <div className="status-card-header">
+                <h3>{t('systemStatus')}</h3>
+                <span className="status-badge">
+                  {systemHealth.hasError ? t('systemErrors') : systemHealth.hasWarning ? t('systemWarnings') : t('systemHealthy')}
+                </span>
+              </div>
+              
+              {systemHealth.issues.length > 0 && (
+                <div className="issues-list">
+                  {systemHealth.issues.map((issue) => (
+                    <div key={issue.id} className={`issue-item ${issue.severity}`}>
+                      <div className="issue-content">
+                        <span className={`issue-dot ${issue.severity}`} />
+                        <span>{appSettings.lang === 'fa' ? issue.message : issue.messageEn}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {systemHealth.issues.some(i => i.recoverable) && (
+                <button
+                  className="sheet-item recommended auto-fix-btn"
+                  style={{ marginTop: '14px', marginBottom: 0, width: '100%' }}
+                  onClick={() => {
+                    const fixed = logger.autoFix()
+                    setSystemHealth(logger.checkHealth())
+                    if (fixed.length > 0) {
+                      setToast(t('fixSuccess'))
+                    }
+                  }}
+                >
+                  <I.IconSparkles size={17} />
+                  <span>{t('runAutoFix')}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Status Metrics Grid */}
+            <p className="settings-label">{appSettings.lang === 'fa' ? 'جزئیات وضعیت سیستم' : 'System Components Status'}</p>
+            <div className="status-grid">
+              <div className="status-item">
+                <span className={`status-dot ${systemHealth.status.localStorage}`} />
+                <span>{t('localStorageStatus')}</span>
+              </div>
+              <div className="status-item">
+                <span className={`status-dot ${systemHealth.status.network}`} />
+                <span>{t('networkStatus')}</span>
+              </div>
+              <div className="status-item">
+                <span className={`status-dot ${systemHealth.status.customFonts}`} />
+                <span>{t('customFontsStatus')}</span>
+              </div>
+              <div className="status-item">
+                <span className={`status-dot ${systemHealth.status.browserCapabilities}`} />
+                <span>{t('browserCapabilities')}</span>
+              </div>
+            </div>
+
+            {/* Event Logs Console */}
+            <div className="logs-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', marginBottom: '8px' }}>
+              <p className="settings-label" style={{ margin: 0 }}>{t('logsList')}</p>
+              <div className="logs-actions" style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  className="icon-btn-text"
+                  onClick={() => {
+                    const logsText = logs.map(l => `[${new Date(l.timestamp).toISOString()}] [${l.level.toUpperCase()}] [${l.action}] ${l.message} ${l.details ? `\nDetails: ${l.details}` : ''}`).join('\n')
+                    navigator.clipboard.writeText(logsText)
+                    setToast(appSettings.lang === 'fa' ? 'لاگ‌ها کپی شدند' : 'Logs copied')
+                  }}
+                  title={t('copyLogs')}
+                >
+                  <I.IconCopy size={14} />
+                  <span style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}>{t('copyLogs')}</span>
+                </button>
+                <button
+                  className="icon-btn-text"
+                  onClick={() => {
+                    logger.clearLogs()
+                  }}
+                  title={t('clearLogs')}
+                >
+                  <I.IconTrash size={14} />
+                  <span style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}>{t('clearLogs')}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Log Search and Filter */}
+            <input
+              type="text"
+              className="text-input"
+              value={logSearch}
+              onChange={(e) => setLogSearch(e.target.value)}
+              placeholder={t('searchLogsPlaceholder')}
+              style={{ marginBottom: '12px' }}
+            />
+
+            <div className="log-filters" style={{ display: 'flex', gap: '8px', marginBottom: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+              {[
+                { key: 'all', label: t('allLogs') },
+                { key: 'info', label: t('infoLogs') },
+                { key: 'warn', label: t('warnLogs') },
+                { key: 'error', label: t('errorLogs') }
+              ].map(f => (
+                <button
+                  key={f.key}
+                  className={`filter-chip ${filterLevel === f.key ? 'active' : ''}`}
+                  onClick={() => setFilterLevel(f.key)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Logs Console Scroll Box */}
+            <div className="logs-console">
+              {logs.filter(l => {
+                const matchesLevel = filterLevel === 'all' || l.level === filterLevel
+                const matchesSearch = !logSearch || 
+                  l.message.toLowerCase().includes(logSearch.toLowerCase()) || 
+                  l.action.toLowerCase().includes(logSearch.toLowerCase()) ||
+                  (l.details && l.details.toLowerCase().includes(logSearch.toLowerCase()))
+                return matchesLevel && matchesSearch
+              }).length === 0 ? (
+                <p className="no-logs-msg">{t('noLogs')}</p>
+              ) : (
+                logs.filter(l => {
+                  const matchesLevel = filterLevel === 'all' || l.level === filterLevel
+                  const matchesSearch = !logSearch || 
+                    l.message.toLowerCase().includes(logSearch.toLowerCase()) || 
+                    l.action.toLowerCase().includes(logSearch.toLowerCase()) ||
+                    (l.details && l.details.toLowerCase().includes(logSearch.toLowerCase()))
+                  return matchesLevel && matchesSearch
+                }).map(l => (
+                  <div
+                    key={l.id}
+                    className={`log-entry ${l.level} ${expandedLogId === l.id ? 'expanded' : ''}`}
+                    onClick={() => setExpandedLogId(expandedLogId === l.id ? null : l.id)}
+                  >
+                    <div className="log-entry-meta">
+                      <span className="log-time">
+                        {new Date(l.timestamp).toLocaleTimeString(appSettings.lang === 'fa' ? 'fa-IR' : 'en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          hour12: false
+                        })}
+                      </span>
+                      <span className="log-action">{l.action}</span>
+                      <span className={`log-badge ${l.level}`}>{l.level}</span>
+                    </div>
+                    <div className="log-message">{l.message}</div>
+                    {l.details && expandedLogId === l.id && (
+                      <pre className="log-detail-pre">{l.details}</pre>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
           </div>
         </Sheet>
       )}

@@ -17,7 +17,7 @@ class CentralLogger {
       const stored = localStorage.getItem(LOGS_KEY)
       this.logs = stored ? JSON.parse(stored) : []
       if (!Array.isArray(this.logs)) this.logs = []
-    } catch (e) {
+    } catch {
       this.logs = []
     }
 
@@ -101,7 +101,7 @@ class CentralLogger {
   persist() {
     try {
       localStorage.setItem(LOGS_KEY, JSON.stringify(this.logs))
-    } catch (e) {
+    } catch {
       // LocalStorage might be full
     }
   }
@@ -145,7 +145,7 @@ class CentralLogger {
           const parsed = JSON.parse(val)
           if (type === 'array' && !Array.isArray(parsed)) throw new Error('Should be array')
           if (type === 'object' && (typeof parsed !== 'object' || parsed === null)) throw new Error('Should be object')
-        } catch (e) {
+        } catch {
           status.localStorage = 'red'
           issues.push({
             id: 'corrupt_ls_' + key,
@@ -195,7 +195,7 @@ class CentralLogger {
           }
         }
       }
-    } catch (e) {}
+    } catch {}
 
     // Check Network
     if (!navigator.onLine) {
