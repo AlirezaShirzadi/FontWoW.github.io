@@ -415,6 +415,16 @@ export default function App() {
     return () => clearTimeout(tm)
   }, [toast])
 
+  // Sync contentEditable content from state (without React controlling the innerHTML)
+  useEffect(() => {
+    if (state.warpMode !== 'none' || !textRef.current) return
+    if (document.activeElement === textRef.current) return
+    const formatted = applyKashida(state.text, state.kashidaAmount)
+    if (textRef.current.innerText !== formatted) {
+      textRef.current.innerText = formatted
+    }
+  }, [state.text, state.kashidaAmount, state.warpMode, state.textBoxStyle])
+
   useEffect(() => {
     checkForUpdate().then((update) => {
       if (update) setAvailableUpdate(update)
@@ -1706,9 +1716,10 @@ export default function App() {
               style={textStyle}
               contentEditable
               suppressContentEditableWarning
+              dir={state.direction}
               data-placeholder={t('placeholder')}
               onInput={onTextInput}
-            >{displayText}</div>
+            />
           ) : (
             <CurvedText text={displayText || t('placeholder')} mode={state.warpMode} bend={state.warpBend} style={curvedTextStyle} />
           )}
