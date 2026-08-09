@@ -8,12 +8,12 @@ export const MEDIA_SUPPORTERS = [
       telegram: {
         handle: 'iotechoi',
         url: 'https://t.me/iotechoi',
-        audience: '۱۸ هزار دنبال‌کننده',
+        audience: '۱۸K دنبال‌کننده',
       },
       instagram: {
         handle: 'iotechoi',
         url: 'https://www.instagram.com/iotechoi/',
-        audience: '۳۸۳ هزار دنبال‌کننده',
+        audience: '۳۸۳K دنبال‌کننده',
       },
       // twitter: { handle: 'username', url: 'https://x.com/username', audience: '… دنبال‌کننده' },
       // youtube: { handle: 'username', url: 'https://youtube.com/@username', audience: '… مشترک' },
@@ -28,22 +28,22 @@ export const MEDIA_SUPPORTERS = [
       github: {
         handle: 'MatinSenPai',
         url: 'https://github.com/MatinSenPai',
-        audience: '۱٫۵ هزار دنبال‌کننده',
+        audience: '۱٫۵K دنبال‌کننده',
       },
       twitter: {
         handle: 'MatinSenPai',
         url: 'https://twitter.com/MatinSenPai',
-        audience: '۲۵ هزار دنبال‌کننده',
+        audience: '۲۵K دنبال‌کننده',
       },
       youtube: {
         handle: 'Matin_SenPai',
         url: 'https://youtube.com/@Matin_SenPai',
-        audience: '۲۵ هزار مشترک',
+        audience: '۲۵K مشترک',
       },
       telegram: {
         handle: 'MatinSenPaii',
         url: 'https://t.me/MatinSenPaii',
-        audience: '۱۶۰ هزار دنبال‌کننده',
+        audience: '۱۶۰K دنبال‌کننده',
       },
       instagram: {
         handle: 'matinsenpai',
