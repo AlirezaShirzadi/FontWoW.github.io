@@ -1,0 +1,57 @@
+name: گزارش باگ
+description: رفتاری قابل بازتولید را گزارش کنید
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "برای آسیب‌پذیری امنیتی Issue عمومی نسازید؛ SECURITY.md را بخوانید."
+  - type: textarea
+    id: description
+    attributes:
+      label: شرح باگ
+      description: چه اتفاقی افتاد و انتظار داشتید چه شود؟
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: مراحل بازتولید
+      placeholder: "1. ...\n2. ...\n3. ..."
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: نسخه FontWoW
+      placeholder: "مثلاً 1.3.4 یا نسخه وب در تاریخ ..."
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: محیط
+      description: سیستم‌عامل، مرورگر یا مدل دستگاه و نسخه Android
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: زبان رابط
+      options: [فارسی (RTL), English (LTR), هر دو]
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: تصویر، ویدئو یا لاگ
+      description: اطلاعات حساس، فونت دارای مجوز یا توکن را حذف کنید.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: تأیید
+      options:
+        - label: Issueهای موجود را برای گزارش تکراری بررسی کرده‌ام.
+          required: true
+        - label: این گزارش شامل آسیب‌پذیری امنیتی یا اطلاعات حساس نیست.
+          required: true

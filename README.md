@@ -105,6 +105,17 @@ npm run preview  # پیش‌نمایش نسخه‌ی buildشده
 
 خروجی build با گیت‌هاب اکشن به‌صورت خودکار روی GitHub Pages منتشر می‌شود.
 
+## مستندات پروژه
+
+- [راهنمای مشارکت](CONTRIBUTING.md)
+- [راه‌اندازی و توسعه](docs/DEVELOPMENT.md)
+- [معماری](docs/ARCHITECTURE.md)
+- [راهنمای تست](docs/TESTING.md)
+- [فرآیند انتشار](docs/RELEASING.md)
+- [پشتیبانی](SUPPORT.md)
+- [سیاست امنیت](SECURITY.md)
+- [منشور رفتاری](CODE_OF_CONDUCT.md)
+
 ## امنیت
 
 کد برنامه و نسخه‌ی آنلاین به‌صورت خودکار با **GitHub CodeQL**، بررسی آسیب‌پذیری وابستگی‌ها و **OWASP ZAP** اسکن می‌شوند. وضعیت آخرین اسکن‌ها در badgeهای بالای همین صفحه و جزئیات آن‌ها در بخش Actions/Security گیت‌هاب قابل مشاهده است. روش گزارش خصوصی آسیب‌پذیری و دامنه‌ی اسکن‌ها در [`SECURITY.md`](SECURITY.md) توضیح داده شده است.

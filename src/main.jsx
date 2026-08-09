@@ -7,14 +7,38 @@ import { Capacitor } from '@capacitor/core'
 import App from './App.jsx'
 import Landing from './Landing.jsx'
 import ShareKit from './ShareKit.jsx'
+import { copyTextNative } from './native.js'
 import './index.css'
 
 const CHUNK_RELOAD_KEY = 'fontwow_chunk_reload'
 
+async function copyToClipboard(text) {
+  if (Capacitor.isNativePlatform()) {
+    await copyTextNative(text)
+    return
+  }
+
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text)
+    return
+  }
+
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.opacity = '0'
+  document.body.appendChild(textarea)
+  textarea.select()
+  const copied = document.execCommand('copy')
+  textarea.remove()
+  if (!copied) throw new Error('Clipboard API unavailable')
+}
+
 class StartupErrorBoundary extends Component {
   constructor(props) {
     super(props)
-    this.state = { error: null }
+    this.state = { error: null, details: '', copied: false }
   }
 
   static getDerivedStateFromError(error) {
@@ -23,6 +47,20 @@ class StartupErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     logger.error('Startup', error?.message || 'Application failed to load', info?.componentStack || '')
+    this.setState({
+      details: [error?.stack || error?.message, info?.componentStack].filter(Boolean).join('\n\n'),
+    })
+  }
+
+  copyError = async () => {
+    const text = this.state.details || this.state.error?.message || 'Unknown startup error'
+    try {
+      await copyToClipboard(text)
+      this.setState({ copied: true })
+    } catch (error) {
+      logger.error('Startup', 'Could not copy startup error', error?.message || String(error))
+      this.setState({ copied: false })
+    }
   }
 
   retry = () => {
@@ -42,7 +80,18 @@ class StartupErrorBoundary extends Component {
           <button type="button" onClick={this.retry}>تلاش دوباره</button>
           <details>
             <summary>جزئیات خطا</summary>
-            <code dir="ltr">{this.state.error?.message || 'Unknown startup error'}</code>
+            <button
+              type="button"
+              className="startup-error__details-copy"
+              onClick={this.copyError}
+              aria-label="کپی جزئیات خطا"
+              title="برای کپی‌کردن جزئیات خطا کلیک کنید"
+            >
+              <code dir="ltr">{this.state.details || this.state.error?.message || 'Unknown startup error'}</code>
+            </button>
+            <span className="startup-error__copy-status" aria-live="polite">
+              {this.state.copied ? 'جزئیات خطا کپی شد' : 'برای کپی، روی متن خطا بزنید'}
+            </span>
           </details>
         </div>
       </main>

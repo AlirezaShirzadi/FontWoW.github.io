@@ -8,15 +8,15 @@ export const MEDIA_SUPPORTERS = [
       telegram: {
         handle: 'iotechoi',
         url: 'https://t.me/iotechoi',
-        audience: '۱۸K دنبال‌کننده',
+        audience: '۱۸K',
       },
       instagram: {
         handle: 'iotechoi',
         url: 'https://www.instagram.com/iotechoi/',
-        audience: '۳۸۳K دنبال‌کننده',
+        audience: '۳۸۳K',
       },
-      // twitter: { handle: 'username', url: 'https://x.com/username', audience: '… دنبال‌کننده' },
-      // youtube: { handle: 'username', url: 'https://youtube.com/@username', audience: '… مشترک' },
+      // twitter: { handle: 'username', url: 'https://x.com/username', audience: '…' },
+      // youtube: { handle: 'username', url: 'https://youtube.com/@username', audience: '…' },
     },
   },
   {
@@ -28,26 +28,42 @@ export const MEDIA_SUPPORTERS = [
       github: {
         handle: 'MatinSenPai',
         url: 'https://github.com/MatinSenPai',
-        audience: '۱٫۵K دنبال‌کننده',
+        audience: '۱٫۵K',
       },
       twitter: {
         handle: 'MatinSenPai',
         url: 'https://twitter.com/MatinSenPai',
-        audience: '۲۵K دنبال‌کننده',
+        audience: '۲۵K',
       },
       youtube: {
         handle: 'Matin_SenPai',
         url: 'https://youtube.com/@Matin_SenPai',
-        audience: '۲۵K مشترک',
+        audience: '۲۵K',
       },
       telegram: {
         handle: 'MatinSenPaii',
         url: 'https://t.me/MatinSenPaii',
-        audience: '۱۶۰K دنبال‌کننده',
+        audience: '۱۶۰K',
       },
       instagram: {
         handle: 'matinsenpai',
         url: 'https://www.instagram.com/matinsenpai/',
+      },
+    },
+  },
+  {
+    id: 'hoseinares',
+    name: 'حسین ارس',
+    handle: 'hoseinares',
+    avatar: '/media-supporters/hoseinares.jpeg',
+    socials: {
+      telegram: {
+        handle: 'hoseinares',
+        url: 'https://t.me/hoseinares/649',
+      },
+      instagram: {
+        handle: 'areshosein',
+        url: 'https://www.instagram.com/areshosein',
       },
     },
   },

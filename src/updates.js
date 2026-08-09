@@ -5,6 +5,24 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.3.6',
+    date: '2026-08-09',
+    fa: {
+      title: 'کپی آسان جزئیات خطای راه‌اندازی',
+      changes: [
+        'رفع خطای راه‌اندازی نسخهٔ وب که به‌دلیل نبودن آیکن‌های شبکه‌های اجتماعی در خروجی ایجاد می‌شد.',
+        'نمایش جزئیات کامل‌تر خطای راه‌اندازی و کپی خودکار آن در کلیپ‌بورد با لمس یا کلیک روی متن خطا.'
+      ]
+    },
+    en: {
+      title: 'Easy Startup Error Copying',
+      changes: [
+        'Fix the web startup crash caused by missing social-network icon exports.',
+        'Show fuller startup error details and copy them to the clipboard by tapping or clicking the error text.'
+      ]
+    }
+  },
+  {
     version: '1.3.5',
     date: '2026-08-09',
     fa: {

@@ -43,3 +43,21 @@ prs_err.txt
 pr*_diff.txt
 out.css
 out.js
+
+# Local AI coding assistants
+.aider.conf.yml
+.amazonq/
+.clinerules
+.continue/
+.cursor/
+.github/copilot-instructions.md
+.junie/
+.roo/
+.windsurf/
+.windsurfrules
+AGENTS.md
+CLAUDE.md
+CONVENTIONS.md
+GEMINI.md
+QWEN.md
+docs/AI_GUIDE.md

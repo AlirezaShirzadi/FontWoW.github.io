@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: گزارش خصوصی آسیب‌پذیری
+    url: https://github.com/FontWoW/FontWoW.github.io/security/policy
+    about: لطفاً مشکلات امنیتی را عمومی گزارش نکنید.

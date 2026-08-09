@@ -1,0 +1,38 @@
+name: پیشنهاد قابلیت
+description: مسئله یا بهبودی برای FontWoW پیشنهاد کنید
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: مسئله کاربر
+      description: چه نیازی دارید و کاربران اکنون چگونه با آن روبه‌رو می‌شوند؟
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: راه‌حل پیشنهادی
+      description: رفتار موردنظر را توضیح دهید، نه فقط شکل ظاهری آن را.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: راه‌حل‌های جایگزین
+      description: چه گزینه‌های دیگری را بررسی کرده‌اید؟
+  - type: textarea
+    id: context
+    attributes:
+      label: نمونه یا زمینه تکمیلی
+      description: تصویر، لینک یا نمونه کاربرد را اضافه کنید.
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: ملاحظات پروژه
+      options:
+        - label: این پیشنهاد با رویکرد client-side و حفظ حریم خصوصی سازگار است.
+          required: true
+        - label: Issueهای موجود را برای پیشنهاد تکراری بررسی کرده‌ام.
+          required: true

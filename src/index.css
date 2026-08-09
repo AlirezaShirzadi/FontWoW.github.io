@@ -172,4 +172,27 @@ input, textarea, [contenteditable] {
 }
 .startup-error button:focus-visible { outline: 3px solid #ffca5c; outline-offset: 3px; }
 .startup-error details { margin-top: 18px; color: #aaa5b9; font-size: 12px; }
-.startup-error code { display: block; margin-top: 8px; overflow-wrap: anywhere; text-align: left; }
+.startup-error__details-copy {
+  width: 100%;
+  min-height: 0;
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: #0f0e17;
+  color: #ddd9e8;
+  cursor: copy;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.startup-error__details-copy code {
+  display: block;
+  max-height: 180px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  text-align: left;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.startup-error__copy-status { display: block; margin-top: 8px; color: #c9c5d8; }

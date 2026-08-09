@@ -149,6 +149,23 @@ export const IconGithub = icon(
     <path d="M9 18c-4.51 2-5-2-7-2" />
   </>,
 )
+export const IconTelegram = icon(
+  <path d="m22 2-7 20-4-9-9-4 20-7ZM11 13l5-5" />,
+)
+export const IconInstagram = icon(
+  <>
+    <rect x="3" y="3" width="18" height="18" rx="5" />
+    <circle cx="12" cy="12" r="4" />
+    <circle cx="17.5" cy="6.5" r=".75" fill="currentColor" stroke="none" />
+  </>,
+)
+export const IconTwitter = icon(<path d="M18 3h3l-6.6 7.5L22 21h-6l-4.7-6.2L5.8 21H3l7-8L2.7 3h6.2l4.2 5.6L18 3Zm-1 16h1.7L8 4.9H6.2L17 19Z" />)
+export const IconYoutube = icon(
+  <>
+    <rect x="2" y="5" width="20" height="14" rx="4" />
+    <path d="m10 9 5 3-5 3V9Z" fill="currentColor" stroke="none" />
+  </>,
+)
 export const IconMail = icon(
   <>
     <rect x="2" y="4" width="20" height="16" rx="2" />
