@@ -5,6 +5,24 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.3.4',
+    date: '2026-08-09',
+    fa: {
+      title: 'بازگشت نام FontWoW به هدر موبایل',
+      changes: [
+        'نمایش دوباره نام FontWoW در کنار لوگو در هدر نسخه موبایل.',
+        'بهینه‌سازی فاصله‌ها و اندازه اجزای هدر برای جلوگیری از بیرون‌زدگی در صفحه‌های کوچک.'
+      ]
+    },
+    en: {
+      title: 'Restore FontWoW Name in the Mobile Header',
+      changes: [
+        'Show the FontWoW name beside the logo again in the mobile header.',
+        'Optimize header spacing and control sizes to prevent overflow on small screens.'
+      ]
+    }
+  },
+  {
     version: '1.3.3',
     date: '2026-08-09',
     fa: {

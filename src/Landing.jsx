@@ -3,6 +3,7 @@ import * as I from './icons'
 import { FONT_GOALS } from './goals'
 import { FEATURES } from './features'
 import { APP_VERSION } from './updates'
+import MediaSupporters from './MediaSupporters'
 import './Landing.css'
 
 const REPO = 'https://github.com/FontWoW/FontWoW.github.io'
@@ -299,6 +300,12 @@ export default function Landing() {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="landing-media-supporters">
+        <h2>حامیان رسانه‌ای</h2>
+        <p>از همراهانی که FontWoW را به مخاطبان بیشتری معرفی می‌کنند، صمیمانه سپاسگزاریم.</p>
+        <MediaSupporters />
       </section>
 
       <footer className="landing-footer">

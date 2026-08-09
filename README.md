@@ -7,6 +7,8 @@
 **متن‌آرایی آنلاین — بنویس، استایل بده، عکس بگیر ⚡**
 
 [![Deploy](https://github.com/FontWoW/FontWoW.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/FontWoW/FontWoW.github.io/actions/workflows/deploy.yml)
+[![Security Scan](https://github.com/FontWoW/FontWoW.github.io/actions/workflows/security.yml/badge.svg)](https://github.com/FontWoW/FontWoW.github.io/actions/workflows/security.yml)
+[![OWASP ZAP](https://github.com/FontWoW/FontWoW.github.io/actions/workflows/zap-scan.yml/badge.svg)](https://github.com/FontWoW/FontWoW.github.io/actions/workflows/zap-scan.yml)
 [![React 19](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
 
@@ -102,6 +104,14 @@ npm run preview  # پیش‌نمایش نسخه‌ی buildشده
 ```
 
 خروجی build با گیت‌هاب اکشن به‌صورت خودکار روی GitHub Pages منتشر می‌شود.
+
+## امنیت
+
+کد برنامه و نسخه‌ی آنلاین به‌صورت خودکار با **GitHub CodeQL**، بررسی آسیب‌پذیری وابستگی‌ها و **OWASP ZAP** اسکن می‌شوند. وضعیت آخرین اسکن‌ها در badgeهای بالای همین صفحه و جزئیات آن‌ها در بخش Actions/Security گیت‌هاب قابل مشاهده است. روش گزارش خصوصی آسیب‌پذیری و دامنه‌ی اسکن‌ها در [`SECURITY.md`](SECURITY.md) توضیح داده شده است.
+
+هر فایل APK نیز پیش از انتشار با **VirusTotal** بررسی می‌شود. لینک عمومی نتیجه‌ی اسکن و SHA-256 فایل به‌صورت خودکار داخل توضیحات همان Release قرار می‌گیرد و در صورت تشخیص فایل مشکوک یا مخرب، انتشار نسخه متوقف می‌شود.
+
+عبور از اسکن خودکار به معنی تضمین نبودن مطلق آسیب‌پذیری نیست، اما یک کنترل امنیتی مستمر و قابل بررسی عمومی فراهم می‌کند.
 
 ## ساختار پروژه
 
