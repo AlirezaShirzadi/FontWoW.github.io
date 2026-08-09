@@ -1532,6 +1532,17 @@
   animation: slideUpIn var(--dur-med) var(--ease-spring) both;
 }
 
+.ios-share-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  border-radius: var(--r-md, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
 @keyframes slideDownIn {
   from {
     opacity: 0;

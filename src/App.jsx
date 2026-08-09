@@ -3241,13 +3241,18 @@ export default function App() {
         </div>
       ) : showIOSPrompt ? (
         <div className="update-banner ios-prompt-banner">
-          <div className="update-banner-text">
-            <strong>{appSettings.lang === 'fa' ? 'نصب اپلیکیشن' : 'Install App'}</strong>
-            <span style={{ fontSize: '12.5px', lineHeight: '1.5' }}>
-              {appSettings.lang === 'fa' 
-                ? 'روی آیفون/آیپد هستی؟ برای تجربه‌ی بهتر، دکمه‌ی Share را بزن و «Add to Home Screen» را انتخاب کن.' 
-                : 'On iOS? Tap Share and select "Add to Home Screen" to install FontWoW.'}
-            </span>
+          <div className="update-banner-text" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <div className="ios-share-badge">
+              <I.IconShare size={20} />
+            </div>
+            <div>
+              <strong style={{ display: 'block', margin: 0 }}>{appSettings.lang === 'fa' ? 'نصب اپلیکیشن' : 'Install App'}</strong>
+              <span style={{ fontSize: '12.5px', lineHeight: '1.5', display: 'block', marginTop: '3px' }}>
+                {appSettings.lang === 'fa' 
+                  ? 'روی آیفون/آیپد هستی؟ برای تجربه‌ی بهتر، دکمه‌ی اشتراک‌گذاری (Share) در پایین مرورگر را بزنید و «Add to Home Screen» را انتخاب کنید.' 
+                  : 'On iOS? Tap the Share button in your browser and select "Add to Home Screen" to install.'}
+              </span>
+            </div>
           </div>
           <div className="update-banner-actions">
             <button

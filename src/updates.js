@@ -8,15 +8,17 @@ export const UPDATES = [
     version: '1.5.2',
     date: '2026-08-09',
     fa: {
-      title: 'بهبود جایگاه پیام نصب در آیفون',
+      title: 'بهبود پیام نصب در آیفون',
       changes: [
-        'انتقال بنر راهنمای نصب وب‌اپلیکیشن در آیفون و آیپد به پایین صفحه برای جلوگیری از مسدود شدن منوی بالای ادیتور.'
+        'انتقال بنر راهنمای نصب وب‌اپلیکیشن در آیفون و آیپد به پایین صفحه برای جلوگیری از مسدود شدن منوی بالای ادیتور.',
+        'افزودن آیکون راهنما برای دکمه‌ی اشتراک‌گذاری (Share) در پیام نصب وب‌اپلیکیشن iOS.'
       ]
     },
     en: {
-      title: 'Improve iOS Installation Prompt Position',
+      title: 'Improve iOS Installation Prompt',
       changes: [
-        'Move the iOS/iPadOS installation guide banner to the bottom of the screen to prevent covering the top toolbar.'
+        'Move the iOS/iPadOS installation guide banner to the bottom of the screen to prevent covering the top toolbar.',
+        'Add a visual guide icon for the Share button in the iOS Web App installation prompt.'
       ]
     }
   },
