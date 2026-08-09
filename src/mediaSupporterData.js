@@ -3,7 +3,7 @@ export const MEDIA_SUPPORTERS = [
     id: 'iotechio',
     name: 'عایوتک',
     handle: 'iotechio',
-    avatar: '/media-supporters/iotechio.jpeg',
+    avatar: 'media-supporters/iotechio.jpeg',
     socials: {
       telegram: {
         handle: 'iotechoi',
@@ -23,7 +23,7 @@ export const MEDIA_SUPPORTERS = [
     id: 'matinsenpai',
     name: 'متین سنپای',
     handle: 'MatinSenPai',
-    avatar: '/media-supporters/matinsenpai.jpeg',
+    avatar: 'media-supporters/matinsenpai.jpeg',
     socials: {
       github: {
         handle: 'MatinSenPai',
@@ -55,7 +55,7 @@ export const MEDIA_SUPPORTERS = [
     id: 'hoseinares',
     name: 'حسین ارس',
     handle: 'hoseinares',
-    avatar: '/media-supporters/hoseinares.jpeg',
+    avatar: 'media-supporters/hoseinares.jpeg',
     socials: {
       telegram: {
         handle: 'hoseinares',

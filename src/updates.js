@@ -5,6 +5,22 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.5.1',
+    date: '2026-08-09',
+    fa: {
+      title: 'رفع مشکل بررسی بروزرسانی موبایل',
+      changes: [
+        'رفع مشکل عدم پیشنهاد نسخه جدید روی دستگاه‌های موبایل و فعال‌سازی بررسی خودکار در زمان هر بار راه‌اندازی برنامه.'
+      ]
+    },
+    en: {
+      title: 'Fix Mobile Update Check',
+      changes: [
+        'Fix issue where update prompts did not appear on mobile devices, and enable automatic update check on every app launch.'
+      ]
+    }
+  },
+  {
     version: '1.5.0',
     date: '2026-08-09',
     fa: {
