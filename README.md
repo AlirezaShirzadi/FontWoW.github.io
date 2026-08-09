@@ -197,6 +197,88 @@ cd android && ./gradlew assembleDebug
 
 ---
 
+## 💖 حمایت مالی
+
+برای حمایت مالی از پروژهٔ FontWoW و کمک به خرید فونت‌های جدید با لایسنس معتبر، می‌توانید از روش‌های زیر استفاده کنید:
+
+* **پرداخت تومانی (ریالی):** [درگاه درامت (Daramet)](https://daramet.com/fontwow)
+* **پرداخت با ارز دیجیتال (Crypto):** [درگاه OxaPay](https://pay.oxapay.com/15417059)
+
+---
+
+## 👥 مشارکت‌کنندگان
+
+از تمامی افرادی که در توسعه و بهبود FontWoW نقش داشته‌اند صمیمانه سپاسگزاریم:
+
+<table style="width: 100%; border-collapse: collapse;">
+  <tr>
+    <td align="center" style="padding: 10px; border: none;">
+      <a href="https://github.com/m4tinbeigi-official">
+        <img src="https://github.com/m4tinbeigi-official.png?size=64" width="64" height="64" style="border-radius: 50%;" alt="m4tinbeigi-official"/><br />
+        <sub><b>m4tinbeigi-official</b></sub>
+      </a>
+    </td>
+    <td align="center" style="padding: 10px; border: none;">
+      <a href="https://github.com/AlirezaShirzadi">
+        <img src="https://github.com/AlirezaShirzadi.png?size=64" width="64" height="64" style="border-radius: 50%;" alt="AlirezaShirzadi"/><br />
+        <sub><b>AlirezaShirzadi</b></sub>
+      </a>
+    </td>
+    <td align="center" style="padding: 10px; border: none;">
+      <a href="https://github.com/Kamandlou">
+        <img src="https://github.com/Kamandlou.png?size=64" width="64" height="64" style="border-radius: 50%;" alt="Kamandlou"/><br />
+        <sub><b>Kamandlou</b></sub>
+      </a>
+    </td>
+    <td align="center" style="padding: 10px; border: none;">
+      <a href="https://github.com/sadraiiali">
+        <img src="https://github.com/sadraiiali.png?size=64" width="64" height="64" style="border-radius: 50%;" alt="sadraiiali"/><br />
+        <sub><b>sadraiiali</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" style="padding: 10px; border: none;">
+      <a href="https://github.com/HWR010101">
+        <img src="https://github.com/HWR010101.png?size=64" width="64" height="64" style="border-radius: 50%;" alt="HWR010101"/><br />
+        <sub><b>HWR010101</b></sub>
+      </a>
+    </td>
+    <td align="center" style="padding: 10px; border: none;">
+      <a href="https://github.com/MatinSenPai">
+        <img src="https://github.com/MatinSenPai.png?size=64" width="64" height="64" style="border-radius: 50%;" alt="MatinSenPai"/><br />
+        <sub><b>MatinSenPai</b></sub>
+      </a>
+    </td>
+    <td align="center" style="padding: 10px; border: none;">
+      <a href="https://github.com/tinars">
+        <img src="https://github.com/tinars.png?size=64" width="64" height="64" style="border-radius: 50%;" alt="tinars"/><br />
+        <sub><b>tinars</b></sub>
+      </a>
+    </td>
+    <td align="center" style="padding: 10px; border: none;">
+      <a href="https://github.com/ketabchi-ar">
+        <img src="https://github.com/ketabchi-ar.png?size=64" width="64" height="64" style="border-radius: 50%;" alt="ketabchi-ar"/><br />
+        <sub><b>ketabchi-ar</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
+
+همچنین می‌توانید لیست کامل مشارکت‌کنندگان را در [صفحه مشارکت‌کنندگان گیت‌هاب](https://github.com/FontWoW/FontWoW.github.io/graphs/contributors) مشاهده کنید.
+
+---
+
+## 📢 حامیان رسانه‌ای
+
+صمیمانه از حامیان رسانه‌ای که در معرفی و نشر پروژه ما را همراهی کردند تشکر می‌کنیم:
+
+* 📡 **عایوتک (iotechio)** - [تلگرام](https://t.me/iotechoi) | [اینستاگرام](https://www.instagram.com/iotechoi/)
+* 📡 **متین سنپای (MatinSenPai)** - [گیت‌هاب](https://github.com/MatinSenPai) | [تلگرام](https://t.me/MatinSenPaii) | [اینستاگرام](https://www.instagram.com/matinsenpai/) | [توییتر](https://twitter.com/MatinSenPai) | [یوتیوب](https://youtube.com/@Matin_SenPai)
+* 📡 **حسین ارس (hoseinares)** - [تلگرام](https://t.me/hoseinares/649) | [اینستاگرام](https://www.instagram.com/areshosein)
+
+---
+
 ## 📄 مجوز و قوانین انتشار
 این پروژه تحت مجوز آزاد **[GPL-3.0](LICENSE)** منتشر شده است. شما می‌توانید آزادانه پروژه را دانلود کرده، تغییر داده و گسترش دهید؛ مشروط بر اینکه تغییرات شما نیز تحت همین مجوز و به صورت متن‌باز منتشر شوند.
 
@@ -254,5 +336,33 @@ cd android && ./gradlew assembleDebug
 ```
 
 For technical guidelines, architecture, and contribution workflows, please check the [Persian documentation above](#fontwow) or refer to the files in the [`docs/`](docs/) folder.
+
+### 💖 Support & Donate
+
+If you'd like to support the development of FontWoW and contribute to buying new licensed fonts, you can support us through:
+
+* **Toman (IRR):** [Daramet Portal](https://daramet.com/fontwow)
+* **Cryptocurrency:** [OxaPay Gateway](https://pay.oxapay.com/15417059)
+
+### 👥 Contributors
+
+A huge thanks to all the contributors who helped make FontWoW better:
+
+* [m4tinbeigi-official](https://github.com/m4tinbeigi-official)
+* [AlirezaShirzadi](https://github.com/AlirezaShirzadi)
+* [Kamandlou](https://github.com/Kamandlou)
+* [sadraiiali](https://github.com/sadraiiali)
+* [HWR010101](https://github.com/HWR010101)
+* [MatinSenPai](https://github.com/MatinSenPai)
+* [tinars](https://github.com/tinars)
+* [ketabchi-ar](https://github.com/ketabchi-ar)
+
+### 📢 Media Sponsors
+
+Special thanks to the media channels and creators who shared FontWoW with their audience:
+
+* **iotechio (عایوتک)** - [Telegram](https://t.me/iotechoi) | [Instagram](https://www.instagram.com/iotechoi/)
+* **MatinSenPai (متین سنپای)** - [GitHub](https://github.com/MatinSenPai) | [Telegram](https://t.me/MatinSenPaii) | [Instagram](https://www.instagram.com/matinsenpai/) | [Twitter](https://twitter.com/MatinSenPai) | [YouTube](https://youtube.com/@Matin_SenPai)
+* **hoseinares (حسین ارس)** - [Telegram](https://t.me/hoseinares/649) | [Instagram](https://www.instagram.com/areshosein)
 
 **Licensed under [GPL-3.0](LICENSE).**
