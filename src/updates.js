@@ -5,6 +5,24 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.5.3',
+    date: '2026-08-09',
+    fa: {
+      title: 'آمار زنده بازدیدکنندگان',
+      changes: [
+        'افزودن قابلیت ثبت آمار بازدید کل صفحات با سیستم حریم‌خصوصی‌محور counter.dev.',
+        'نمایش کارت شکیل آمار بازدیدهای زنده در صفحه اصلی و افزودن صفحه آمار تفصیلی کل وب‌سایت.'
+      ]
+    },
+    en: {
+      title: 'Live Visitor Analytics',
+      changes: [
+        'Add page view analytics tracking powered by privacy-friendly counter.dev.',
+        'Display a sleek live visitor count card on the landing page and add a dedicated web analytics dashboard.'
+      ]
+    }
+  },
+  {
     version: '1.5.2',
     date: '2026-08-09',
     fa: {

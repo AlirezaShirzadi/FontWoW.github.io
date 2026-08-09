@@ -8,6 +8,7 @@ import App from './App.jsx'
 import Landing from './Landing.jsx'
 import ShareKit from './ShareKit.jsx'
 import StartupLoader from './StartupLoader.jsx'
+import StatsDashboard from './StatsDashboard.jsx'
 import { copyTextNative } from './native.js'
 import './index.css'
 
@@ -112,6 +113,7 @@ function getRoute() {
   const hash = window.location.hash.replace(/^#\/?/, '')
   if (hash === 'app') return 'app'
   if (hash === 'share') return 'share'
+  if (hash === 'stats') return 'stats'
   return 'landing'
 }
 
@@ -140,6 +142,7 @@ function Root() {
       <div className="startup-content" aria-hidden={isStarting || undefined}>
         {route === 'share' && <ShareKit />}
         {route === 'app' && <App />}
+        {route === 'stats' && <StatsDashboard />}
         {route === 'landing' && <Landing />}
       </div>
       {isStarting && <StartupLoader onComplete={finishStartup} />}
