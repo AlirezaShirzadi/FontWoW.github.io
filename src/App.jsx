@@ -3240,7 +3240,7 @@ export default function App() {
           </div>
         </div>
       ) : showIOSPrompt ? (
-        <div className="update-banner">
+        <div className="update-banner ios-prompt-banner">
           <div className="update-banner-text">
             <strong>{appSettings.lang === 'fa' ? 'نصب اپلیکیشن' : 'Install App'}</strong>
             <span style={{ fontSize: '12.5px', lineHeight: '1.5' }}>
