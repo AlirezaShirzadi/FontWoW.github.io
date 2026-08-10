@@ -255,6 +255,28 @@ export default function Landing() {
         </div>
       </section>
 
+      <section className="landing-faq">
+        <h2>سوالات متداول</h2>
+        <div className="landing-faq-list">
+          <details className="landing-faq-item">
+            <summary>FontWoW رایگان است؟</summary>
+            <p>بله. استفاده از نسخه وب رایگان است و برای ساخت متن، ذخیره تصویر و کپی کردن خروجی نیازی به حساب کاربری نیست.</p>
+          </details>
+          <details className="landing-faq-item">
+            <summary>آیا FontWoW روی موبایل هم خوب کار می‌کند؟</summary>
+            <p>بله. رابط کاربری برای موبایل و دسکتاپ طراحی شده و روی Android و iPhone هم قابل استفاده است.</p>
+          </details>
+          <details className="landing-faq-item">
+            <summary>آیا خروجی بدون واترمارک است؟</summary>
+            <p>بله. خروجی تصویر بدون واترمارک تبلیغاتی است و می‌توانی آن را با کیفیت بالا ذخیره یا کپی کنی.</p>
+          </details>
+          <details className="landing-faq-item">
+            <summary>آیا نیاز به نصب یا ثبت‌نام دارد؟</summary>
+            <p>خیر. نسخه وب مستقیم در مرورگر اجرا می‌شود و بدون نصب یا ساخت حساب کار می‌کند.</p>
+          </details>
+        </div>
+      </section>
+
       <section className="landing-donate">
         <h2>حمایت مالی</h2>
         <p>

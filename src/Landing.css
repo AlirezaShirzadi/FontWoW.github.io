@@ -243,6 +243,48 @@
   line-height: 1.7;
 }
 
+.landing-faq {
+  width: 100%;
+  max-width: 900px;
+}
+
+.landing-faq h2 {
+  text-align: center;
+  font-size: 20px;
+  margin: 0 0 24px;
+}
+
+.landing-faq-list {
+  display: grid;
+  gap: 12px;
+}
+
+.landing-faq-item {
+  padding: 16px 18px;
+  border-radius: var(--r-l);
+  background: rgba(25, 23, 36, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.landing-faq-item summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-1);
+  list-style: none;
+}
+
+.landing-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.landing-faq-item p {
+  margin: 10px 0 0;
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.8;
+}
+
 .landing-donate {
   width: 100%;
   max-width: 900px;
@@ -1102,4 +1144,3 @@
     min-height: 550px;
   }
 }
-
