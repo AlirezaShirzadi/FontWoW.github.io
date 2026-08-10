@@ -20,7 +20,7 @@ export default function StatsDashboard() {
       <main className="stats-main">
         <div className="stats-iframe-container">
           <iframe
-            src="https://counter.dev/dashboard.html?user=c01222e5-9a4d-47e9-b07a-9aa20bb5c6bd"
+            src="https://counter.dev/dashboard.html?user=matinbeigiwp&token=WnLRlPO9LRk%3D"
             title="Counter.dev Web Analytics"
             className="stats-iframe"
             sandbox="allow-scripts allow-same-origin allow-popups"

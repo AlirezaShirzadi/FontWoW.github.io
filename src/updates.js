@@ -5,6 +5,40 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.5.5',
+    date: '2026-08-10',
+    fa: {
+      title: 'افزودن حامی رسانه‌ای جدید',
+      changes: [
+        'افزودن محمد زمانی به لیست حامیان رسانه‌ای پروژه همراه با آدرس کانال تلگرام و صفحه اینستاگرام.'
+      ]
+    },
+    en: {
+      title: 'Add Mohammad Zamani to Media Supporters',
+      changes: [
+        'Add Mohammad Zamani to the media supporters list with his Telegram channel and Instagram links.'
+      ]
+    }
+  },
+  {
+    version: '1.5.4',
+    date: '2026-08-10',
+    fa: {
+      title: 'افزودن حامیان رسانه‌ای جدید',
+      changes: [
+        'افزودن نیما اکسوی و امیر مختاری به جمع حامیان رسانه‌ای پروژه همراه با مشخصات و پیوندهای ارتباطی.',
+        'پشتیبانی بخش حامیان رسانه‌ای از پلتفرم‌های لینکدین، وب‌سایت شخصی و تیک‌تاک.'
+      ]
+    },
+    en: {
+      title: 'Add New Media Supporters',
+      changes: [
+        'Add Nima Aksoy and Amir Mokhtari to the media supporters list with their profiles and social links.',
+        'Expand the media supporters section to support LinkedIn, personal websites, and TikTok.'
+      ]
+    }
+  },
+  {
     version: '1.5.3',
     date: '2026-08-09',
     fa: {

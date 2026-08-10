@@ -95,7 +95,10 @@ export default function Landing() {
         return res.json()
       })
       .then(data => {
-        if (!cancelled) setContributors(Array.isArray(data) ? data : [])
+        if (!cancelled) {
+          const list = Array.isArray(data) ? data : []
+          setContributors(list.filter(c => c.login !== 'github-actions[bot]' && c.login !== 'github-actions'))
+        }
       })
       .catch(() => {
         if (!cancelled) setContributorsError(true)

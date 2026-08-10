@@ -276,6 +276,9 @@ cd android && ./gradlew assembleDebug
 * 📡 **عایوتک (iotechio)** - [تلگرام](https://t.me/iotechoi) | [اینستاگرام](https://www.instagram.com/iotechoi/)
 * 📡 **متین سنپای (MatinSenPai)** - [گیت‌هاب](https://github.com/MatinSenPai) | [تلگرام](https://t.me/MatinSenPaii) | [اینستاگرام](https://www.instagram.com/matinsenpai/) | [توییتر](https://twitter.com/MatinSenPai) | [یوتیوب](https://youtube.com/@Matin_SenPai)
 * 📡 **حسین ارس (hoseinares)** - [تلگرام](https://t.me/hoseinares/649) | [اینستاگرام](https://www.instagram.com/areshosein)
+* 📡 **نیما اکسوی (nimaaksoy)** - [وب‌سایت](https://nimaaksoy.com/) | [اینستاگرام](https://www.instagram.com/nimaaksoy/) | [توییتر](https://x.com/nima1980) | [اینستاگرام دوم](https://www.instagram.com/1980nima/) | [لینکدین](https://linkedin.com/in/nima1980) | [بورووا](https://bowora.com/) | [تلگرام](https://t.me/nimaaksoychannel/457)
+* 📡 **امیر مختاری (amirmokhtari)** - [اینستاگرام](https://www.instagram.com/amirmokhtaritv/) | [یوتیوب](https://www.youtube.com/channel/UC1A9jDZ6EhRlW3TOU6mD20Q) | [لینکدین](https://ir.linkedin.com/in/amir-mokhtari-536a99317) | [تیک‌تاک](https://www.tiktok.com/@amirmokhtarihd)
+* 📡 **محمد زمانی (mohammadzamani)** - [تلگرام](https://t.me/Mohammad_zammani/6582) | [اینستاگرام](https://www.instagram.com/mohammad.zammani.offical)
 
 ---
 
@@ -364,5 +367,8 @@ Special thanks to the media channels and creators who shared FontWoW with their 
 * **iotechio (عایوتک)** - [Telegram](https://t.me/iotechoi) | [Instagram](https://www.instagram.com/iotechoi/)
 * **MatinSenPai (متین سنپای)** - [GitHub](https://github.com/MatinSenPai) | [Telegram](https://t.me/MatinSenPaii) | [Instagram](https://www.instagram.com/matinsenpai/) | [Twitter](https://twitter.com/MatinSenPai) | [YouTube](https://youtube.com/@Matin_SenPai)
 * **hoseinares (حسین ارس)** - [Telegram](https://t.me/hoseinares/649) | [Instagram](https://www.instagram.com/areshosein)
+* **nimaaksoy (نیما اکسوی)** - [Website](https://nimaaksoy.com/) | [Instagram](https://www.instagram.com/nimaaksoy/) | [Twitter](https://x.com/nima1980) | [Instagram 2](https://www.instagram.com/1980nima/) | [LinkedIn](https://linkedin.com/in/nima1980) | [Bowora](https://bowora.com/) | [Telegram](https://t.me/nimaaksoychannel/457)
+* **amirmokhtari (امیر مختاری)** - [Instagram](https://www.instagram.com/amirmokhtaritv/) | [YouTube](https://www.youtube.com/channel/UC1A9jDZ6EhRlW3TOU6mD20Q) | [LinkedIn](https://ir.linkedin.com/in/amir-mokhtari-536a99317) | [TikTok](https://www.tiktok.com/@amirmokhtarihd)
+* **mohammadzamani (محمد زمانی)** - [Telegram](https://t.me/Mohammad_zammani/6582) | [Instagram](https://www.instagram.com/mohammad.zammani.offical)
 
 **Licensed under [GPL-3.0](LICENSE).**

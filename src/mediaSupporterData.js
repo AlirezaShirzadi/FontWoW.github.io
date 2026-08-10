@@ -67,4 +67,89 @@ export const MEDIA_SUPPORTERS = [
       },
     },
   },
+  {
+    id: 'nimaaksoy',
+    name: 'نیما اکسوی',
+    handle: 'nima1980',
+    avatar: 'media-supporters/nimaaksoy.png',
+    socials: {
+      website: {
+        handle: 'nimaaksoy.com',
+        url: 'https://nimaaksoy.com/',
+        noAt: true,
+      },
+      instagram: {
+        handle: 'nimaaksoy',
+        url: 'https://www.instagram.com/nimaaksoy/',
+      },
+      twitter: {
+        handle: 'nima1980',
+        url: 'https://x.com/nima1980',
+      },
+      instagram2: {
+        handle: '1980nima',
+        url: 'https://www.instagram.com/1980nima/',
+      },
+      linkedin: {
+        handle: 'nima1980',
+        url: 'https://linkedin.com/in/nima1980',
+      },
+      website2: {
+        label: 'بورووا',
+        handle: 'bowora.com',
+        url: 'https://bowora.com/',
+        noAt: true,
+      },
+      telegram: {
+        label: 'تلگرام',
+        handle: 'معرفی پروژه',
+        url: 'https://t.me/nimaaksoychannel/457',
+        noAt: true,
+      },
+    },
+  },
+  {
+    id: 'amirmokhtari',
+    name: 'امیر مختاری',
+    handle: 'amirmokhtaritv',
+    avatar: 'media-supporters/amirmokhtari.jpg',
+    socials: {
+      instagram: {
+        handle: 'amirmokhtaritv',
+        url: 'https://www.instagram.com/amirmokhtaritv/',
+        audience: '۱۶۱K',
+      },
+      youtube: {
+        handle: 'کانال یوتیوب',
+        url: 'https://www.youtube.com/channel/UC1A9jDZ6EhRlW3TOU6mD20Q',
+        audience: '۱۱K',
+        noAt: true,
+      },
+      linkedin: {
+        handle: 'amir-mokhtari',
+        url: 'https://ir.linkedin.com/in/amir-mokhtari-536a99317',
+      },
+      tiktok: {
+        handle: 'amirmokhtarihd',
+        url: 'https://www.tiktok.com/@amirmokhtarihd',
+      },
+    },
+  },
+  {
+    id: 'mohammadzamani',
+    name: 'محمد زمانی',
+    handle: 'mohammad.zammani.offical',
+    avatar: 'media-supporters/mohammadzamani.jpg',
+    socials: {
+      telegram: {
+        handle: 'Mohammad_zammani',
+        url: 'https://t.me/Mohammad_zammani/6582',
+        audience: '۱۰K',
+      },
+      instagram: {
+        handle: 'mohammad.zammani.offical',
+        url: 'https://www.instagram.com/mohammad.zammani.offical',
+      },
+    },
+  },
 ]
