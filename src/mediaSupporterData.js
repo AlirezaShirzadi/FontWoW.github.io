@@ -152,4 +152,40 @@ export const MEDIA_SUPPORTERS = [
       },
     },
   },
+  {
+    id: 'ricksanchez',
+    name: 'ریک سانچز',
+    handle: 'm4tinbeigi',
+    avatar: 'media-supporters/rick-sanchez.png',
+    socials: {
+      twitter: {
+        handle: 'm4tinbeigi',
+        url: 'https://x.com/m4tinbeigi',
+      },
+      twitter2: {
+        handle: 'matinbeigiwp',
+        url: 'https://x.com/matinbeigiwp',
+      },
+      instagram: {
+        handle: 'm4tinbeigi',
+        url: 'https://www.instagram.com/m4tinbeigi',
+      },
+      instagram2: {
+        handle: 'matinbeigiwp',
+        url: 'https://www.instagram.com/matinbeigiwp',
+      },
+      instagram3: {
+        handle: 'm4tinbeigipv',
+        url: 'https://www.instagram.com/m4tinbeigipv',
+      },
+      linkedin: {
+        handle: 'matinbeigi',
+        url: 'https://www.linkedin.com/in/matinbeigi',
+      },
+      github: {
+        handle: 'm4tinbeigi-official',
+        url: 'http://github.com/m4tinbeigi-official/',
+      },
+    },
+  },
 ]

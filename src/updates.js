@@ -5,6 +5,40 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.5.7',
+    date: '2026-08-10',
+    fa: {
+      title: 'تفکیک آمار بازدید صفحات',
+      changes: [
+        'ثبت آمار بازدید هر بخش سایت به‌صورت جداگانه؛ از جمله صفحه اصلی، ویرایشگر، صفحه اشتراک‌گذاری و داشبورد آمار.',
+        'تفکیک اجرای نسخه نصب‌شدهٔ اپلیکیشن از بازدید ویرایشگر در مرورگر، با حفظ حریم خصوصی کاربران.'
+      ]
+    },
+    en: {
+      title: 'Page Visit Analytics Breakdown',
+      changes: [
+        'Track visits for each site section separately, including the landing page, editor, sharing page, and analytics dashboard.',
+        'Separate installed app launches from browser editor visits while preserving visitor privacy.'
+      ]
+    }
+  },
+  {
+    version: '1.5.6',
+    date: '2026-08-10',
+    fa: {
+      title: 'افزودن حامی رسانه‌ای جدید',
+      changes: [
+        'افزودن ریک سانچز به حامیان رسانه‌ای پروژه همراه با تمام پیوندهای توییتر، اینستاگرام، لینکدین و گیت‌هاب.'
+      ]
+    },
+    en: {
+      title: 'Add Rick Sanchez to Media Supporters',
+      changes: [
+        'Add Rick Sanchez to the media supporters list with Twitter, Instagram, LinkedIn, and GitHub links.'
+      ]
+    }
+  },
+  {
     version: '1.5.5',
     date: '2026-08-10',
     fa: {

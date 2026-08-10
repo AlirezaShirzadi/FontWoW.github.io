@@ -1,7 +1,7 @@
 import logger from './logger'
 logger.init()
 
-import { Component, StrictMode, useCallback, useEffect, useState } from 'react'
+import { Component, StrictMode, useCallback, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Capacitor } from '@capacitor/core'
 import App from './App.jsx'
@@ -9,6 +9,7 @@ import Landing from './Landing.jsx'
 import ShareKit from './ShareKit.jsx'
 import StartupLoader from './StartupLoader.jsx'
 import StatsDashboard from './StatsDashboard.jsx'
+import { trackPageView } from './analytics.js'
 import { copyTextNative } from './native.js'
 import './index.css'
 
@@ -125,6 +126,7 @@ if (Capacitor.isNativePlatform() && getRoute() !== 'app') {
 function Root() {
   const [route, setRoute] = useState(getRoute)
   const [isStarting, setIsStarting] = useState(true)
+  const trackedRoute = useRef(null)
   const finishStartup = useCallback(() => setIsStarting(false), [])
 
   useEffect(() => {
@@ -135,6 +137,12 @@ function Root() {
 
   useEffect(() => {
     document.body.classList.toggle('landing-mode', route === 'landing')
+  }, [route])
+
+  useEffect(() => {
+    if (trackedRoute.current === route) return
+    trackedRoute.current = route
+    trackPageView(route)
   }, [route])
 
   return (
