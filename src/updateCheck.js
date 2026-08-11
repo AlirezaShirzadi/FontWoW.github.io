@@ -4,12 +4,15 @@ import { APP_VERSION } from './updates'
 const LATEST_RELEASE_API = 'https://api.github.com/repos/FontWoW/FontWoW.github.io/releases/tags/latest'
 const DISMISSED_KEY = 'fontwow_update_dismissed_version_v1'
 
-// The Android release workflow writes the version as the first line of the
-// GitHub release body, e.g. "version: 1.3.0", since every release reuses the
-// same "latest" tag and has no versioned tag_name to read instead.
-function parseVersion(body) {
-  const match = /version:\s*([0-9]+\.[0-9]+\.[0-9]+)/i.exec(body || '')
-  return match ? match[1] : null
+// The Android release workflow writes the version in the body, but the GitHub
+// release name, tag, or APK asset name can also be used as a fallback so the
+// update checker keeps working if one field changes format.
+function parseVersion(...candidates) {
+  for (const candidate of candidates) {
+    const match = /(?:^|[^0-9])([0-9]+\.[0-9]+\.[0-9]+)(?:[^0-9]|$)/.exec(candidate || '')
+    if (match) return match[1]
+  }
+  return null
 }
 
 function parseChangesFromBody(body) {
@@ -26,6 +29,22 @@ function isNewer(remote, local) {
     if ((r[i] || 0) !== (l[i] || 0)) return (r[i] || 0) > (l[i] || 0)
   }
   return false
+}
+
+function readDismissedVersion() {
+  try {
+    return localStorage.getItem(DISMISSED_KEY)
+  } catch {
+    return null
+  }
+}
+
+function dismissVersion(version) {
+  try {
+    localStorage.setItem(DISMISSED_KEY, version)
+  } catch {
+    // Ignore storage failures so update checks never break in restricted webviews.
+  }
 }
 
 /**
@@ -45,10 +64,10 @@ export async function checkForUpdate({ force = false } = {}) {
     return null
   }
 
-  const remoteVersion = parseVersion(data.body)
+  const remoteVersion = parseVersion(data.body, data.name, data.tag_name, data.assets?.map((a) => a.name).join(' '))
   if (!remoteVersion || !isNewer(remoteVersion, APP_VERSION)) return null
 
-  if (!force && localStorage.getItem(DISMISSED_KEY) === remoteVersion) return null
+  if (!force && readDismissedVersion() === remoteVersion) return null
 
   const asset = data.assets
     ?.filter((a) => a.name.endsWith('.apk'))
@@ -62,5 +81,5 @@ export async function checkForUpdate({ force = false } = {}) {
 }
 
 export function dismissUpdate(version) {
-  localStorage.setItem(DISMISSED_KEY, version)
+  dismissVersion(version)
 }

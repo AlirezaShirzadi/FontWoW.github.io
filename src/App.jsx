@@ -12,6 +12,7 @@ import {
   TEXT_COLORS,
   THEME_COLORS,
   googleFontsUrlForFont,
+  googleFontsUrlFor,
   TEXT_EFFECTS,
   TEXT_GRADIENTS,
   ASPECT_RATIOS,
@@ -567,6 +568,18 @@ export default function App() {
       )
       .join('\n')
   }, [customFonts])
+
+  useEffect(() => {
+    const url = googleFontsUrlFor(fontLang)
+    if (!url) return
+    const linkId = `google-category-${fontLang}`
+    if (document.getElementById(linkId)) return
+    const link = document.createElement('link')
+    link.id = linkId
+    link.rel = 'stylesheet'
+    link.href = url
+    document.head.appendChild(link)
+  }, [fontLang])
 
   useLayoutEffect(() => {
     function place() {
@@ -2014,7 +2027,7 @@ export default function App() {
                       </span>
                     )}
                     <span style={{ fontFamily: f.family }}>{f.rtl ? 'ابر' : 'Aa'}</span>
-                    <span className="chip-label">{f.label}</span>
+                    <span className="chip-label" style={{ fontFamily: f.family }}>{f.label}</span>
                   </button>
                 ))}
                 <label className="chip font-chip upload-chip">

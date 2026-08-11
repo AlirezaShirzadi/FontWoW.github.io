@@ -5,6 +5,60 @@
 // build once that release goes out.
 export const UPDATES = [
   {
+    version: '1.6.0',
+    date: '2026-08-11',
+    fa: {
+      title: 'افزودن فونت‌های فارسی جدید و پیش‌نمایش زنده',
+      changes: [
+        'افزودن ۱۰ فونت فارسی جدید و رایگان از گوگل‌فونتز (پرستو، روبیک عربی، ریدکس پرو، کتیبه، جمهوریا، میرزا، المسیری، لمونادا، شهرزاد جدید و هارماتان).',
+        'نمایش نام و پیش‌نمایش هر فونت در بخش انتخاب فونت با خود همان فونت برای انتخاب آسان‌تر کاربران.'
+      ]
+    },
+    en: {
+      title: 'New Persian Fonts and Live Previews',
+      changes: [
+        'Add 10 new free Persian fonts from Google Fonts (Parastoo, Rubik Arabic, Readex Pro, Katibeh, Jomhuria, Mirza, El Messiri, Lemonada, Scheherazade New, and Harmattan).',
+        'Display each font’s name and preview character in its own typeface within the font selection menu.'
+      ]
+    }
+  },
+  {
+    version: '1.5.11',
+    date: '2026-08-10',
+    fa: {
+      title: 'پایداری بیشتر بررسی آپدیت',
+      changes: [
+        'سخت‌گیرانه‌تر شدن تشخیص نسخه‌ی جدید تا اگر فرمت متن انتشار یا نام ریلیز تغییر کند، بررسی آپدیت از کار نیفتد.',
+        'ایمن‌سازی ذخیره‌سازی نسخه‌های ردشده تا محدودیت‌های مرورگر یا WebView باعث خطا در نمایش یا رد کردن آپدیت نشوند.'
+      ]
+    },
+    en: {
+      title: 'More Reliable Update Checks',
+      changes: [
+        'Make update detection more tolerant so it keeps working even if the release body or release name format changes.',
+        'Harden dismissed-version storage so browser or WebView storage limits do not break update prompts.'
+      ]
+    }
+  },
+  {
+    version: '1.5.9',
+    date: '2026-08-10',
+    fa: {
+      title: 'پایداری بیشتر بررسی آپدیت',
+      changes: [
+        'سخت‌گیرانه‌تر شدن تشخیص نسخه‌ی جدید تا اگر فرمت متن انتشار یا نام ریلیز تغییر کند، بررسی آپدیت از کار نیفتد.',
+        'ایمن‌سازی ذخیره‌سازی نسخه‌های ردشده تا محدودیت‌های مرورگر یا WebView باعث خطا در نمایش یا رد کردن آپدیت نشوند.'
+      ]
+    },
+    en: {
+      title: 'More Reliable Update Checks',
+      changes: [
+        'Make update detection more tolerant so it keeps working even if the release body or release name format changes.',
+        'Harden dismissed-version storage so browser or WebView storage limits do not break update prompts.'
+      ]
+    }
+  },
+  {
     version: '1.5.7',
     date: '2026-08-10',
     fa: {
